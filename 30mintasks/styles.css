@@ -1,0 +1,220 @@
+/* ベーススタイル */
+:root {
+  --bg: #0b0f14;
+  --panel: #10161d;
+  --text: #e6edf3;
+  --muted: #9aa7b3;
+  --primary: #fb923c;
+  --primary-600: #f97316;
+  --border: #1f2a36;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  margin: 0;
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  color: var(--text);
+  background: radial-gradient(1200px 600px at 10% -10%, #0f172a 0%, transparent 60%),
+              radial-gradient(1000px 700px at 120% -20%, #0b1324 0%, transparent 60%),
+              var(--bg);
+  line-height: 1.6;
+}
+
+.site-header, .site-footer {
+  padding: 16px 20px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0));
+}
+.site-header { border-bottom: 1px solid var(--border); }
+.site-footer {
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 0.95rem;
+  min-height: 52px;
+}
+
+.site-main {
+  max-width: 720px;
+  margin: 32px auto;
+  padding: 24px;
+  background: color-mix(in hsl, var(--panel) 92%, black 8%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+}
+
+/* 横長に広げる */
+@media (min-width: 900px) {
+  .site-main { max-width: 1100px; }
+}
+
+h1 { margin: 0; font-size: 1.5rem; }
+.section-title {
+  margin: 32px 0 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--muted);
+}
+p { color: var(--muted); }
+
+.button-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(180deg, var(--primary), var(--primary-600));
+  border: 1px solid color-mix(in oklab, var(--primary) 65%, black);
+  border-radius: 10px;
+  box-shadow: 0 8px 18px rgba(249, 115, 22, 0.35);
+  cursor: pointer;
+  transition: transform .12s ease, box-shadow .12s ease, filter .12s ease;
+}
+.button-primary:hover { transform: translateY(-1px); filter: brightness(1.05); }
+.button-primary:active { transform: translateY(0); filter: brightness(.98); }
+
+.message {
+  margin-top: 16px;
+  padding: 12px 14px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid color-mix(in oklab, var(--primary) 35%, black);
+  border-radius: 10px;
+}
+
+/* 小さい画面向け */
+@media (max-width: 480px) {
+  .site-main { margin: 16px; padding: 16px; }
+}
+
+/* ===== Task app styles ===== */
+.intro { margin-bottom: 16px; }
+.muted { color: var(--muted); }
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+.task-controls { margin-top: 12px; margin-bottom: 16px; }
+.control-row { display: grid; gap: 8px; grid-template-columns: 1fr 120px auto; align-items: center; }
+.input {
+  flex: 1 1 auto;
+  padding: 14px 16px;
+  color: var(--text);
+  background: #0e141b;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 1.05rem;
+}
+.input-number { max-width: 140px; }
+
+.icon { opacity: .9; }
+
+.task-completed-section {
+  margin-top: 40px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.task-list { list-style: none; padding: 0; margin: 8px 0 0; }
+.task-list.completed { margin-top: 12px; }
+.task-item {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) 140px minmax(180px, 1fr) 120px auto;
+  gap: 12px;
+  align-items: center;
+  padding: 16px 16px;
+  background: #0f151d;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  min-height: 68px;
+}
+.task-item.is-running {
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(34, 197, 94, 0.30);
+}
+.task-item.is-done {
+  background: #0f151d;
+  border-color: rgba(148, 163, 184, 0.35);
+}
+.drag-handle {
+  width: 24px; height: 24px; display: grid; place-items: center;
+  cursor: grab; user-select: none;
+  color: var(--muted);
+}
+.task-title {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.task-title:hover,
+.task-title:focus {
+  text-decoration: underline;
+  outline: none;
+}
+.task-meta { color: var(--muted); font-size: 0.9rem; }
+.task-time {
+  font-variant-numeric: tabular-nums;
+  font-weight: 600;
+  color: var(--muted);
+}
+.task-time-running { color: #4ade80; }
+.task-time-progress { color: #facc15; }
+.task-time-done { color: #cbd5f5; }
+.task-time-editable select {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 0.95rem;
+}
+.task-actions { display: inline-flex; gap: 6px; }
+.btn {
+  padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04); color: var(--text); cursor: pointer;
+}
+.btn:hover { filter: brightness(1.08); }
+.btn-complete { background: rgba(34,197,94,0.15); border-color: rgba(34,197,94,0.35); }
+.btn-delete { background: rgba(255,255,255,0.04); border-color: var(--border); }
+
+.task-item.dragging { opacity: 0.6; }
+.task-item.drop-target { outline: 2px dashed var(--primary); }
+
+.badge {
+  padding: 2px 8px; border-radius: 999px; font-size: 0.8rem; border: 1px solid var(--border);
+}
+.badge-good { background: rgba(34,197,94,0.15); border-color: rgba(34,197,94,0.35); }
+.badge-warn { background: rgba(250,204,21,0.15); border-color: rgba(250,204,21,0.35); }
+.badge-bad { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.35); }
+
+/* 進捗バー */
+.progress {
+  height: 8px;
+  width: 100%;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.progress > .bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #22c55e, #16a34a);
+  transition: width .3s ease;
+}
+.progress.over > .bar { background: linear-gradient(90deg, #ef4444, #b91c1c); }
+
+
