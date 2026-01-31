@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg id="_レイヤー_2" data-name="レイヤー 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 171.16 40.49">
+  <defs>
+    <style>
+      .cls-1 {
+        font-family: PAntiqueAN2pProN-Bold-83pv-RKSJ-H, 'A P-OTF Antique AN2+ ProN';
+        font-size: 32.58px;
+        font-weight: 700;
+      }
+
+      .cls-2 {
+        letter-spacing: -.21em;
+      }
+
+      .cls-3 {
+        letter-spacing: -.09em;
+      }
+
+      .cls-4 {
+        letter-spacing: -.13em;
+      }
+
+      .cls-5 {
+        letter-spacing: -.14em;
+      }
+
+      .cls-6 {
+        letter-spacing: -.12em;
+      }
+
+      .cls-7 {
+        letter-spacing: -.02em;
+      }
+    </style>
+  </defs>
+  <g id="_レイヤー_1-2" data-name="レイヤー 1">
+    <text class="cls-1" transform="translate(-1.47 28.67)"><tspan class="cls-2" x="0" y="0">イ</tspan><tspan class="cls-4" x="25.61" y="0">ニ</tspan><tspan class="cls-6" x="53.98" y="0">シ</tspan><tspan class="cls-3" x="82.52" y="0">ア</tspan><tspan class="cls-5" x="112.16" y="0">チ</tspan><tspan class="cls-7" x="140.05" y="0">ブ</tspan></text>
+  </g>
+</svg>
