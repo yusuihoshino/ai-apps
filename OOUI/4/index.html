@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>会議室予約管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* 時刻入力フィールドのアイコンを非表示 */
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            display: none;
+        }
+        input[type="time"]::-webkit-inner-spin-button,
+        input[type="time"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="time"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <!-- ヘッダー -->
+        <div class="flex items-center justify-between mb-6">
+            <!-- 左側：日付選択 -->
+            <div class="flex items-center gap-2">
+                <button 
+                    id="prevDateBtn"
+                    class="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                    title="前の日"
+                >
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </button>
+                <button 
+                    id="dateDisplayBtn"
+                    class="px-4 py-2 text-lg font-semibold text-gray-900 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+                >
+                    <span id="dateDisplay"></span>
+                </button>
+                <input 
+                    type="date" 
+                    id="dateInput" 
+                    class="hidden"
+                >
+                <button 
+                    id="nextDateBtn"
+                    class="p-2 hover:bg-gray-200 rounded-lg transition-colors"
+                    title="次の日"
+                >
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M9 18l6-6-6-6"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- 右側：ボタン -->
+            <div class="flex items-center gap-2">
+                <button 
+                    id="addReservationBtn"
+                    class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    <span>予約する</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 予約グリッド -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
+            <div class="min-w-[800px]">
+                <!-- ヘッダー行（時刻） -->
+                <div id="roomHeader" class="grid border-b border-gray-200 sticky top-0 bg-white z-10">
+                    <div class="p-2 font-semibold text-gray-700 border-r border-gray-200 sticky left-0 bg-white z-20"></div>
+                    <!-- JavaScriptで動的に生成 -->
+                </div>
+
+                <!-- 時刻行 -->
+                <div id="timeGrid" class="divide-y divide-gray-200">
+                    <!-- JavaScriptで動的に生成 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 予定追加モーダル -->
+    <div id="addModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">予約する</h2>
+            <form id="reservationForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">会議室</label>
+                    <select id="roomSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <!-- JavaScriptで動的に生成 -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">開始時刻</label>
+                    <div class="relative">
+                        <input 
+                            type="time" 
+                            id="startTime" 
+                            min="06:00" 
+                            max="24:00"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                            required
+                        >
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">終了時刻</label>
+                    <div class="relative">
+                        <input 
+                            type="time" 
+                            id="endTime" 
+                            min="06:00" 
+                            max="24:00"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                            required
+                        >
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">予定名</label>
+                    <input 
+                        type="text" 
+                        id="titleInput" 
+                        placeholder="例: チームミーティング"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                    >
+                </div>
+                <div class="flex gap-3 pt-4 justify-end">
+                    <button 
+                        type="button"
+                        id="cancelBtn"
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                    >
+                        キャンセル
+                    </button>
+                    <button 
+                        type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                        追加
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 予約編集モーダル -->
+    <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">予約を編集</h2>
+            <form id="editReservationForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">会議室</label>
+                    <select id="editRoomSelect" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <!-- JavaScriptで動的に生成 -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">開始時刻</label>
+                    <div class="relative">
+                        <input 
+                            type="time" 
+                            id="editStartTime" 
+                            min="06:00" 
+                            max="24:00"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                            required
+                        >
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">終了時刻</label>
+                    <div class="relative">
+                        <input 
+                            type="time" 
+                            id="editEndTime" 
+                            min="06:00" 
+                            max="24:00"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                            required
+                        >
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">予定名</label>
+                    <input 
+                        type="text" 
+                        id="editTitleInput" 
+                        placeholder="例: チームミーティング"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                    >
+                </div>
+                <div class="flex gap-3 pt-4">
+                    <button 
+                        type="button"
+                        id="deleteBtn"
+                        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                    >
+                        削除
+                    </button>
+                    <div class="flex-1"></div>
+                    <button 
+                        type="button"
+                        id="editCancelBtn"
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                    >
+                        キャンセル
+                    </button>
+                    <button 
+                        type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                        保存
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 会議室追加モーダル -->
+    <div id="addRoomModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <h2 class="text-xl font-bold text-gray-900 mb-4">会議室を追加</h2>
+            <form id="addRoomForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">会議室名</label>
+                    <input 
+                        type="text" 
+                        id="roomNameInput" 
+                        placeholder="例: 会議室6"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                    >
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">階数</label>
+                    <input 
+                        type="text" 
+                        id="roomFloorInput" 
+                        placeholder="例: 3階"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                    >
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">定員</label>
+                    <input 
+                        type="text" 
+                        id="roomCapacityInput" 
+                        placeholder="例: 10名"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                    >
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">設備</label>
+                    <input 
+                        type="text" 
+                        id="roomEquipmentInput" 
+                        placeholder="例: プロジェクター、ホワイトボード、Wi-Fi"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        required
+                    >
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">画像（最大3枚）</label>
+                    <div id="roomImagesContainer" class="grid grid-cols-3 gap-4">
+                        <!-- 画像アップローダースロット（動的に生成） -->
+                    </div>
+                </div>
+                <div class="flex gap-3 pt-4 justify-end">
+                    <button 
+                        type="button"
+                        id="cancelRoomBtn"
+                        class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors"
+                    >
+                        キャンセル
+                    </button>
+                    <button 
+                        type="submit"
+                        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                    >
+                        追加
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // 会議室データ（localStorageから読み込み）
+        let rooms = JSON.parse(localStorage.getItem('rooms') || '[]');
+        
+        // 初期会議室データがない場合はデフォルトを設定
+        if (rooms.length === 0) {
+            rooms = [
+                { id: 1, name: '会議室1' },
+                { id: 2, name: '会議室2' },
+                { id: 3, name: '会議室3' },
+                { id: 4, name: '会議室4' },
+                { id: 5, name: '会議室5' }
+            ];
+            localStorage.setItem('rooms', JSON.stringify(rooms));
+        } else if (rooms.length < 5) {
+            // 会議室が5つ未満の場合は、不足分を追加
+            const existingIds = rooms.map(r => r.id);
+            let nextId = Math.max(...existingIds, 0) + 1;
+            const defaultNames = ['会議室1', '会議室2', '会議室3', '会議室4', '会議室5'];
+            
+            while (rooms.length < 5) {
+                const roomNumber = rooms.length + 1;
+                rooms.push({ id: nextId, name: defaultNames[roomNumber - 1] });
+                nextId++;
+            }
+            localStorage.setItem('rooms', JSON.stringify(rooms));
+        }
+        
+        // 予約データ（localStorageから読み込み）
+        let reservations = JSON.parse(localStorage.getItem('reservations') || '[]');
+        
+        // 編集中の予約のインデックス
+        let editingIndex = -1;
+        
+        // localStorageに保存する関数
+        function saveReservations() {
+            localStorage.setItem('reservations', JSON.stringify(reservations));
+        }
+        
+        function saveRooms() {
+            localStorage.setItem('rooms', JSON.stringify(rooms));
+        }
+        
+        // 現在選択中の日付
+        let currentDate = new Date();
+        
+        // 日付をフォーマット（YYYY-MM-DD）
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // 日付を日本語表示形式にフォーマット
+        function formatDateDisplay(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            const weekdays = ['日', '月', '火', '水', '木', '金', '土'];
+            const weekday = weekdays[date.getDay()];
+            return `${year}年${month}月${day}日(${weekday})`;
+        }
+        
+        // 日付表示を更新
+        function updateDateDisplay() {
+            document.getElementById('dateDisplay').textContent = formatDateDisplay(currentDate);
+            document.getElementById('dateInput').value = formatDate(currentDate);
+            renderReservations();
+        }
+        
+        // 日付を変更
+        function changeDate(days) {
+            currentDate.setDate(currentDate.getDate() + days);
+            updateDateDisplay();
+        }
+        
+        // 日付選択イベント
+        document.getElementById('dateDisplayBtn').addEventListener('click', () => {
+            document.getElementById('dateInput').showPicker();
+        });
+        
+        document.getElementById('dateInput').addEventListener('change', (e) => {
+            const selectedDate = new Date(e.target.value);
+            currentDate = selectedDate;
+            updateDateDisplay();
+        });
+        
+        // 左右矢印ボタン
+        document.getElementById('prevDateBtn').addEventListener('click', () => {
+            changeDate(-1);
+        });
+        
+        document.getElementById('nextDateBtn').addEventListener('click', () => {
+            changeDate(1);
+        });
+        
+        
+        // 初期日付表示
+        updateDateDisplay();
+
+        // 会議室選択肢を生成
+        function generateRoomSelects() {
+            const roomSelect = document.getElementById('roomSelect');
+            const editRoomSelect = document.getElementById('editRoomSelect');
+            
+            // 既存のオプションをクリア
+            roomSelect.innerHTML = '';
+            editRoomSelect.innerHTML = '';
+            
+            // 会議室オプションを動的に生成
+            rooms.forEach(room => {
+                const option = document.createElement('option');
+                option.value = room.id;
+                option.textContent = room.name;
+                roomSelect.appendChild(option.cloneNode(true));
+                editRoomSelect.appendChild(option);
+            });
+        }
+
+        // 会議室ヘッダーを生成
+        function generateRoomHeader() {
+            const roomHeader = document.getElementById('roomHeader');
+            roomHeader.innerHTML = '';
+            
+            // 時刻列の空セル
+            const emptyCell = document.createElement('div');
+            emptyCell.className = 'p-2 font-semibold text-gray-700 border-r border-gray-200 sticky left-0 bg-white z-20';
+            roomHeader.appendChild(emptyCell);
+            
+            // 会議室ヘッダーを動的に生成
+            rooms.forEach(room => {
+                const headerCell = document.createElement('a');
+                headerCell.href = `detail.html?room=${room.id}`;
+                headerCell.className = 'py-2 px-3 font-bold text-lg text-gray-800 text-center border-r border-gray-200 bg-blue-50 hover:bg-blue-100 transition-colors';
+                headerCell.innerHTML = `<span class="border-b-2 border-gray-800 pb-0 leading-none inline-block">${room.name}</span>`;
+                roomHeader.appendChild(headerCell);
+            });
+            
+            // +ボタンを追加（会議室の右端にはみ出して表示）
+            const addRoomHeaderBtn = document.createElement('button');
+            addRoomHeaderBtn.id = 'addRoomHeaderBtn';
+            addRoomHeaderBtn.className = 'py-2 px-3 font-bold text-lg text-gray-800 text-center bg-blue-50 hover:bg-blue-100 transition-colors flex items-center justify-center border-l border-gray-200';
+            addRoomHeaderBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+            `;
+            addRoomHeaderBtn.title = '会議室を追加';
+            roomHeader.appendChild(addRoomHeaderBtn);
+            
+            // グリッドの列数を動的に設定（+ボタンを含む）
+            const gridCols = `grid-cols-[60px_repeat(${rooms.length},1fr)_auto]`;
+            roomHeader.className = `grid ${gridCols} border-b border-gray-200 sticky top-0 bg-white z-10`;
+        }
+
+        // 時刻グリッドを生成
+        function generateTimeGrid() {
+            const timeGrid = document.getElementById('timeGrid');
+            timeGrid.innerHTML = '';
+            
+            // グリッドの列数を動的に設定（+ボタン用の列は含めない）
+            const gridCols = `grid-cols-[60px_repeat(${rooms.length},1fr)]`;
+
+            for (let hour = 6; hour < 24; hour++) {
+                const row = document.createElement('div');
+                row.className = `grid ${gridCols}`;
+                
+                // 時刻表示
+                const timeCell = document.createElement('div');
+                timeCell.className = 'p-2 text-sm text-gray-600 border-r border-gray-200 bg-gray-50 sticky left-0 z-10';
+                timeCell.textContent = `${hour.toString().padStart(2, '0')}:00`;
+                row.appendChild(timeCell);
+
+                // 各会議室のセル
+                rooms.forEach(room => {
+                    const cell = document.createElement('div');
+                    cell.className = 'relative border-r border-gray-200 min-h-[30px] p-1';
+                    cell.dataset.room = room.id;
+                    cell.dataset.hour = hour;
+                    row.appendChild(cell);
+                });
+
+                timeGrid.appendChild(row);
+            }
+
+            renderReservations();
+        }
+
+        // 予約を描画
+        function renderReservations() {
+            // すべての予約ブロックをクリア
+            document.querySelectorAll('[data-room]').forEach(cell => {
+                const existingBlock = cell.querySelector('.reservation-block');
+                if (existingBlock) {
+                    existingBlock.remove();
+                }
+            });
+
+            // 現在の日付の予約のみをフィルタリング
+            const currentDateStr = formatDate(currentDate);
+            const filteredReservations = reservations.filter(r => r.date === currentDateStr);
+
+            filteredReservations.forEach((reservation, index) => {
+                const originalIndex = reservations.indexOf(reservation);
+                const startHour = parseInt(reservation.startTime.split(':')[0]);
+                const startMinute = parseInt(reservation.startTime.split(':')[1]);
+                const endHour = parseInt(reservation.endTime.split(':')[0]);
+                const endMinute = parseInt(reservation.endTime.split(':')[1]);
+
+                // 開始時刻のセルを探す
+                const startCell = document.querySelector(`[data-room="${reservation.room}"][data-hour="${startHour}"]`);
+                if (!startCell) return;
+
+                // 予約ブロックを作成
+                const block = document.createElement('div');
+                block.className = 'reservation-block absolute left-0 right-0 bg-blue-500 text-white rounded px-2 py-1 text-xs cursor-pointer hover:bg-blue-600 transition-colors z-10';
+                block.dataset.index = index;
+                
+                const title = document.createElement('div');
+                title.className = 'font-semibold truncate';
+                title.textContent = reservation.title;
+                block.appendChild(title);
+
+                const time = document.createElement('div');
+                time.className = 'text-xs opacity-90';
+                time.textContent = `${reservation.startTime} - ${reservation.endTime}`;
+                block.appendChild(time);
+
+                // 開始時刻からの位置を計算（分単位）
+                const startOffset = (startMinute / 60) * 30; // 30px = 1時間
+                block.style.top = `${startOffset}px`;
+
+                // 高さを計算
+                const duration = (endHour * 60 + endMinute) - (startHour * 60 + startMinute);
+                block.style.height = `${(duration / 60) * 30}px`;
+
+                startCell.appendChild(block);
+
+                // クリックで編集モーダルを開く
+                block.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    editingIndex = originalIndex;
+                    const reservation = reservations[originalIndex];
+                    
+                    document.getElementById('editRoomSelect').value = reservation.room;
+                    document.getElementById('editStartTime').value = reservation.startTime;
+                    document.getElementById('editEndTime').value = reservation.endTime;
+                    document.getElementById('editTitleInput').value = reservation.title;
+                    
+                    document.getElementById('editModal').classList.remove('hidden');
+                });
+            });
+        }
+
+        // 時刻入力フィールドをクリックしたら時刻選択UIを開く
+        document.getElementById('startTime').addEventListener('click', function() {
+            this.showPicker();
+        });
+        
+        document.getElementById('endTime').addEventListener('click', function() {
+            this.showPicker();
+        });
+        
+        document.getElementById('editStartTime').addEventListener('click', function() {
+            this.showPicker();
+        });
+        
+        document.getElementById('editEndTime').addEventListener('click', function() {
+            this.showPicker();
+        });
+
+        // モーダルを開く
+        document.getElementById('addReservationBtn').addEventListener('click', () => {
+            document.getElementById('addModal').classList.remove('hidden');
+        });
+
+        // モーダルを閉じる
+        document.getElementById('cancelBtn').addEventListener('click', () => {
+            document.getElementById('addModal').classList.add('hidden');
+            document.getElementById('reservationForm').reset();
+        });
+
+        // 編集モーダルを閉じる
+        document.getElementById('editCancelBtn').addEventListener('click', () => {
+            document.getElementById('editModal').classList.add('hidden');
+            editingIndex = -1;
+        });
+
+        // 編集モーダルの背景クリックで閉じる
+        document.getElementById('editModal').addEventListener('click', (e) => {
+            if (e.target.id === 'editModal') {
+                document.getElementById('editModal').classList.add('hidden');
+                editingIndex = -1;
+            }
+        });
+
+        // 削除ボタン
+        document.getElementById('deleteBtn').addEventListener('click', () => {
+            if (editingIndex >= 0 && confirm('この予約を削除しますか？')) {
+                reservations.splice(editingIndex, 1);
+                saveReservations();
+                renderReservations();
+                document.getElementById('editModal').classList.add('hidden');
+                editingIndex = -1;
+            }
+        });
+
+        // 編集フォーム送信
+        document.getElementById('editReservationForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            if (editingIndex < 0) return;
+
+            const room = parseInt(document.getElementById('editRoomSelect').value);
+            const startTime = document.getElementById('editStartTime').value;
+            const endTime = document.getElementById('editEndTime').value;
+            const title = document.getElementById('editTitleInput').value;
+
+            // 時間の検証
+            if (startTime >= endTime) {
+                alert('終了時刻は開始時刻より後である必要があります。');
+                return;
+            }
+
+            // 重複チェック（編集中の予約自身は除外）
+            const currentDateStr = formatDate(currentDate);
+            const start = new Date(`2000-01-01 ${startTime}`);
+            const end = new Date(`2000-01-01 ${endTime}`);
+            const hasConflict = reservations.some((r, index) => {
+                if (index === editingIndex) return false; // 編集中の予約は除外
+                if (r.date !== currentDateStr || r.room !== room) return false;
+                const rStart = new Date(`2000-01-01 ${r.startTime}`);
+                const rEnd = new Date(`2000-01-01 ${r.endTime}`);
+                return (start < rEnd && end > rStart);
+            });
+
+            if (hasConflict) {
+                alert('この時間帯には既に予約が入っています。');
+                return;
+            }
+
+            // 予約を更新
+            reservations[editingIndex] = {
+                date: currentDateStr,
+                room,
+                startTime,
+                endTime,
+                title
+            };
+
+            saveReservations();
+            renderReservations();
+            document.getElementById('editModal').classList.add('hidden');
+            editingIndex = -1;
+        });
+
+        // フォーム送信
+        document.getElementById('reservationForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const room = parseInt(document.getElementById('roomSelect').value);
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const title = document.getElementById('titleInput').value;
+
+            // 時間の検証
+            if (startTime >= endTime) {
+                alert('終了時刻は開始時刻より後である必要があります。');
+                return;
+            }
+
+            // 重複チェック（同じ日付、同じ会議室で）
+            const currentDateStr = formatDate(currentDate);
+            const start = new Date(`2000-01-01 ${startTime}`);
+            const end = new Date(`2000-01-01 ${endTime}`);
+            const hasConflict = reservations.some(r => {
+                if (r.date !== currentDateStr || r.room !== room) return false;
+                const rStart = new Date(`2000-01-01 ${r.startTime}`);
+                const rEnd = new Date(`2000-01-01 ${r.endTime}`);
+                return (start < rEnd && end > rStart);
+            });
+
+            if (hasConflict) {
+                alert('この時間帯には既に予約が入っています。');
+                return;
+            }
+
+            reservations.push({
+                date: currentDateStr,
+                room,
+                startTime,
+                endTime,
+                title
+            });
+
+            saveReservations();
+            renderReservations();
+            document.getElementById('addModal').classList.add('hidden');
+            document.getElementById('reservationForm').reset();
+        });
+
+        // 画像アップローダーのスロットを生成
+        function createImageUploaderSlots() {
+            const container = document.getElementById('roomImagesContainer');
+            if (!container) return;
+            
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 3; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'relative border-2 border-dashed border-gray-300 rounded-lg aspect-video flex items-center justify-center cursor-pointer hover:border-blue-400 transition-colors';
+                slot.dataset.slotIndex = i;
+                
+                const fileInput = document.createElement('input');
+                fileInput.type = 'file';
+                fileInput.accept = 'image/*';
+                fileInput.className = 'hidden';
+                fileInput.dataset.slotIndex = i;
+                
+                const preview = document.createElement('div');
+                preview.className = 'hidden absolute inset-0 rounded-lg overflow-hidden';
+                
+                const img = document.createElement('img');
+                img.className = 'w-full h-full object-cover';
+                preview.appendChild(img);
+                
+                const removeBtn = document.createElement('button');
+                removeBtn.type = 'button';
+                removeBtn.className = 'absolute top-1 right-1 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-600 transition-colors z-10';
+                removeBtn.innerHTML = '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>';
+                removeBtn.style.display = 'none';
+                
+                const placeholder = document.createElement('div');
+                placeholder.className = 'text-center p-4';
+                placeholder.innerHTML = `
+                    <svg class="w-12 h-12 text-gray-400 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                    <p class="text-xs text-gray-500">画像を追加</p>
+                `;
+                
+                slot.appendChild(fileInput);
+                slot.appendChild(preview);
+                slot.appendChild(removeBtn);
+                slot.appendChild(placeholder);
+                
+                // クリックでファイル選択
+                slot.addEventListener('click', (e) => {
+                    if (e.target !== removeBtn && !removeBtn.contains(e.target)) {
+                        fileInput.click();
+                    }
+                });
+                
+                // ファイル選択時の処理
+                fileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file && file.type.startsWith('image/')) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            img.src = event.target.result;
+                            preview.classList.remove('hidden');
+                            placeholder.style.display = 'none';
+                            removeBtn.style.display = 'block';
+                            slot.classList.remove('border-dashed');
+                            slot.classList.add('border-solid', 'border-gray-300');
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                });
+                
+                // 削除ボタン
+                removeBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    fileInput.value = '';
+                    preview.classList.add('hidden');
+                    placeholder.style.display = 'block';
+                    removeBtn.style.display = 'none';
+                    slot.classList.add('border-dashed');
+                    slot.classList.remove('border-solid');
+                });
+                
+                container.appendChild(slot);
+            }
+        }
+
+        // 会議室ヘッダーの+ボタンをクリック
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('#addRoomHeaderBtn')) {
+                document.getElementById('addRoomModal').classList.remove('hidden');
+                setTimeout(createImageUploaderSlots, 100);
+            }
+        });
+
+        // 会議室追加モーダルを閉じる
+        document.getElementById('cancelRoomBtn').addEventListener('click', () => {
+            document.getElementById('addRoomModal').classList.add('hidden');
+            document.getElementById('addRoomForm').reset();
+            // 画像スロットをリセット
+            createImageUploaderSlots();
+        });
+
+        // 会議室追加モーダルの背景クリックで閉じる
+        document.getElementById('addRoomModal').addEventListener('click', (e) => {
+            if (e.target.id === 'addRoomModal') {
+                document.getElementById('addRoomModal').classList.add('hidden');
+                document.getElementById('addRoomForm').reset();
+                // 画像スロットをリセット
+                createImageUploaderSlots();
+            }
+        });
+
+        // 会議室追加フォーム送信
+        document.getElementById('addRoomForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const roomName = document.getElementById('roomNameInput').value.trim();
+            const roomFloor = document.getElementById('roomFloorInput').value.trim();
+            const roomCapacity = document.getElementById('roomCapacityInput').value.trim();
+            const roomEquipment = document.getElementById('roomEquipmentInput').value.trim();
+            
+            if (!roomName || !roomFloor || !roomCapacity || !roomEquipment) {
+                alert('すべての必須項目を入力してください。');
+                return;
+            }
+
+            // 画像を取得（Base64エンコードされたデータURL）
+            const imageSlots = document.querySelectorAll('#roomImagesContainer [data-slot-index]');
+            const images = [];
+            imageSlots.forEach(slot => {
+                const fileInput = slot.querySelector('input[type="file"]');
+                const preview = slot.querySelector('div.absolute.inset-0');
+                if (fileInput.files.length > 0 && preview && !preview.classList.contains('hidden')) {
+                    const img = preview.querySelector('img');
+                    if (img && img.src) {
+                        images.push(img.src); // Base64データURL
+                    }
+                }
+            });
+
+            // 新しいIDを生成（既存のIDの最大値+1）
+            const maxId = rooms.length > 0 ? Math.max(...rooms.map(r => r.id)) : 0;
+            const newRoom = {
+                id: maxId + 1,
+                name: roomName,
+                floor: roomFloor,
+                capacity: roomCapacity,
+                equipment: roomEquipment,
+                images: images.length > 0 ? images : []
+            };
+
+            rooms.push(newRoom);
+            saveRooms();
+            
+            // グリッドと選択肢を再生成
+            generateRoomSelects();
+            generateRoomHeader();
+            generateTimeGrid();
+            
+            // モーダルを閉じる
+            document.getElementById('addRoomModal').classList.add('hidden');
+            document.getElementById('addRoomForm').reset();
+            // 画像スロットをリセット
+            createImageUploaderSlots();
+        });
+
+        // 初期化
+        generateRoomSelects();
+        generateRoomHeader();
+        generateTimeGrid();
+    </script>
+</body>
+</html>

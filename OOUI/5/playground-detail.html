@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>遊具詳細 - ブランコ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <!-- ヘッダー -->
+        <div class="flex items-center gap-4 mb-6">
+            <a id="backLink" href="#" class="text-blue-600 hover:text-blue-700 transition-colors">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M15 18l-6-6 6-6"/>
+                </svg>
+            </a>
+            <h1 class="text-2xl font-bold text-gray-900">ブランコ</h1>
+        </div>
+
+        <!-- 遊具情報 -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+            <div class="space-y-6">
+                <!-- 画像プレースホルダー -->
+                <div class="bg-gray-200 rounded-lg aspect-video flex items-center justify-center">
+                    <svg class="w-32 h-32 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                    </svg>
+                </div>
+
+                <!-- 基本情報 -->
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">基本情報</h2>
+                    <div class="space-y-3">
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">遊具名:</span>
+                            <span class="ml-2 text-gray-900">ブランコ</span>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">設置場所:</span>
+                            <span id="parkLocation" class="ml-2 text-gray-900"></span>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">対象年齢:</span>
+                            <span class="ml-2 text-gray-900">3歳以上</span>
+                        </div>
+                        <div>
+                            <span class="text-sm font-medium text-gray-600">座席数:</span>
+                            <span class="ml-2 text-gray-900">2席</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 説明 -->
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">説明</h2>
+                    <p class="text-gray-700 leading-relaxed">
+                        安全に設計されたブランコです。座席は柔らかい素材で作られており、小さなお子様でも安心して遊べます。
+                        前後に揺れる動きでバランス感覚を養うことができます。
+                    </p>
+                </div>
+
+                <!-- 注意事項 -->
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-4">注意事項</h2>
+                    <ul class="list-disc list-inside space-y-2 text-gray-700">
+                        <li>使用前に座席の状態を確認してください</li>
+                        <li>複数人で同時に使用しないでください</li>
+                        <li>周囲に人がいないことを確認してから使用してください</li>
+                        <li>使用後は他の方に譲りましょう</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 公園データ
+        const parks = {
+            1: {
+                id: 1,
+                name: '公園A',
+                address: '東京都渋谷区1-1-1',
+                area: '5,000㎡',
+                facilities: ['トイレ', '駐車場', 'ベンチ'],
+                playgrounds: [
+                    { id: 1, name: 'ブランコ', type: 'swing' },
+                    { id: 2, name: '滑り台', type: 'slide' },
+                    { id: 3, name: 'ジャングルジム', type: 'jungle-gym' }
+                ]
+            },
+            2: {
+                id: 2,
+                name: '公園B',
+                address: '東京都新宿区2-2-2',
+                area: '3,000㎡',
+                facilities: ['トイレ', 'ベンチ'],
+                playgrounds: [
+                    { id: 4, name: 'ブランコ', type: 'swing' },
+                    { id: 5, name: 'シーソー', type: 'seesaw' }
+                ]
+            },
+            3: {
+                id: 3,
+                name: '公園C',
+                address: '東京都港区3-3-3',
+                area: '7,000㎡',
+                facilities: ['トイレ', '駐車場', 'ベンチ', '売店'],
+                playgrounds: [
+                    { id: 6, name: '滑り台', type: 'slide' },
+                    { id: 7, name: 'ブランコ', type: 'swing' },
+                    { id: 8, name: '鉄棒', type: 'horizontal-bar' }
+                ]
+            },
+            4: {
+                id: 4,
+                name: '公園D',
+                address: '東京都世田谷区4-4-4',
+                area: '4,000㎡',
+                facilities: ['トイレ', 'ベンチ'],
+                playgrounds: [
+                    { id: 9, name: 'ブランコ', type: 'swing' },
+                    { id: 10, name: 'ジャングルジム', type: 'jungle-gym' }
+                ]
+            }
+        };
+
+        // URLパラメータから情報を取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const parkId = parseInt(urlParams.get('parkId')) || 1;
+        const playgroundId = parseInt(urlParams.get('playgroundId')) || 1;
+
+        const park = parks[parkId];
+        if (park) {
+            document.getElementById('parkLocation').textContent = park.name;
+            document.getElementById('backLink').href = `index.html`;
+        }
+    </script>
+</body>
+</html>

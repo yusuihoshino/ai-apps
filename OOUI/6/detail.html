@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>詳細</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <!-- ヘッダー -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+                <a id="backLink" href="index.html" class="text-blue-600 hover:text-blue-700 transition-colors">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </a>
+                <h1 id="pageTitle" class="text-2xl font-bold text-gray-900">詳細</h1>
+            </div>
+            <div id="actionButtons" class="flex items-center gap-2">
+                <!-- 編集・削除ボタン（動的に生成） -->
+            </div>
+        </div>
+
+        <!-- 仕入れ詳細 -->
+        <div id="purchaseDetail" class="hidden">
+            <!-- 仕入れ情報 -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                <div class="space-y-3">
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-medium text-gray-600 w-24">仕入れID:</span>
+                        <span id="purchaseId" class="text-lg text-gray-900"></span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-medium text-gray-600 w-24">日付:</span>
+                        <span id="purchaseDateDisplay" class="text-lg text-gray-900"></span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-medium text-gray-600 w-24">合計金額:</span>
+                        <span id="purchaseTotalAmount" class="text-lg text-gray-900"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 商品一覧 -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">商品一覧</h2>
+                <div class="overflow-x-auto">
+                    <div class="min-w-[600px]">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">商品名</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">ID</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">個数</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">金額</th>
+                                </tr>
+                            </thead>
+                            <tbody id="purchaseItemsBody" class="divide-y divide-gray-200">
+                                <!-- JavaScriptで動的に生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 商品詳細 -->
+        <div id="productDetail" class="hidden">
+            <!-- 商品情報 -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+                <div class="space-y-3">
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-medium text-gray-600 w-24">商品ID:</span>
+                        <span id="productId" class="text-lg text-gray-900"></span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-medium text-gray-600 w-24">商品名:</span>
+                        <span id="productName" class="text-lg text-gray-900"></span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-medium text-gray-600 w-24">単価:</span>
+                        <span id="productPrice" class="text-lg text-gray-900"></span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-medium text-gray-600 w-24">仕入れ日:</span>
+                        <span id="purchaseDate" class="text-lg text-gray-900"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 直近の仕入れリスト -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">直近の仕入れ</h2>
+                <div class="overflow-x-auto">
+                    <div class="min-w-[600px]">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">仕入れID</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">仕入れ日</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">個数</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">単価</th>
+                                </tr>
+                            </thead>
+                            <tbody id="purchaseHistoryBody" class="divide-y divide-gray-200">
+                                <!-- JavaScriptで動的に生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URLパラメータからIDを取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const purchaseId = urlParams.get('id');
+        const productId = urlParams.get('productId');
+
+        // サンプルデータ
+        const sampleProducts = [
+            { id: 'PRD001', transactionDate: '2025-02-11', purchaseDate: '2025-02-10', purchaseId: 'P001', quantity: 10, name: '米', price: 500 },
+            { id: 'PRD002', transactionDate: '2025-02-11', purchaseDate: '2025-02-10', purchaseId: 'P001', quantity: 20, name: '卵', price: 300 },
+            { id: 'PRD003', transactionDate: '2025-02-11', purchaseDate: '2025-02-10', purchaseId: 'P001', quantity: 6, name: '牛乳', price: 200 },
+            { id: 'PRD004', transactionDate: '2025-02-09', purchaseDate: '2025-02-08', purchaseId: 'P002', quantity: 15, name: 'トマト', price: 200 },
+            { id: 'PRD005', transactionDate: '2025-02-09', purchaseDate: '2025-02-08', purchaseId: 'P002', quantity: 10, name: '玉ねぎ', price: 150 },
+            { id: 'PRD006', transactionDate: '2025-02-09', purchaseDate: '2025-02-08', purchaseId: 'P002', quantity: 8, name: 'にんじん', price: 100 },
+            { id: 'PRD007', transactionDate: '2025-02-06', purchaseDate: '2025-02-05', purchaseId: 'P003', quantity: 5, name: '鶏肉', price: 800 },
+            { id: 'PRD008', transactionDate: '2025-02-06', purchaseDate: '2025-02-05', purchaseId: 'P003', quantity: 4, name: '豚肉', price: 1200 },
+            { id: 'PRD009', transactionDate: '2025-02-06', purchaseDate: '2025-02-05', purchaseId: 'P003', quantity: 12, name: 'じゃがいも', price: 150 },
+            { id: 'PRD010', transactionDate: '2025-02-04', purchaseDate: '2025-02-03', purchaseId: 'P004', quantity: 6, name: 'バター', price: 400 },
+            { id: 'PRD011', transactionDate: '2025-02-04', purchaseDate: '2025-02-03', purchaseId: 'P004', quantity: 4, name: 'チーズ', price: 600 },
+            { id: 'PRD012', transactionDate: '2025-02-02', purchaseDate: '2025-02-01', purchaseId: 'P005', quantity: 3, name: '魚', price: 1500 },
+            { id: 'PRD013', transactionDate: '2025-02-02', purchaseDate: '2025-02-01', purchaseId: 'P005', quantity: 5, name: '小麦粉', price: 300 }
+        ];
+
+        const samplePurchases = [
+            {
+                id: 'P001',
+                date: '2025-02-10',
+                totalAmount: 12500,
+                items: [
+                    { id: 'PRD001', name: '米', quantity: 10, price: 500 },
+                    { id: 'PRD002', name: '卵', quantity: 20, price: 300 },
+                    { id: 'PRD003', name: '牛乳', quantity: 6, price: 200 }
+                ]
+            },
+            {
+                id: 'P002',
+                date: '2025-02-08',
+                totalAmount: 8500,
+                items: [
+                    { id: 'PRD004', name: 'トマト', quantity: 15, price: 200 },
+                    { id: 'PRD005', name: '玉ねぎ', quantity: 10, price: 150 },
+                    { id: 'PRD006', name: 'にんじん', quantity: 8, price: 100 }
+                ]
+            },
+            {
+                id: 'P003',
+                date: '2025-02-05',
+                totalAmount: 15600,
+                items: [
+                    { id: 'PRD007', name: '鶏肉', quantity: 5, price: 800 },
+                    { id: 'PRD008', name: '豚肉', quantity: 4, price: 1200 },
+                    { id: 'PRD009', name: 'じゃがいも', quantity: 12, price: 150 }
+                ]
+            },
+            {
+                id: 'P004',
+                date: '2025-02-03',
+                totalAmount: 7200,
+                items: [
+                    { id: 'PRD010', name: 'バター', quantity: 6, price: 400 },
+                    { id: 'PRD011', name: 'チーズ', quantity: 4, price: 600 }
+                ]
+            },
+            {
+                id: 'P005',
+                date: '2025-02-01',
+                totalAmount: 9500,
+                items: [
+                    { id: 'PRD012', name: '魚', quantity: 3, price: 1500 },
+                    { id: 'PRD013', name: '小麦粉', quantity: 5, price: 300 }
+                ]
+            },
+            {
+                id: 'P006',
+                date: '2025-01-28',
+                totalAmount: 11200,
+                items: [
+                    { id: 'PRD001', name: '米', quantity: 8, price: 500 },
+                    { id: 'PRD002', name: '卵', quantity: 15, price: 300 },
+                    { id: 'PRD014', name: 'サラダ油', quantity: 4, price: 400 }
+                ]
+            },
+            {
+                id: 'P007',
+                date: '2025-01-25',
+                totalAmount: 9800,
+                items: [
+                    { id: 'PRD004', name: 'トマト', quantity: 12, price: 200 },
+                    { id: 'PRD015', name: 'キャベツ', quantity: 3, price: 300 },
+                    { id: 'PRD016', name: 'レタス', quantity: 5, price: 250 }
+                ]
+            },
+            {
+                id: 'P008',
+                date: '2025-01-22',
+                totalAmount: 13400,
+                items: [
+                    { id: 'PRD007', name: '鶏肉', quantity: 6, price: 800 },
+                    { id: 'PRD017', name: '牛肉', quantity: 2, price: 2000 },
+                    { id: 'PRD009', name: 'じゃがいも', quantity: 10, price: 150 }
+                ]
+            },
+            {
+                id: 'P009',
+                date: '2025-01-20',
+                totalAmount: 6400,
+                items: [
+                    { id: 'PRD010', name: 'バター', quantity: 5, price: 400 },
+                    { id: 'PRD018', name: '砂糖', quantity: 3, price: 300 },
+                    { id: 'PRD019', name: '塩', quantity: 5, price: 200 }
+                ]
+            },
+            {
+                id: 'P010',
+                date: '2025-01-18',
+                totalAmount: 10500,
+                items: [
+                    { id: 'PRD012', name: '魚', quantity: 4, price: 1500 },
+                    { id: 'PRD020', name: 'えび', quantity: 2, price: 1500 },
+                    { id: 'PRD013', name: '小麦粉', quantity: 3, price: 300 }
+                ]
+            },
+            {
+                id: 'P011',
+                date: '2025-01-15',
+                totalAmount: 8900,
+                items: [
+                    { id: 'PRD001', name: '米', quantity: 6, price: 500 },
+                    { id: 'PRD003', name: '牛乳', quantity: 8, price: 200 },
+                    { id: 'PRD021', name: 'ヨーグルト', quantity: 6, price: 150 }
+                ]
+            },
+            {
+                id: 'P012',
+                date: '2025-01-12',
+                totalAmount: 7600,
+                items: [
+                    { id: 'PRD005', name: '玉ねぎ', quantity: 8, price: 150 },
+                    { id: 'PRD006', name: 'にんじん', quantity: 10, price: 100 },
+                    { id: 'PRD022', name: '大根', quantity: 2, price: 200 }
+                ]
+            },
+            {
+                id: 'P013',
+                date: '2025-02-11',
+                totalAmount: 11200,
+                items: [
+                    { id: 'PRD009', name: 'じゃがいも', quantity: 15, price: 150 },
+                    { id: 'PRD001', name: '米', quantity: 5, price: 500 },
+                    { id: 'PRD002', name: '卵', quantity: 12, price: 300 }
+                ]
+            },
+            {
+                id: 'P014',
+                date: '2025-02-09',
+                totalAmount: 9800,
+                items: [
+                    { id: 'PRD009', name: 'じゃがいも', quantity: 20, price: 150 },
+                    { id: 'PRD007', name: '鶏肉', quantity: 3, price: 800 },
+                    { id: 'PRD003', name: '牛乳', quantity: 10, price: 200 }
+                ]
+            },
+            {
+                id: 'P015',
+                date: '2025-02-07',
+                totalAmount: 7500,
+                items: [
+                    { id: 'PRD009', name: 'じゃがいも', quantity: 12, price: 150 },
+                    { id: 'PRD004', name: 'トマト', quantity: 8, price: 200 },
+                    { id: 'PRD005', name: '玉ねぎ', quantity: 6, price: 150 }
+                ]
+            },
+            {
+                id: 'P016',
+                date: '2025-02-05',
+                totalAmount: 10500,
+                items: [
+                    { id: 'PRD009', name: 'じゃがいも', quantity: 18, price: 150 },
+                    { id: 'PRD010', name: 'バター', quantity: 4, price: 400 },
+                    { id: 'PRD013', name: '小麦粉', quantity: 6, price: 300 }
+                ]
+            },
+            {
+                id: 'P017',
+                date: '2025-02-03',
+                totalAmount: 8900,
+                items: [
+                    { id: 'PRD009', name: 'じゃがいも', quantity: 10, price: 150 },
+                    { id: 'PRD012', name: '魚', quantity: 2, price: 1500 },
+                    { id: 'PRD001', name: '米', quantity: 4, price: 500 }
+                ]
+            }
+        ];
+
+        // データ（localStorageから読み込み、なければサンプルデータを使用）
+        let products = JSON.parse(localStorage.getItem('products') || '[]');
+        
+        // データが空の場合はサンプルデータを設定
+        if (products.length === 0) {
+            products = sampleProducts;
+            localStorage.setItem('products', JSON.stringify(products));
+        }
+        
+        // 金額をフォーマット
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('ja-JP').format(amount);
+        }
+
+        // 日付を日本語表示形式にフォーマット
+        function formatDateDisplay(dateStr) {
+            const date = new Date(dateStr);
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            return `${year}年${month}月${day}日`;
+        }
+
+        // 仕入れ詳細を表示
+        function renderPurchaseDetail() {
+            // 仕入れデータを取得
+            let purchases = JSON.parse(localStorage.getItem('purchases') || '[]');
+            if (purchases.length === 0) {
+                purchases = samplePurchases;
+                localStorage.setItem('purchases', JSON.stringify(purchases));
+            }
+
+            const purchase = purchases.find(p => p.id === purchaseId);
+            
+            if (!purchase) {
+                document.getElementById('purchaseId').textContent = '仕入れが見つかりません';
+                return;
+            }
+
+            // タイトルを更新
+            document.getElementById('pageTitle').textContent = `${formatDateDisplay(purchase.date)}の仕入れ`;
+
+            // アクションボタンを生成
+            const actionButtons = document.getElementById('actionButtons');
+            actionButtons.innerHTML = '';
+            
+            // 編集ボタン
+            const editBtn = document.createElement('button');
+            editBtn.className = 'p-2 text-gray-600 hover:text-blue-600 transition-colors';
+            editBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+            `;
+            editBtn.title = '編集';
+            editBtn.addEventListener('click', () => {
+                // 編集処理（後で実装）
+            });
+            
+            // 削除ボタン
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'p-2 text-gray-600 hover:text-red-600 transition-colors';
+            deleteBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                </svg>
+            `;
+            deleteBtn.title = '削除';
+            deleteBtn.addEventListener('click', () => {
+                if (confirm('この仕入れを削除しますか？')) {
+                    purchases = purchases.filter(p => p.id !== purchaseId);
+                    localStorage.setItem('purchases', JSON.stringify(purchases));
+                    window.location.href = 'index.html';
+                }
+            });
+            
+            actionButtons.appendChild(editBtn);
+            actionButtons.appendChild(deleteBtn);
+
+            document.getElementById('purchaseId').textContent = purchase.id;
+            document.getElementById('purchaseDateDisplay').textContent = formatDateDisplay(purchase.date);
+            document.getElementById('purchaseTotalAmount').textContent = `¥${formatCurrency(purchase.totalAmount)}`;
+
+            // 商品一覧を表示
+            const tbody = document.getElementById('purchaseItemsBody');
+            tbody.innerHTML = '';
+
+            purchase.items.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+                
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-sm text-gray-900">${item.name}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">${item.id}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">${item.quantity}個</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">¥${formatCurrency(item.price)}</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+        }
+
+        // 商品詳細を表示
+        function renderProductDetail() {
+            const product = products.find(p => p.id === productId);
+            
+            if (!product) {
+                document.getElementById('productId').textContent = '商品が見つかりません';
+                return;
+            }
+
+            // タイトルを更新
+            document.getElementById('pageTitle').textContent = `${product.name}の商品詳細`;
+
+            // アクションボタンを生成
+            const actionButtons = document.getElementById('actionButtons');
+            actionButtons.innerHTML = '';
+            
+            // 編集ボタン
+            const editBtn = document.createElement('button');
+            editBtn.className = 'p-2 text-gray-600 hover:text-blue-600 transition-colors';
+            editBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+            `;
+            editBtn.title = '編集';
+            editBtn.addEventListener('click', () => {
+                // 編集処理（後で実装）
+            });
+            
+            // 削除ボタン
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'p-2 text-gray-600 hover:text-red-600 transition-colors';
+            deleteBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                </svg>
+            `;
+            deleteBtn.title = '削除';
+            deleteBtn.addEventListener('click', () => {
+                if (confirm('この商品を削除しますか？')) {
+                    products = products.filter(p => p.id !== productId);
+                    localStorage.setItem('products', JSON.stringify(products));
+                    window.location.href = 'product-list.html';
+                }
+            });
+            
+            actionButtons.appendChild(editBtn);
+            actionButtons.appendChild(deleteBtn);
+
+            document.getElementById('productId').textContent = product.id;
+            document.getElementById('productName').textContent = product.name;
+            document.getElementById('productPrice').textContent = `¥${formatCurrency(product.price)}`;
+            document.getElementById('purchaseDate').textContent = formatDateDisplay(product.purchaseDate);
+
+            // 直近の仕入れリストを表示
+            renderPurchaseHistory(product.name);
+        }
+
+        // 直近の仕入れリストを表示
+        function renderPurchaseHistory(productName) {
+            // 仕入れデータを取得（常に最新のサンプルデータを使用）
+            let purchases = JSON.parse(localStorage.getItem('purchases') || '[]');
+            
+            // サンプルデータに新しい仕入れが含まれているか確認し、含まれていない場合は更新
+            const hasNewPurchases = purchases.some(p => p.id === 'P013' || p.id === 'P014' || p.id === 'P015' || p.id === 'P016' || p.id === 'P017');
+            if (purchases.length === 0 || !hasNewPurchases) {
+                // 既存のデータと新しいデータをマージ（重複を避ける）
+                const existingIds = new Set(purchases.map(p => p.id));
+                const newPurchases = samplePurchases.filter(p => !existingIds.has(p.id));
+                purchases = [...purchases, ...newPurchases];
+                // 日付順にソート
+                purchases.sort((a, b) => new Date(b.date) - new Date(a.date));
+                localStorage.setItem('purchases', JSON.stringify(purchases));
+            }
+
+            // 該当商品の仕入れ履歴を取得
+            const history = [];
+            purchases.forEach(purchase => {
+                if (purchase.items && Array.isArray(purchase.items)) {
+                    purchase.items.forEach(item => {
+                        if (item && item.name === productName) {
+                            history.push({
+                                purchaseId: purchase.id,
+                                date: purchase.date,
+                                quantity: item.quantity,
+                                price: item.price
+                            });
+                        }
+                    });
+                }
+            });
+
+            // 日付順（新しい順）にソート
+            history.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const tbody = document.getElementById('purchaseHistoryBody');
+            tbody.innerHTML = '';
+
+            if (history.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="4" class="px-4 py-8 text-center text-gray-500">仕入れ履歴がありません</td>';
+                tbody.appendChild(row);
+                return;
+            }
+
+            // 最新の5件のみ表示
+            const recentHistory = history.slice(0, 5);
+
+            recentHistory.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 cursor-pointer transition-colors';
+                
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-sm text-gray-900">${item.purchaseId}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">${formatDateDisplay(item.date)}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">${item.quantity}個</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">¥${formatCurrency(item.price)}</td>
+                `;
+
+                // クリックで仕入れ詳細ページに移動
+                row.addEventListener('click', () => {
+                    window.location.href = `detail.html?id=${item.purchaseId}`;
+                });
+
+                tbody.appendChild(row);
+            });
+        }
+
+        // 初期化
+        if (purchaseId) {
+            // 仕入れ詳細を表示
+            document.getElementById('backLink').href = 'index.html';
+            document.getElementById('purchaseDetail').classList.remove('hidden');
+            renderPurchaseDetail();
+        } else if (productId) {
+            // 商品詳細を表示
+            document.getElementById('pageTitle').textContent = '商品詳細';
+            document.getElementById('backLink').href = 'product-list.html';
+            document.getElementById('productDetail').classList.remove('hidden');
+            renderProductDetail();
+        }
+    </script>
+</body>
+</html>
