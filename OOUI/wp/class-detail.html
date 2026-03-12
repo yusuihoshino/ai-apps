@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>クラス詳細 - クラス 生徒</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-white min-h-screen flex flex-col">
+    <header class="bg-white border-b border-gray-300 px-6 py-4 shrink-0 flex justify-center">
+        <nav class="inline-flex rounded-2xl bg-white p-1.5 gap-1">
+            <a href="class-list.html" class="inline-flex items-center justify-center h-11 px-5 rounded-xl bg-gray-200 text-black text-base font-medium">クラス</a>
+            <a href="student-list.html" class="inline-flex items-center justify-center h-11 px-5 rounded-xl text-gray-600 text-base font-medium hover:bg-gray-100">生徒</a>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-8 py-8 flex-1 max-w-2xl">
+        <div class="flex items-center justify-between gap-4 mb-4">
+            <div class="flex items-center gap-2 min-w-0">
+                <a href="class-list.html" class="text-black hover:opacity-70 shrink-0" aria-label="戻る"><span class="material-icons text-2xl">arrow_back</span></a>
+                <h2 id="detail-title" class="text-lg font-bold text-black">1年A組の詳細</h2>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="#" id="btn-edit-members" class="inline-flex items-center justify-center h-9 px-4 border-2 border-gray-400 rounded-2xl bg-white text-sm font-bold text-black hover:bg-gray-100">編集</a>
+                <button type="button" id="btn-delete-members" class="inline-flex items-center justify-center h-9 px-4 border-2 border-red-500 rounded-2xl bg-white text-sm font-bold text-red-600 hover:bg-red-50">削除</button>
+            </div>
+        </div>
+        <p class="text-sm font-medium text-gray-800 mb-8">担任: <span id="teacher-name">佐藤先生</span></p>
+
+        <section class="pt-6 border-t border-gray-300">
+            <h3 class="text-base font-bold text-black mb-4">所属生徒一覧</h3>
+            <div id="student-list" class="flex flex-col gap-4"></div>
+        </section>
+    </main>
+
+    <script>
+        (function() {
+            var classes = {
+                'C1A': { name: '1年A組', teacher: '佐藤先生', studentIds: ['S1','S2','S3'] },
+                'C1B': { name: '1年B組', teacher: '田中先生', studentIds: [] },
+                'C1C': { name: '1年C組', teacher: '鈴木先生', studentIds: [] },
+                'C2A': { name: '2年A組', teacher: '高橋先生', studentIds: ['S4'] },
+                'C2B': { name: '2年B組', teacher: '伊藤先生', studentIds: [] },
+                'C2C': { name: '2年C組', teacher: '渡辺先生', studentIds: [] }
+            };
+            var students = {
+                'S1': { name: '青木れな', classId: 'C1A' },
+                'S2': { name: '加藤まなぶ', classId: 'C1A' },
+                'S3': { name: '斉藤たける', classId: 'C1A' },
+                'S4': { name: '増田ゆうすけ', classId: 'C2A' }
+            };
+            var id = (location.search.match(/[?&]id=([^&]+)/) || [])[1] || 'C1A';
+            var c = classes[id];
+            if (c) {
+                document.getElementById('detail-title').textContent = c.name + 'の詳細';
+                document.getElementById('teacher-name').textContent = c.teacher;
+                var container = document.getElementById('student-list');
+                if (c.studentIds.length) {
+                    container.innerHTML = c.studentIds.map(function(sid) {
+                        var s = students[sid];
+                        if (!s) return '';
+                        return '<div class="relative flex items-center justify-between p-4 border border-gray-300 rounded-2xl hover:bg-gray-50 transition-colors group">' +
+                            '<a href="student-detail.html?id=' + sid + '" class="flex-1 min-w-0"><span class="text-base font-bold text-black">' + s.name + '</span></a>' +
+                            '<button type="button" class="p-1 rounded-full hover:bg-gray-200 text-gray-600 shrink-0 student-card-menu-btn" aria-label="メニュー"><span class="material-icons text-xl">more_vert</span></button>' +
+                            '<div class="student-card-menu hidden absolute right-4 top-full mt-1 py-1 bg-white border border-gray-300 rounded-xl shadow-lg z-10 min-w-[120px]">' +
+                            '<a href="student-detail.html?id=' + sid + '" class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100">詳細</a>' +
+                            '<a href="student-edit.html?id=' + sid + '" class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100">編集</a>' +
+                            '<button type="button" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">クラスから外す</button></div></div>';
+                    }).join('');
+                    container.querySelectorAll('.student-card-menu-btn').forEach(function(btn) {
+                        btn.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            var menu = this.nextElementSibling;
+                            container.querySelectorAll('.student-card-menu').forEach(function(m) { if (m !== menu) m.classList.add('hidden'); });
+                            menu.classList.toggle('hidden');
+                        });
+                    });
+                } else {
+                    container.innerHTML = '<p class="text-sm text-gray-500 py-4">所属生徒はいません</p>';
+                }
+            }
+            document.addEventListener('click', function() {
+                var list = document.getElementById('student-list');
+                if (list) list.querySelectorAll('.student-card-menu').forEach(function(m) { m.classList.add('hidden'); });
+            });
+            document.getElementById('btn-delete-members').addEventListener('click', function() {
+                if (confirm('選択した生徒をクラスから外しますか？')) alert('削除しました。（デモ）');
+            });
+        })();
+    </script>
+</body>
+</html>

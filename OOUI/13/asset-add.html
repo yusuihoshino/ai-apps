@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アセット追加 - アセット管理システム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col" style="padding-bottom: 72px;">
+    <header class="bg-white border-b border-gray-300 py-4">
+        <div class="container mx-auto px-6 flex items-center gap-4">
+            <a href="asset-list.html" class="inline-flex items-center gap-1 text-black hover:opacity-70 text-sm font-medium"><span class="material-icons">arrow_back</span>戻る</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-8 py-8">
+        <form id="add-form">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 py-6">
+                <div>
+                    <div class="border-2 border-dashed border-gray-300 rounded-2xl p-6 bg-white">
+                        <p id="file-label" class="mb-3 text-gray-500 font-medium">ドラッグ＆ドロップまたは下のボタンから選択</p>
+                        <div class="flex gap-3">
+                            <label class="inline-flex items-center justify-center gap-2 h-10 px-4 border-2 border-gray-400 rounded-2xl bg-white text-sm font-bold text-black hover:bg-gray-100 cursor-pointer">
+                                <span class="material-icons text-lg">folder_open</span>ファイル選択
+                                <input type="file" id="file-input" class="hidden" accept="image/*,.pdf,.doc,.docx,.zip,.mp4">
+                            </label>
+                            <button type="button" id="upload-btn" class="inline-flex items-center justify-center gap-2 h-10 px-4 bg-black text-white rounded-2xl text-sm font-bold hover:bg-gray-800">
+                                <span class="material-icons text-lg">upload</span>アップロード
+                            </button>
+                        </div>
+                        <p class="mt-2 text-xs font-medium text-gray-600">画像・PDF・ドキュメント・動画など（デモ）</p>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-black mb-1">アセット名</label>
+                        <input type="text" name="name" placeholder="アセット名を入力" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium placeholder-gray-500 focus:ring-2 focus:ring-black focus:border-black">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-black mb-1">説明</label>
+                        <textarea name="description" rows="2" placeholder="説明を入力" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium placeholder-gray-500 focus:ring-2 focus:ring-black focus:border-black"></textarea>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <footer class="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-gray-300 px-6 py-3 flex justify-center">
+        <button type="submit" form="add-form" class="inline-flex items-center justify-center gap-2 h-10 px-6 bg-black text-white rounded-2xl text-sm font-bold hover:bg-gray-800">
+            <span class="material-icons text-lg">save</span>保存
+        </button>
+    </footer>
+
+    <script>
+        (function() {
+            var fileInput = document.getElementById('file-input');
+            var fileLabel = document.getElementById('file-label');
+            var defaultLabel = fileLabel.textContent;
+            fileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) fileLabel.textContent = this.files[0].name;
+                else fileLabel.textContent = defaultLabel;
+            });
+            document.getElementById('upload-btn').addEventListener('click', function() {
+                if (fileInput.files && fileInput.files[0]) {
+                    fileLabel.textContent = fileInput.files[0].name + ' （選択済み）';
+                    alert('アップロードしました。（デモ）');
+                } else alert('先にファイルを選択してください。');
+            });
+            document.getElementById('add-form').addEventListener('submit', function(e) {
+                e.preventDefault();
+                var name = this.querySelector('[name="name"]').value.trim();
+                if (!name) { alert('アセット名を入力してください。'); return; }
+                alert('保存しました。一覧に戻ります。（デモ）');
+                location.href = 'asset-list.html';
+            });
+        })();
+    </script>
+</body>
+</html>

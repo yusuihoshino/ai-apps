@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アセット編集 - アセット管理システム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col" style="padding-bottom: 72px;">
+    <header class="bg-white border-b border-gray-300 py-4 shrink-0">
+        <div class="container mx-auto px-6 flex items-center gap-4">
+            <a href="asset-list.html" class="inline-flex items-center gap-1 text-black hover:opacity-70 text-sm font-medium"><span class="material-icons">arrow_back</span>戻る</a>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-8 py-8">
+        <div id="not-found" class="hidden py-12 text-center">
+            <p class="font-medium text-black">アセットが見つかりません。</p>
+            <a href="asset-list.html" class="inline-block mt-4 font-bold text-black hover:underline">一覧に戻る</a>
+        </div>
+
+        <form id="edit-form">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 py-6">
+                <div>
+                    <div id="preview-wrap" class="aspect-square max-w-md bg-gray-200 overflow-hidden flex items-center justify-center">
+                        <img id="preview-img" src="" alt="" class="w-full h-full object-contain hidden">
+                        <span id="preview-placeholder" class="material-icons text-8xl text-gray-500">image</span>
+                    </div>
+                </div>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-bold text-black mb-1">アセット名</label>
+                        <input type="text" name="name" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-black mb-1">説明</label>
+                        <textarea name="description" rows="2" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black"></textarea>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-black mb-1">登録日</label>
+                        <input type="text" name="registeredAt" readonly class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-2xl bg-gray-50 text-gray-600 font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-black mb-1">更新日</label>
+                        <input type="text" name="updated" readonly class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-2xl bg-gray-50 text-gray-600 font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-black mb-1">登録者</label>
+                        <input type="text" name="registeredBy" readonly class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-2xl bg-gray-50 text-gray-600 font-medium">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-black mb-1">更新者</label>
+                        <input type="text" name="updatedBy" readonly class="w-full px-4 py-2.5 border-2 border-gray-200 rounded-2xl bg-gray-50 text-gray-600 font-medium">
+                    </div>
+                </div>
+            </div>
+        </form>
+    </main>
+
+    <footer class="fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-gray-300 px-6 py-3 flex justify-center gap-3">
+        <button type="submit" form="edit-form" class="inline-flex items-center justify-center gap-2 h-10 px-6 bg-black text-white rounded-2xl text-sm font-bold hover:bg-gray-800">
+            <span class="material-icons text-lg">save</span>保存
+        </button>
+        <button type="button" id="btn-download" class="inline-flex items-center justify-center gap-2 h-10 px-4 border border-blue-500 rounded-2xl bg-white text-sm font-bold text-blue-600 hover:bg-blue-50">
+            <span class="material-icons text-lg">download</span>ダウンロード
+        </button>
+        <button type="button" id="btn-delete" class="inline-flex items-center justify-center gap-2 h-10 px-4 border border-red-500 rounded-2xl bg-white text-sm font-bold text-red-600 hover:bg-red-50">
+            <span class="material-icons text-lg">delete</span>削除
+        </button>
+    </footer>
+
+    <script>
+        (function() {
+            var assets = [
+                { id: 'A001', name: 'ロゴマーク メイン', category: '画像', fileName: 'logo-main.png', updated: '2025-02-18', registeredAt: '2025-01-10', registeredBy: '山田太郎', updatedBy: '山田太郎', description: 'メインロゴ', imageUrl: 'https://picsum.photos/seed/logo1/400/400' },
+                { id: 'A002', name: '製品写真 A', category: '画像', fileName: 'product-a.jpg', updated: '2025-02-17', registeredAt: '2025-01-12', registeredBy: '佐藤花子', updatedBy: '佐藤花子', description: '製品Aの写真', imageUrl: 'https://picsum.photos/seed/product2/400/400' },
+                { id: 'A003', name: 'バナー 春キャンペーン', category: '画像', fileName: 'banner-spring.png', updated: '2025-02-17', registeredAt: '2025-01-15', registeredBy: '山田太郎', updatedBy: '鈴木一郎', description: '春キャンペーンバナー', imageUrl: 'https://picsum.photos/seed/banner3/400/400' },
+                { id: 'A004', name: '紹介動画 30秒', category: '動画', fileName: 'intro-30s.mp4', updated: '2025-02-16', registeredAt: '2025-01-20', registeredBy: '佐藤花子', updatedBy: '佐藤花子', description: '30秒紹介動画', imageUrl: 'https://picsum.photos/seed/video4/400/300' },
+                { id: 'A005', name: '取扱説明書 PDF', category: 'ドキュメント', fileName: 'manual.pdf', updated: '2025-02-16', registeredAt: '2025-01-22', registeredBy: '鈴木一郎', updatedBy: '鈴木一郎', description: '製品取扱説明書', imageUrl: 'https://picsum.photos/seed/doc5/400/400' },
+                { id: 'A006', name: 'アイコンセット', category: '画像', fileName: 'icons-v2.zip', updated: '2025-02-15', registeredAt: '2025-01-25', registeredBy: '山田太郎', updatedBy: '山田太郎', description: 'UI用アイコン一式', imageUrl: 'https://picsum.photos/seed/icon6/400/400' },
+                { id: 'A007', name: 'サムネイル画像', category: '画像', fileName: 'thumb-default.jpg', updated: '2025-02-15', registeredAt: '2025-01-28', registeredBy: '佐藤花子', updatedBy: '佐藤花子', description: 'デフォルトサムネイル', imageUrl: 'https://picsum.photos/seed/thumb7/400/400' },
+                { id: 'A008', name: 'プレゼン資料', category: 'ドキュメント', fileName: 'presentation.pptx', updated: '2025-02-14', registeredAt: '2025-02-01', registeredBy: '鈴木一郎', updatedBy: '鈴木一郎', description: '2025年度版', imageUrl: 'https://picsum.photos/seed/slide8/400/400' }
+            ];
+
+            var id = (function() {
+                var m = location.search.match(/[?&]id=([^&]+)/);
+                return m ? decodeURIComponent(m[1]) : '';
+            })();
+
+            var form = document.getElementById('edit-form');
+            var notFound = document.getElementById('not-found');
+            var asset = assets.filter(function(a) { return a.id === id; })[0];
+
+            if (!asset) {
+                form.classList.add('hidden');
+                notFound.classList.remove('hidden');
+            } else {
+                form.querySelector('[name="name"]').value = asset.name || '';
+                form.querySelector('[name="description"]').value = asset.description || '';
+                form.querySelector('[name="registeredAt"]').value = asset.registeredAt || '';
+                form.querySelector('[name="updated"]').value = asset.updated || '';
+                form.querySelector('[name="registeredBy"]').value = asset.registeredBy || '';
+                form.querySelector('[name="updatedBy"]').value = asset.updatedBy || '';
+
+                var previewImg = document.getElementById('preview-img');
+                var previewPlaceholder = document.getElementById('preview-placeholder');
+                if (asset.imageUrl) {
+                    previewImg.src = asset.imageUrl;
+                    previewImg.classList.remove('hidden');
+                    previewImg.onerror = function() {
+                        previewImg.classList.add('hidden');
+                        previewPlaceholder.classList.remove('hidden');
+                    };
+                    previewPlaceholder.classList.add('hidden');
+                }
+
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    alert('保存しました。（デモ）');
+                    location.href = 'asset-list.html';
+                });
+                document.getElementById('btn-delete').addEventListener('click', function() {
+                    if (confirm('このアセットを削除しますか？')) {
+                        alert('削除しました。一覧に戻ります。（デモ）');
+                        location.href = 'asset-list.html';
+                    }
+                });
+                document.getElementById('btn-download').addEventListener('click', function() {
+                    alert('ダウンロードしました。（デモ: ' + (asset.fileName || '') + '）');
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

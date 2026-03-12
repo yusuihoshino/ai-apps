@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>契約一覧 - 管理システム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-white min-h-screen">
+    <header class="bg-white border-b border-gray-300 py-3">
+        <div class="container mx-auto px-8">
+            <nav class="inline-flex rounded-2xl bg-white p-1 gap-0.5">
+                <a href="customer-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">顧客</a>
+                <a href="contract-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl bg-gray-200 text-black text-sm font-medium">契約</a>
+                <a href="incident-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">事故</a>
+                <a href="application-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">申し込み</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-8 py-8">
+        <div class="w-full max-w-full">
+            <div class="flex items-center justify-between gap-3 mb-2">
+                <div class="flex items-center gap-3">
+                <h1 class="text-lg font-bold text-black">契約</h1>
+                <div class="relative">
+                    <input type="text" id="contract-search" placeholder="検索" class="h-9 w-56 pl-8 pr-3 rounded-2xl border border-gray-400 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-black">
+                    <span class="material-icons text-gray-500 text-base absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">search</span>
+                </div>
+                <div class="relative">
+                    <button type="button" id="filter-btn" class="inline-flex items-center justify-center h-9 px-4 border border-gray-400 rounded-2xl bg-white text-sm font-medium text-black hover:bg-gray-50">
+                        <span class="material-icons text-lg mr-1">filter_list</span>フィルター
+                    </button>
+                    <div id="filter-panel" class="hidden absolute right-0 top-full mt-1 z-30 w-56 py-3 px-4 border border-gray-300 rounded-2xl bg-white shadow-lg">
+                        <p class="text-xs font-bold text-black mb-2">表示</p>
+                        <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-black mb-1"><input type="checkbox" id="filter-near" class="rounded border-gray-400">直近1ヶ月で契約期間が終了する契約</label>
+                        <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-black"><input type="checkbox" id="filter-unpaid" class="rounded border-gray-400">未納の契約</input></label>
+                    </div>
+                </div>
+                </div>
+                <a href="contract-edit.html" class="inline-flex items-center justify-center gap-2 h-9 px-4 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 shrink-0">
+                    <span class="material-icons text-lg">add</span>新規追加
+                </a>
+            </div>
+            <div class="overflow-x-auto border border-gray-300 rounded-2xl w-full">
+                <table class="w-full text-left">
+                <thead class="border-b-2 border-gray-300 bg-gray-50">
+                    <tr>
+                        <th class="pb-3 pt-3 pl-6 pr-8 text-sm font-bold text-black">ID</th>
+                        <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">契約内容</th>
+                        <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">顧客</th>
+                        <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">契約期間</th>
+                        <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">料金</th>
+                        <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">支払状況</th>
+                        <th class="pb-3 pt-3 pr-6 text-sm font-bold text-black w-12"></th>
+                    </tr>
+                </thead>
+                <tbody id="tbody" class="divide-y divide-gray-300">
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        (function() {
+            var STORAGE_DELETED = 'contract_deleted';
+            var STORAGE_UPDATED = 'contract_updated';
+            var baseList = [
+                { id: 'C001', name: '火災保険（持ち家）', customerId: 'CU001', customerName: '山田 太郎', startDate: '2024-04-01', endDate: '2025-03-31', amount: '年額60,000円', paymentStatus: '納付済' },
+                { id: 'C002', name: '自動車保険', customerId: 'CU002', customerName: '佐藤 花子', startDate: '2024-06-01', endDate: '2025-05-31', amount: '年額80,000円', paymentStatus: '未納' },
+                { id: 'C003', name: '医療保険', customerId: 'CU001', customerName: '山田 太郎', startDate: '2024-10-01', endDate: '2025-09-30', amount: '月額8,000円', paymentStatus: '納付済' },
+                { id: 'C004', name: '火災保険（賃貸）', customerId: 'CU003', customerName: '鈴木 一郎', startDate: '2024-01-15', endDate: '2025-01-14', amount: '年額20,000円', paymentStatus: '未納' },
+                { id: 'C005', name: '自動車保険', customerId: 'CU002', customerName: '佐藤 花子', startDate: '2025-01-01', endDate: '2025-12-31', amount: '年額90,000円', paymentStatus: '納付済' }
+            ];
+
+            function getDeleted() {
+                try { return JSON.parse(sessionStorage.getItem(STORAGE_DELETED) || '[]'); } catch (e) { return []; }
+            }
+            function getUpdated() {
+                try { return JSON.parse(sessionStorage.getItem(STORAGE_UPDATED) || '{}'); } catch (e) { return {}; }
+            }
+            function getList() {
+                var deleted = getDeleted();
+                var updated = getUpdated();
+                return baseList
+                    .filter(function(r) { return deleted.indexOf(r.id) < 0; })
+                    .map(function(r) { return updated[r.id] || r; });
+            }
+
+            function renderPaymentStatus(status) {
+                if (!status) return '—';
+                var baseClass = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ';
+                if (status === '未納') {
+                    return '<span class="' + baseClass + 'bg-red-50 text-gray-900 border-red-200">未納</span>';
+                }
+                return '<span class="' + baseClass + 'bg-emerald-50 text-gray-900 border-emerald-200">' + status + '</span>';
+            }
+
+            function isNearExpiry(endStr) {
+                if (!endStr) return false;
+                var end = new Date(endStr.replace(/-/g, '/'));
+                var now = new Date();
+                var days = (end - now) / (24 * 60 * 60 * 1000);
+                return days >= 0 && days <= 30;
+            }
+
+            function render() {
+                var list = getList().slice().sort(function(a, b) {
+                    return (a.id || '').localeCompare(b.id || '') * -1;
+                });
+                var keyword = (document.getElementById('contract-search').value || '').toLowerCase();
+                if (keyword) {
+                    list = list.filter(function(r) {
+                        return (r.id || '').toLowerCase().indexOf(keyword) >= 0 ||
+                            (r.name || '').toLowerCase().indexOf(keyword) >= 0 ||
+                            (r.customerName || '').toLowerCase().indexOf(keyword) >= 0 ||
+                            (r.amount || '').toLowerCase().indexOf(keyword) >= 0;
+                    });
+                }
+                var filterNear = document.getElementById('filter-near').checked;
+                var filterUnpaid = document.getElementById('filter-unpaid').checked;
+                if (filterNear) list = list.filter(function(r) { return isNearExpiry(r.endDate); });
+                if (filterUnpaid) list = list.filter(function(r) { return r.paymentStatus === '未納'; });
+
+                var tbody = document.getElementById('tbody');
+                tbody.innerHTML = list.map(function(r) {
+                    var period = (r.startDate || '') + ' ～ ' + (r.endDate || '');
+                    return '<tr class="hover:bg-gray-50 cursor-pointer row-link" data-id="' + encodeURIComponent(r.id) + '" data-href="contract-detail.html?id=' + encodeURIComponent(r.id) + '">' +
+                        '<td class="py-3 pl-6 pr-8 text-sm font-medium text-gray-800">' + (r.id || '—') + '</td>' +
+                        '<td class="py-3 pr-8 font-bold text-black">' + (r.name || '') + '</td>' +
+                        '<td class="py-3 pr-8 text-sm font-medium text-gray-800">' + (r.customerName || '') + '</td>' +
+                        '<td class="py-3 pr-8 text-sm font-medium text-gray-700">' + (period || '—') + '</td>' +
+                        '<td class="py-3 pr-8 text-sm font-medium text-gray-800">' + (r.amount || '—') + '</td>' +
+                        '<td class="py-3 pr-8 text-sm font-medium">' + renderPaymentStatus(r.paymentStatus) + '</td>' +
+                        '<td class="py-3 pr-6 row-actions relative">' +
+                        '<button type="button" class="menu-btn relative inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 text-gray-600" data-id="' + r.id + '" aria-label="メニュー">' +
+                        '<span class="material-icons text-lg">more_vert</span></button>' +
+                        '<div class="menu-dropdown hidden absolute right-0 top-full mt-1 z-20 w-32 py-1 border border-gray-300 rounded-xl bg-white shadow-lg">' +
+                        '<a href="contract-edit.html?id=' + encodeURIComponent(r.id) + '" class="block px-4 py-2 text-sm text-black hover:bg-gray-100">編集</a>' +
+                        '<button type="button" class="contract-delete block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50" data-id="' + r.id + '">削除</button>' +
+                        '</div></td></tr>';
+                }).join('');
+
+                tbody.querySelectorAll('tr.row-link').forEach(function(tr) {
+                    tr.addEventListener('click', function(e) {
+                        if (e.target.closest('.row-actions')) return;
+                        location.href = this.getAttribute('data-href');
+                    });
+                });
+                tbody.querySelectorAll('.menu-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var open = document.querySelector('.menu-dropdown:not(.hidden)');
+                        if (open && open !== this.nextElementSibling) open.classList.add('hidden');
+                        this.nextElementSibling.classList.toggle('hidden');
+                    });
+                });
+                tbody.querySelectorAll('.menu-dropdown').forEach(function(d) {
+                    d.addEventListener('click', function(e) { e.stopPropagation(); });
+                });
+                document.addEventListener('click', function() {
+                    document.querySelectorAll('.menu-dropdown').forEach(function(d) { d.classList.add('hidden'); });
+                });
+                document.querySelectorAll('.contract-delete').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var id = this.getAttribute('data-id');
+                        if (!confirm('この契約を削除しますか？')) return;
+                        var deleted = getDeleted();
+                        if (deleted.indexOf(id) < 0) deleted.push(id);
+                        sessionStorage.setItem(STORAGE_DELETED, JSON.stringify(deleted));
+                        render();
+                    });
+                });
+            }
+
+            document.getElementById('filter-btn').addEventListener('click', function(e) {
+                e.stopPropagation();
+                document.getElementById('filter-panel').classList.toggle('hidden');
+            });
+            document.addEventListener('click', function() { document.getElementById('filter-panel').classList.add('hidden'); });
+            document.getElementById('filter-panel').addEventListener('click', function(e) { e.stopPropagation(); });
+            document.getElementById('filter-near').addEventListener('change', render);
+            document.getElementById('filter-unpaid').addEventListener('change', render);
+            document.getElementById('contract-search').addEventListener('input', render);
+
+            render();
+        })();
+    </script>
+</body>
+</html>

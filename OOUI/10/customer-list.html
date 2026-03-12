@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>顧客一覧</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="common.css">
+</head>
+<body class="min-h-screen bg-black">
+    <div class="iphone-frame flex flex-col">
+        <header class="app-header safe-top safe-x flex items-center justify-between px-4 bg-white border-b border-gray-200 shrink-0">
+            <div class="w-10"></div>
+            <h1 class="text-lg font-semibold text-gray-900">顧客一覧</h1>
+            <a href="customer-edit.html" class="p-2 text-blue-600" aria-label="追加"><span class="material-icons">add</span></a>
+        </header>
+
+        <main class="flex-1 overflow-y-auto safe-x safe-bottom has-bottom-nav px-4 py-4">
+            <div class="relative mb-4">
+                <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl">search</span>
+                <input type="search" id="customerSearch" placeholder="名前・企業で検索" class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <ul id="customerList" class="space-y-3">
+                <li class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="flex items-center gap-4 p-4">
+                        <a href="customer-detail.html?id=U001" class="flex-1 flex items-center gap-4 min-w-0 active:opacity-80">
+                            <img src="https://ui-avatars.com/api/?name=Yamada+Taro&size=64&background=3b82f6&color=fff" alt="" class="w-14 h-14 rounded-full object-cover shrink-0">
+                            <div class="min-w-0">
+                                <div class="font-semibold text-gray-900">山田太郎</div>
+                                <div class="text-sm text-gray-500">株式会社山田食品</div>
+                            </div>
+                        </a>
+                        <button type="button" class="customer-menu-btn p-2 text-gray-400 hover:text-gray-600 rounded-full" data-id="U001" aria-label="メニュー">
+                            <span class="material-icons">more_vert</span>
+                        </button>
+                    </div>
+                </li>
+                <li class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="flex items-center gap-4 p-4">
+                        <a href="customer-detail.html?id=U002" class="flex-1 flex items-center gap-4 min-w-0 active:opacity-80">
+                            <img src="https://ui-avatars.com/api/?name=Suzuki+Hanako&size=64&background=10b981&color=fff" alt="" class="w-14 h-14 rounded-full object-cover shrink-0">
+                            <div class="min-w-0">
+                                <div class="font-semibold text-gray-900">鈴木花子</div>
+                                <div class="text-sm text-gray-500">株式会社山田食品</div>
+                            </div>
+                        </a>
+                        <button type="button" class="customer-menu-btn p-2 text-gray-400 hover:text-gray-600 rounded-full" data-id="U002" aria-label="メニュー">
+                            <span class="material-icons">more_vert</span>
+                        </button>
+                    </div>
+                </li>
+                <li class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="flex items-center gap-4 p-4">
+                        <a href="customer-detail.html?id=U003" class="flex-1 flex items-center gap-4 min-w-0 active:opacity-80">
+                            <img src="https://ui-avatars.com/api/?name=Tanaka+Ichiro&size=64&background=f59e0b&color=fff" alt="" class="w-14 h-14 rounded-full object-cover shrink-0">
+                            <div class="min-w-0">
+                                <div class="font-semibold text-gray-900">田中一郎</div>
+                                <div class="text-sm text-gray-500">佐藤商事</div>
+                            </div>
+                        </a>
+                        <button type="button" class="customer-menu-btn p-2 text-gray-400 hover:text-gray-600 rounded-full" data-id="U003" aria-label="メニュー">
+                            <span class="material-icons">more_vert</span>
+                        </button>
+                    </div>
+                </li>
+                <li class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="flex items-center gap-4 p-4">
+                        <a href="customer-detail.html?id=U004" class="flex-1 flex items-center gap-4 min-w-0 active:opacity-80">
+                            <img src="https://ui-avatars.com/api/?name=Watanabe+Yuki&size=64&background=8b5cf6&color=fff" alt="" class="w-14 h-14 rounded-full object-cover shrink-0">
+                            <div class="min-w-0">
+                                <div class="font-semibold text-gray-900">渡辺雪</div>
+                                <div class="text-sm text-gray-500">有限会社田中物産</div>
+                            </div>
+                        </a>
+                        <button type="button" class="customer-menu-btn p-2 text-gray-400 hover:text-gray-600 rounded-full" data-id="U004" aria-label="メニュー">
+                            <span class="material-icons">more_vert</span>
+                        </button>
+                    </div>
+                </li>
+            </ul>
+        </main>
+
+        <div id="customerMenuDropdown" class="fixed hidden z-30 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[140px]" style="left: 0; top: 0;">
+            <a href="#" id="customerMenuEdit" class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                <span class="material-icons text-lg">edit</span>編集
+            </a>
+            <button type="button" id="customerMenuDelete" class="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                <span class="material-icons text-lg">delete</span>削除
+            </button>
+        </div>
+        <div id="customerMenuBackdrop" class="fixed inset-0 z-20 hidden" aria-hidden="true"></div>
+
+        <nav class="bottom-nav">
+            <a href="company-list.html"><span class="material-icons">business</span>企業</a>
+            <a href="customer-list.html" class="active"><span class="material-icons">people</span>顧客</a>
+            <a href="case-list.html"><span class="material-icons">folder</span>案件</a>
+            <a href="material-list.html"><span class="material-icons">description</span>資料</a>
+            <a href="schedule-list.html"><span class="material-icons">event</span>予定</a>
+        </nav>
+    </div>
+    <script>
+        (function() {
+            var list = document.getElementById('customerList');
+            var dropdown = document.getElementById('customerMenuDropdown');
+            var backdrop = document.getElementById('customerMenuBackdrop');
+            var editLink = document.getElementById('customerMenuEdit');
+            var deleteBtn = document.getElementById('customerMenuDelete');
+            var currentId = null;
+            function openMenu(id, btn) {
+                currentId = id;
+                var r = btn.getBoundingClientRect();
+                dropdown.style.left = (r.right - 140) + 'px';
+                dropdown.style.top = (r.bottom + 4) + 'px';
+                dropdown.classList.remove('hidden');
+                backdrop.classList.remove('hidden');
+            }
+            function closeMenu() {
+                dropdown.classList.add('hidden');
+                backdrop.classList.add('hidden');
+                currentId = null;
+            }
+            list.addEventListener('click', function(e) {
+                var btn = e.target.closest('.customer-menu-btn');
+                if (btn) { e.preventDefault(); openMenu(btn.getAttribute('data-id'), btn); }
+            });
+            backdrop.addEventListener('click', closeMenu);
+            editLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (currentId) location.href = 'customer-edit.html?id=' + encodeURIComponent(currentId);
+                closeMenu();
+            });
+            deleteBtn.addEventListener('click', function() {
+                if (currentId && confirm('この顧客を削除しますか？')) { closeMenu(); }
+            });
+            var search = document.getElementById('customerSearch');
+            var cards = list.querySelectorAll('li');
+            if (search) search.addEventListener('input', function() {
+                var q = (this.value || '').trim().toLowerCase();
+                cards.forEach(function(li) {
+                    var text = (li.textContent || '').toLowerCase();
+                    li.style.display = q === '' || text.indexOf(q) >= 0 ? '' : 'none';
+                });
+            });
+        })();
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="screenshot.js"></script>
+</body>
+</html>

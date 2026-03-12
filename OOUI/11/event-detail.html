@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>イベント詳細 - イベント管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .calendar-day { min-height: 100px; }
+        .calendar-day.other-month { background-color: #f9fafb; color: #9ca3af; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- サイドバー -->
+        <div class="w-64 bg-white border-r border-gray-200 flex flex-col shrink-0">
+            <div class="p-4 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-gray-900">イベント管理</h1>
+            </div>
+            <nav class="flex-1 p-4">
+                <a href="event-list.html" class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-900 bg-blue-50 text-blue-600 rounded-lg transition-colors">
+                    <span class="material-icons">event</span>
+                    <span>イベント</span>
+                </a>
+                <a href="material-list.html" class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                    <span class="material-icons">inventory_2</span>
+                    <span>資材</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- メインコンテンツ -->
+        <div class="flex-1 overflow-y-auto">
+            <div class="container mx-auto px-4 py-8">
+                <div class="mb-6">
+                    <a href="event-list.html" class="inline-flex items-center gap-1 text-gray-600 hover:text-blue-600 text-sm font-medium">
+                        <span class="material-icons text-lg">arrow_back</span>一覧に戻る
+                    </a>
+                </div>
+
+                <!-- イベント：見出しは表の外、その下に白背景の表 -->
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-2">
+                        <h2 class="text-lg font-semibold text-gray-900">イベント</h2>
+                        <div class="flex items-center gap-2">
+                            <a href="event-detail.html" class="inline-flex items-center justify-center h-10 px-4 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">編集</a>
+                            <button type="button" class="inline-flex items-center justify-center h-10 px-4 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700">削除</button>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                        <table class="w-full">
+                            <tbody class="divide-y divide-gray-200">
+                                <tr><td class="px-6 py-3 text-sm font-medium text-gray-500 w-40">イベント</td><td class="px-6 py-3 text-sm text-gray-900" data-event-name="技術カンファレンス 2025">技術カンファレンス 2025（E001）</td></tr>
+                                <tr><td class="px-6 py-3 text-sm font-medium text-gray-500 w-40">会場</td><td class="px-6 py-3 text-sm text-gray-900">東京国際フォーラム（V001）</td></tr>
+                                <tr><td class="px-6 py-3 text-sm font-medium text-gray-500 w-40">開始日</td><td class="px-6 py-3 text-sm text-gray-900" data-event-date="2025-03-15">2025-03-15 9:00</td></tr>
+                                <tr><td class="px-6 py-3 text-sm font-medium text-gray-500 w-40">終了日</td><td class="px-6 py-3 text-sm text-gray-900">2025-03-15 18:00</td></tr>
+                                <tr><td class="px-6 py-3 text-sm font-medium text-gray-500 w-40">主催者</td><td class="px-6 py-3 text-sm text-gray-900">テック（O001）</td></tr>
+                                <tr><td class="px-6 py-3 text-sm font-medium text-gray-500 w-40">カテゴリー</td><td class="px-6 py-3 text-sm text-gray-900"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-900">技術（C001）</span></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 資材：見出しは表の外、右端に新規追加、その下に白背景の表 -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <h2 class="text-lg font-semibold text-gray-900">資材</h2>
+                        <a href="material-detail.html" class="inline-flex items-center justify-center gap-1.5 h-10 px-4 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">
+                            <span class="material-icons text-lg">add</span>新規追加
+                        </a>
+                    </div>
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">資材（ID）</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">金額</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">納入日</th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">メーカー</th>
+                                    <th class="px-4 py-3 text-right text-sm font-semibold text-gray-900 w-32">操作</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                            <tr class="hover:bg-gray-50 cursor-pointer" onclick="location.href='material-detail.html?id=M001'" data-delivery-date="2025-03-10" data-material-name="プロジェクター">
+                                <td class="px-4 py-3 text-sm text-gray-900">プロジェクター <span class="text-gray-500">（M001）</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-900">¥120,000</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">2025-03-10</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">日本電機</td>
+                                <td class="px-4 py-3 text-right" onclick="event.stopPropagation()">
+                                    <div class="flex flex-row items-center justify-end gap-1 flex-nowrap">
+                                        <a href="material-detail.html?id=M001" class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 whitespace-nowrap">編集</a>
+                                        <button type="button" class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700 whitespace-nowrap">削除</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr class="hover:bg-gray-50 cursor-pointer" onclick="location.href='material-detail.html?id=M002'" data-delivery-date="2025-03-12" data-material-name="音響機器レンタル">
+                                <td class="px-4 py-3 text-sm text-gray-900">音響機器レンタル <span class="text-gray-500">（M002）</span></td>
+                                <td class="px-4 py-3 text-sm text-gray-900">¥85,000</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">2025-03-12</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">山田音響</td>
+                                <td class="px-4 py-3 text-right" onclick="event.stopPropagation()">
+                                    <div class="flex flex-row items-center justify-end gap-1 flex-nowrap">
+                                        <a href="material-detail.html?id=M002" class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-white bg-blue-600 rounded hover:bg-blue-700 whitespace-nowrap">編集</a>
+                                        <button type="button" class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-white bg-red-600 rounded hover:bg-red-700 whitespace-nowrap">削除</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- カレンダー：このイベントと関連資材の納入日を表示 -->
+                <div class="mt-8">
+                    <h2 class="text-lg font-semibold text-gray-900 mb-2">カレンダー</h2>
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                            <button type="button" id="detail-cal-prev" class="inline-flex items-center justify-center h-10 w-10 rounded-lg hover:bg-gray-100"><span class="material-icons">chevron_left</span></button>
+                            <h3 id="detail-cal-title" class="text-lg font-semibold text-gray-900">2025年3月</h3>
+                            <button type="button" id="detail-cal-next" class="inline-flex items-center justify-center h-10 w-10 rounded-lg hover:bg-gray-100"><span class="material-icons">chevron_right</span></button>
+                        </div>
+                        <div class="p-4">
+                            <table class="w-full border-collapse">
+                                <thead>
+                                    <tr class="text-left text-sm font-medium text-gray-500">
+                                        <th class="border border-gray-200 p-2">日</th><th class="border border-gray-200 p-2">月</th><th class="border border-gray-200 p-2">火</th><th class="border border-gray-200 p-2">水</th><th class="border border-gray-200 p-2">木</th><th class="border border-gray-200 p-2">金</th><th class="border border-gray-200 p-2">土</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="detail-cal-body"></tbody>
+                            </table>
+                        </div>
+                        <div class="px-6 py-3 border-t border-gray-200 bg-gray-50 text-xs text-gray-600 flex gap-4">
+                            <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded bg-blue-500"></span>イベント</span>
+                            <span class="inline-flex items-center gap-1"><span class="w-2 h-2 rounded bg-amber-500"></span>資材納入日</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function() {
+            var calYear = 2025, calMonth = 2; // 3月
+            function getEventDate() {
+                var el = document.querySelector('[data-event-date]');
+                if (!el) return null;
+                var raw = (el.getAttribute('data-event-date') || '').trim();
+                if (raw.indexOf(' ') >= 0) raw = raw.split(' ')[0];
+                return raw || null;
+            }
+            function getEventName() {
+                var el = document.querySelector('[data-event-name]');
+                return (el && el.getAttribute('data-event-name')) ? el.getAttribute('data-event-name').trim() : 'イベント';
+            }
+            function getMaterialItems() {
+                var items = [];
+                document.querySelectorAll('tr[data-delivery-date][data-material-name]').forEach(function(tr) {
+                    var date = (tr.getAttribute('data-delivery-date') || '').trim();
+                    var name = (tr.getAttribute('data-material-name') || '').trim() || '資材';
+                    if (date) items.push({ date: date, name: name, type: 'material' });
+                });
+                return items;
+            }
+            function buildCalItems() {
+                var eventDate = getEventDate();
+                var eventName = getEventName();
+                var materials = getMaterialItems();
+                var items = [];
+                if (eventDate) items.push({ date: eventDate, name: eventName, type: 'event' });
+                items = items.concat(materials);
+                return items;
+            }
+            function renderDetailCal() {
+                var items = buildCalItems();
+                document.getElementById('detail-cal-title').textContent = calYear + '年' + (calMonth + 1) + '月';
+                var first = new Date(calYear, calMonth, 1), last = new Date(calYear, calMonth + 1, 0);
+                var startDay = first.getDay(), daysInMonth = last.getDate(), totalCells = 42, dayNum = 1 - startDay;
+                var html = '';
+                for (var i = 0; i < totalCells; i++) {
+                    if (i % 7 === 0) html += '<tr>';
+                    var cellDay, ymd, isOther = false;
+                    if (dayNum < 1) {
+                        cellDay = new Date(calYear, calMonth, 0).getDate() + dayNum;
+                        var pY = calMonth === 0 ? calYear - 1 : calYear, pM = calMonth === 0 ? 11 : calMonth - 1;
+                        ymd = pY + '-' + String(pM + 1).padStart(2, '0') + '-' + String(cellDay).padStart(2, '0');
+                        isOther = true;
+                    } else if (dayNum > daysInMonth) {
+                        cellDay = dayNum - daysInMonth;
+                        var nY = calMonth === 11 ? calYear + 1 : calYear, nM = calMonth === 11 ? 0 : calMonth + 1;
+                        ymd = nY + '-' + String(nM + 1).padStart(2, '0') + '-' + String(cellDay).padStart(2, '0');
+                        isOther = true;
+                    } else {
+                        cellDay = dayNum;
+                        ymd = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(cellDay).padStart(2, '0');
+                    }
+                    dayNum++;
+                    var list = items.filter(function(it) { return it.date === ymd; });
+                    var content = '<div class="text-xs font-medium text-gray-500 mb-1">' + cellDay + '</div>';
+                    list.forEach(function(it) {
+                        if (it.type === 'event') {
+                            content += '<span class="block text-xs truncate rounded px-1 py-0.5 bg-blue-100 text-blue-800 mb-0.5" title="' + it.name + '">' + it.name + '</span>';
+                        } else {
+                            content += '<span class="block text-xs truncate rounded px-1 py-0.5 bg-amber-100 text-amber-800 mb-0.5" title="' + it.name + ' 納入">' + it.name + ' 納入</span>';
+                        }
+                    });
+                    html += '<td class="border border-gray-200 p-2 align-top calendar-day' + (isOther ? ' other-month' : '') + '">' + content + '</td>';
+                    if (i % 7 === 6) html += '</tr>';
+                }
+                document.getElementById('detail-cal-body').innerHTML = html;
+            }
+            document.getElementById('detail-cal-prev').addEventListener('click', function() { calMonth--; if (calMonth < 0) { calYear--; calMonth = 11; } renderDetailCal(); });
+            document.getElementById('detail-cal-next').addEventListener('click', function() { calMonth++; if (calMonth > 11) { calYear++; calMonth = 0; } renderDetailCal(); });
+            var eventDate = getEventDate();
+            if (eventDate) {
+                var parts = eventDate.split('-');
+                if (parts.length >= 2) { calYear = parseInt(parts[0], 10); calMonth = parseInt(parts[1], 10) - 1; }
+            }
+            renderDetailCal();
+        })();
+    </script>
+</body>
+</html>

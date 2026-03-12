@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stujio</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .sidebar-item.active { background-color: #f3f4f6; font-weight: 600; }
+        .sidebar-item:not(.active):hover { background-color: #f9fafb; }
+        .tab-btn.active { background-color: #e5e7eb; color: #000; font-weight: 600; }
+        .toggle-btn[aria-pressed="true"] { background-color: #000; }
+        .toggle-btn[aria-pressed="true"] .toggle-knob { transform: translateX(1.25rem); }
+        .page-menu-dropdown { min-width: 120px; }
+        .page-drag-handle { touch-action: none; }
+        .sidebar-pages-li.drag-over { background-color: #e5e7eb; border-radius: 9999px; }
+        #header-public-toggle[aria-pressed="false"] { background-color: #000; color: #fff; border-color: #000; }
+        #header-public-toggle[aria-pressed="false"]:hover { background-color: #333; border-color: #333; }
+        #header-public-toggle[aria-pressed="true"] { border-color: #9ca3af; background-color: #f3f4f6; color: #6b7280; }
+        .header-account-dropdown { min-width: 140px; }
+        .form-label { margin-bottom: 0.25rem; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+    <!-- ヘッダー: アプリ名、公開切替、ヘルプ、設定、ログアウト -->
+    <header class="bg-white border-b border-gray-300 px-6 py-3 flex items-center justify-between shrink-0">
+        <h1 class="text-lg font-bold text-black" id="app-title">Stujio</h1>
+        <div class="flex items-center gap-4">
+            <button type="button" id="header-public-toggle" class="inline-flex items-center gap-2 h-9 pl-3 pr-4 rounded-full text-sm font-bold border-2 border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors" aria-pressed="false" title="サイト全体の公開・非公開を切り替え">
+                <span class="material-icons text-lg" id="header-public-icon">visibility</span>
+                <span id="header-public-label">公開中</span>
+            </button>
+            <div class="relative">
+                <button type="button" id="header-account-btn" class="inline-flex items-center gap-1.5 h-9 pl-3 pr-3 rounded-full text-sm font-medium text-gray-700 hover:bg-gray-100" aria-expanded="false" aria-haspopup="true" title="アカウントメニュー">
+                    <span class="material-icons text-xl">person</span>
+                    <span id="header-account-name">アカウント</span>
+                    <span class="material-icons text-lg">expand_more</span>
+                </button>
+                <div id="header-account-dropdown" class="hidden absolute right-0 top-full mt-1 min-w-[140px] bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-30">
+                    <button type="button" class="account-menu-help w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 rounded-full">
+                        <span class="material-icons text-lg">help_outline</span>ヘルプ
+                    </button>
+                    <button type="button" class="account-menu-settings w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 rounded-full">
+                        <span class="material-icons text-lg">settings</span>設定
+                    </button>
+                    <button type="button" class="account-menu-logout w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2 rounded-full">
+                        <span class="material-icons text-lg">logout</span>ログアウト
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex flex-1 min-h-0">
+        <!-- サイドバー: サイト設定 + ページ一覧 + ページを追加 -->
+        <aside class="w-64 shrink-0 bg-white border-r border-gray-300 flex flex-col overflow-hidden">
+            <div class="p-3 border-b border-gray-200">
+                <button type="button" id="sidebar-site-settings" class="sidebar-item active w-full text-left flex items-center gap-2 px-3 py-2.5 rounded-full text-sm font-medium text-black">
+                    <span class="material-icons text-xl">tune</span>サイト設定
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto p-3">
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider px-2 mb-2">ページ</p>
+                <ul id="sidebar-pages" class="space-y-0.5">
+                    <!-- ページがJSで挿入される -->
+                </ul>
+                <button type="button" id="btn-add-page" class="mt-3 w-full inline-flex items-center justify-center gap-2 h-9 px-3 bg-black text-white rounded-full text-sm font-bold hover:bg-gray-800 transition-colors">
+                    <span class="material-icons text-lg">add</span>ページを追加
+                </button>
+            </div>
+        </aside>
+
+        <!-- 中央: 選択に応じた編集エリア -->
+        <main class="flex-1 overflow-y-auto p-6 bg-gray-100">
+            <!-- サイト設定 -->
+            <section id="panel-site-settings" class="max-w-2xl">
+                <div class="bg-white rounded-2xl border border-gray-300 p-6 space-y-4">
+                    <div class="form-section">
+                        <label class="block text-sm font-bold text-black form-label">URL</label>
+                        <a id="site-url" href="#" target="_blank" rel="noopener" class="text-blue-600 hover:underline block py-0.5">https://example.stujio.site</a>
+                    </div>
+                    <div class="form-section">
+                        <p class="text-sm font-bold text-black form-label">サイトタイトル</p>
+                        <input type="text" id="site-title" class="w-full px-4 py-2 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black" placeholder="例: Y Meishi">
+                    </div>
+                    <div class="form-section">
+                        <p class="text-sm font-bold text-black form-label">説明文</p>
+                        <textarea id="site-description" rows="3" class="w-full px-4 py-2 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black" placeholder="サイトの説明文"></textarea>
+                    </div>
+                    <div class="form-section">
+                        <p class="text-sm font-bold text-black form-label">言語</p>
+                        <div class="flex items-center gap-2 border-2 border-gray-300 rounded-2xl bg-white focus-within:ring-2 focus-within:ring-black focus-within:border-black">
+                        <select id="site-language" class="flex-1 py-2 pl-4 pr-8 bg-transparent text-black font-medium focus:outline-none appearance-none">
+                            <option value="ja">日本語 - Japanese</option>
+                            <option value="en">English</option>
+                        </select>
+                        <span class="material-icons text-gray-500 pointer-events-none -ml-6">arrow_drop_down</span>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <p class="text-sm font-bold text-black form-label">ソーシャルカバー</p>
+                        <div id="site-social-cover" class="aspect-video max-w-md rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center text-gray-500 text-sm cursor-pointer hover:bg-gray-100">
+                            <span>画像をアップロード</span>
+                        </div>
+                    </div>
+                    <div class="form-section">
+                        <p class="text-sm font-bold text-black form-label">ファビコン</p>
+                        <div id="site-favicon" class="w-16 h-16 rounded-xl border-2 border-dashed border-gray-300 bg-gray-50 flex items-center justify-center text-gray-400 text-xs cursor-pointer hover:bg-gray-100">
+                            <span class="material-icons">image</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-2 flex justify-center gap-3">
+                        <button type="button" id="delete-site" class="inline-flex items-center justify-center gap-2 h-10 min-w-[240px] px-6 border-2 border-red-500 rounded-full bg-white text-sm font-bold text-red-600 hover:bg-red-50">
+                            <span class="material-icons text-lg text-red-600">delete</span>サイトを削除
+                        </button>
+                        <button type="button" id="save-site-settings" class="hidden inline-flex items-center justify-center gap-2 h-10 px-6 bg-black text-white rounded-full text-sm font-bold hover:bg-gray-800">
+                            <span class="material-icons text-lg">save</span>保存
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ページ編集フォーム（選択したページ用） -->
+            <section id="panel-page-edit" class="max-w-2xl hidden">
+                <input type="hidden" id="page-id" value="">
+                <div class="bg-white rounded-2xl border border-gray-300 p-6 space-y-4">
+                    <div class="form-section">
+                        <label class="block text-sm font-bold text-black form-label">ページ名</label>
+                        <input type="text" id="page-name" class="w-full px-4 py-2 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black" placeholder="例: Home">
+                    </div>
+                    <div class="form-section">
+                        <label class="block text-sm font-bold text-black form-label">パス</label>
+                        <div class="flex items-center border-2 border-gray-200 rounded-2xl bg-gray-50 px-4 py-2 text-black font-medium" id="page-path-display">/page-one</div>
+                        <p class="text-xs text-gray-500 mt-0.5">上からの順番で自動的に付きます（page-1, page-2, page-3…）</p>
+                    </div>
+                    <div class="form-section">
+                        <label class="block text-sm font-bold text-black form-label">説明文</label>
+                        <textarea id="page-description" rows="3" class="w-full px-4 py-2 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black" placeholder="ページの説明文"></textarea>
+                    </div>
+                    <div class="flex items-center justify-end gap-3 pt-2">
+                        <button type="button" id="save-page" class="hidden inline-flex items-center justify-center gap-2 h-10 px-6 bg-black text-white rounded-full text-sm font-bold hover:bg-gray-800">
+                            <span class="material-icons text-lg">save</span>保存
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 未選択時やページが無いとき -->
+            <section id="panel-empty" class="max-w-2xl hidden">
+                <div class="bg-white rounded-2xl border border-gray-300 p-8 text-center text-gray-500">
+                    <span class="material-icons text-5xl mb-2">description</span>
+                    <p class="font-medium">左の「ページを追加」でページを作成するか、一覧から編集するページを選んでください。</p>
+                </div>
+            </section>
+        </main>
+
+        <!-- 右: プレビューエリア（サイト設定＝Google表示 / ページ編集＝ウェブページ見栄え） -->
+        <aside id="preview-panel" class="w-[420px] min-w-[320px] shrink-0 bg-gray-50 border-l border-gray-300 overflow-y-auto flex flex-col hidden lg:flex">
+            <!-- サイト設定時: Google検索結果のプレビュー -->
+            <div id="preview-google-wrap" class="p-6 hidden">
+                <p class="text-xs font-bold text-gray-500 tracking-wider mb-3">Google 検索の表示</p>
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                    <div class="text-sm text-green-800 mb-0.5 truncate" id="preview-google-url">https://example.stujio.site</div>
+                    <a href="#" class="text-xl text-blue-600 hover:underline block mb-1 truncate" id="preview-google-title">サイトタイトル</a>
+                    <p class="text-sm text-gray-600 leading-snug line-clamp-2" id="preview-google-desc">サイトの説明文がここに表示されます。</p>
+                </div>
+            </div>
+            <!-- ページ編集時: ウェブページの見栄え -->
+            <div id="preview-page-wrap" class="p-6 flex-1 hidden">
+                <p class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3">ページの見た目</p>
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden flex flex-col" style="min-height: 320px;">
+                    <div class="bg-gray-100 px-3 py-2 flex items-center gap-2 border-b border-gray-200">
+                        <span class="w-3 h-3 rounded-full bg-gray-400"></span>
+                        <span class="w-3 h-3 rounded-full bg-gray-400"></span>
+                        <span class="w-3 h-3 rounded-full bg-gray-400"></span>
+                        <div class="flex-1 ml-2 bg-white rounded px-2 py-1 text-xs text-gray-500 truncate" id="preview-page-address">https://example.stujio.site/</div>
+                    </div>
+                    <div class="p-4 flex-1">
+                        <h2 class="text-xl font-bold text-black mb-2 truncate" id="preview-page-pagetitle">ページ名</h2>
+                        <p class="text-sm text-gray-600 leading-relaxed line-clamp-4" id="preview-page-content">ページの内容がここに表示されます。</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        (function() {
+            var STORAGE_SITE = 'cms_site_settings';
+            var STORAGE_PAGES = 'cms_pages';
+
+            var defaultSite = {
+                siteUrl: 'https://example.stujio.site',
+                isPublic: true,
+                siteTitle: 'My Site',
+                siteDescription: '',
+                language: 'ja'
+            };
+            var defaultPages = [
+                { id: 'p1', name: 'ホーム', slug: 'page-one', type: 'home', isPrivate: false, title: 'Y Meishi', description: '', content: 'トップページの内容です。', language: 'ja', noindex: false },
+                { id: 'p2', name: '会社案内', slug: 'page-two', type: 'page', isPrivate: false, title: '', description: '', content: '会社案内の内容をここに記載します。', language: 'ja', noindex: false }
+            ];
+
+            function getSite() {
+                try {
+                    var s = localStorage.getItem(STORAGE_SITE);
+                    if (!s) return defaultSite;
+                    var parsed = JSON.parse(s);
+                    if (parsed.siteName && !parsed.siteTitle) parsed.siteTitle = parsed.siteName;
+                    if (parsed.pageTitle && !parsed.siteTitle) parsed.siteTitle = parsed.pageTitle;
+                    var site = Object.assign({}, defaultSite, parsed);
+                    if (site.siteUrl && site.siteUrl.indexOf('studio') !== -1) {
+                        site.siteUrl = site.siteUrl.replace(/studio/g, 'stujio');
+                        setSite(site);
+                    }
+                    return site;
+                } catch (e) { return defaultSite; }
+            }
+            function getPages() {
+                try {
+                    var p = localStorage.getItem(STORAGE_PAGES);
+                    return p ? JSON.parse(p) : defaultPages.slice();
+                } catch (e) { return defaultPages.slice(); }
+            }
+            function setSite(data) {
+                localStorage.setItem(STORAGE_SITE, JSON.stringify(data));
+            }
+            function setPages(pages) {
+                localStorage.setItem(STORAGE_PAGES, JSON.stringify(pages));
+            }
+
+            function getSlugForIndex(i) {
+                return 'page-' + (i + 1);
+            }
+
+            var currentSelection = 'site'; // 'site' | pageId
+            var pages = getPages();
+            var initialSite = {};
+            var initialPage = {};
+
+            function getSiteFormValues() {
+                var site = getSite();
+                return {
+                    siteUrl: document.getElementById('site-url').href,
+                    isPublic: site.isPublic !== false,
+                    siteTitle: document.getElementById('site-title').value,
+                    siteDescription: document.getElementById('site-description').value,
+                    language: document.getElementById('site-language').value
+                };
+            }
+            function getPageFormValues() {
+                return {
+                    name: document.getElementById('page-name').value,
+                    description: document.getElementById('page-description').value
+                };
+            }
+            function isSiteDirty() {
+                var cur = getSiteFormValues();
+                return cur.siteTitle !== (initialSite.siteTitle || '') || cur.siteDescription !== (initialSite.siteDescription || '') ||
+                    cur.language !== (initialSite.language || 'ja');
+            }
+            function isPageDirty() {
+                var cur = getPageFormValues();
+                return cur.name !== (initialPage.name || '') || cur.description !== (initialPage.description || '');
+            }
+            function updateSaveSiteVisibility() {
+                document.getElementById('save-site-settings').classList.toggle('hidden', !isSiteDirty());
+            }
+            function updateSavePageVisibility() {
+                document.getElementById('save-page').classList.toggle('hidden', !isPageDirty());
+            }
+
+            function updateHeaderPublicToggle() {
+                var site = getSite();
+                var isPublic = site.isPublic !== false;
+                var btn = document.getElementById('header-public-toggle');
+                var label = document.getElementById('header-public-label');
+                var icon = document.getElementById('header-public-icon');
+                if (!btn) return;
+                btn.setAttribute('aria-pressed', isPublic ? 'false' : 'true');
+                if (label) label.textContent = isPublic ? '公開中' : '非公開中';
+                if (icon) icon.textContent = isPublic ? 'visibility' : 'visibility_off';
+            }
+
+            function showPanel() {
+                var isSite = currentSelection === 'site';
+                var hasPage = !isSite && pages.some(function(p) { return p.id === currentSelection; });
+                document.getElementById('app-title').textContent = 'Stujio';
+                document.getElementById('panel-site-settings').classList.toggle('hidden', !isSite);
+                document.getElementById('panel-page-edit').classList.toggle('hidden', !hasPage);
+                document.getElementById('panel-empty').classList.toggle('hidden', hasPage || isSite);
+                updatePreview();
+            }
+
+            function updatePreview() {
+                var isSite = currentSelection === 'site';
+                var hasPage = !isSite && pages.some(function(p) { return p.id === currentSelection; });
+                var site = getSite();
+                var googleWrap = document.getElementById('preview-google-wrap');
+                var pageWrap = document.getElementById('preview-page-wrap');
+                if (isSite) {
+                    googleWrap.classList.remove('hidden');
+                    pageWrap.classList.add('hidden');
+                    document.getElementById('preview-google-url').textContent = site.siteUrl || document.getElementById('site-url').href || 'https://example.stujio.site';
+                    document.getElementById('preview-google-title').textContent = document.getElementById('site-title').value || '（サイトタイトル）';
+                    document.getElementById('preview-google-desc').textContent = document.getElementById('site-description').value || 'サイトの説明文を入力すると検索結果に表示されます。';
+                } else if (hasPage) {
+                    googleWrap.classList.add('hidden');
+                    pageWrap.classList.remove('hidden');
+                    var page = pages.filter(function(p) { return p.id === currentSelection; })[0];
+                    var baseUrl = site.siteUrl || 'https://example.stujio.site';
+                    var idx = page ? pages.indexOf(page) : 0;
+                    var slug = getSlugForIndex(idx);
+                    document.getElementById('preview-page-address').textContent = baseUrl.replace(/\/$/, '') + '/' + slug;
+                    document.getElementById('preview-page-pagetitle').textContent = (document.getElementById('page-name') && document.getElementById('page-name').value) || (page && (page.name || page.title)) || 'ページ名';
+                    document.getElementById('preview-page-content').textContent = (page && page.content) ? page.content : 'ページの内容がここに表示されます。';
+                } else {
+                    googleWrap.classList.add('hidden');
+                    pageWrap.classList.add('hidden');
+                }
+            }
+
+            function renderSidebar() {
+                pages = getPages();
+                var list = document.getElementById('sidebar-pages');
+                list.innerHTML = pages.map(function(p) {
+                    var isActive = currentSelection === p.id;
+                    var label = (p.name || p.title || '（無題）').replace(/"/g, '&quot;');
+                    return '<li class="sidebar-pages-li relative flex items-center rounded-full group" data-id="' + p.id + '">' +
+                        '<span class="page-drag-handle shrink-0 cursor-grab active:cursor-grabbing p-1 -ml-0.5 rounded-full text-gray-400 hover:text-gray-600" draggable="true" data-id="' + p.id + '" aria-label="並び替え" role="button"><span class="material-icons text-lg">drag_indicator</span></span>' +
+                        '<button type="button" class="sidebar-item ' + (isActive ? 'active' : '') + ' flex-1 min-w-0 text-left flex items-center gap-2 px-3 py-2.5 rounded-full text-sm font-medium text-black" data-id="' + p.id + '">' +
+                        '<span class="truncate">' + label + '</span></button>' +
+                        '<button type="button" class="page-menu-btn shrink-0 p-1.5 rounded-full text-gray-500 hover:bg-gray-200 hover:text-black" data-id="' + p.id + '" aria-label="メニュー">' +
+                        '<span class="material-icons text-lg">more_vert</span></button>' +
+                        '<div class="page-menu-dropdown hidden absolute right-0 top-full mt-0.5 bg-white border border-gray-200 rounded-xl shadow-lg py-1 z-20" data-id="' + p.id + '">' +
+                        '<button type="button" class="page-menu-delete w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-gray-100 rounded-full" data-id="' + p.id + '">削除</button>' +
+                        '<button type="button" class="page-menu-duplicate w-full text-left px-3 py-2 text-sm text-black hover:bg-gray-100 rounded-full" data-id="' + p.id + '">複製</button>' +
+                        '</div></li>';
+                }).join('');
+
+                list.querySelectorAll('.sidebar-item').forEach(function(btn) {
+                    btn.addEventListener('click', function() {
+                        select(currentSelection = this.getAttribute('data-id'));
+                    });
+                });
+
+                list.querySelectorAll('.page-menu-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var id = this.getAttribute('data-id');
+                        var dropdown = this.nextElementSibling;
+                        var open = !dropdown.classList.contains('hidden');
+                        list.querySelectorAll('.page-menu-dropdown').forEach(function(d) { d.classList.add('hidden'); });
+                        if (!open) dropdown.classList.remove('hidden');
+                    });
+                });
+                list.querySelectorAll('.page-menu-dropdown').forEach(function(dd) {
+                    dd.addEventListener('click', function(e) { e.stopPropagation(); });
+                });
+                list.querySelectorAll('.page-menu-delete').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var id = this.getAttribute('data-id');
+                        this.closest('.page-menu-dropdown').classList.add('hidden');
+                        deletePageById(id);
+                    });
+                });
+                list.querySelectorAll('.page-menu-duplicate').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var id = this.getAttribute('data-id');
+                        this.closest('.page-menu-dropdown').classList.add('hidden');
+                        duplicatePageById(id);
+                    });
+                });
+
+                var lis = list.querySelectorAll('.sidebar-pages-li');
+                list.querySelectorAll('.page-drag-handle').forEach(function(handle) {
+                    handle.addEventListener('dragstart', function(e) {
+                        e.stopPropagation();
+                        e.dataTransfer.setData('text/plain', this.getAttribute('data-id'));
+                        e.dataTransfer.effectAllowed = 'move';
+                    });
+                });
+                lis.forEach(function(li) {
+                    li.addEventListener('dragover', function(e) {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'move';
+                        var id = e.dataTransfer.getData('text/plain');
+                        if (id && this.getAttribute('data-id') !== id) this.classList.add('drag-over');
+                    });
+                    li.addEventListener('dragleave', function(e) {
+                        this.classList.remove('drag-over');
+                    });
+                    li.addEventListener('drop', function(e) {
+                        e.preventDefault();
+                        this.classList.remove('drag-over');
+                        var draggedId = e.dataTransfer.getData('text/plain');
+                        if (!draggedId) return;
+                        var targetId = this.getAttribute('data-id');
+                        if (draggedId === targetId) return;
+                        pages = getPages();
+                        var fromIdx = pages.findIndex(function(p) { return p.id === draggedId; });
+                        var toIdx = pages.findIndex(function(p) { return p.id === targetId; });
+                        if (fromIdx < 0 || toIdx < 0) return;
+                        var moved = pages.splice(fromIdx, 1)[0];
+                        pages.splice(toIdx, 0, moved);
+                        setPages(pages);
+                        renderSidebar();
+                        updatePreview();
+                        select(currentSelection);
+                    });
+                });
+            }
+
+            function deletePageById(id) {
+                if (!id || !confirm('このページを削除しますか？')) return;
+                pages = getPages().filter(function(p) { return p.id !== id; });
+                setPages(pages);
+                renderSidebar();
+                if (currentSelection === id) {
+                    select(currentSelection = 'site');
+                } else {
+                    document.querySelectorAll('.sidebar-item').forEach(function(el) {
+                        el.classList.toggle('active', el.getAttribute('data-id') === currentSelection);
+                    });
+                }
+                updatePreview();
+                alert('ページを削除しました。');
+            }
+
+            function duplicatePageById(id) {
+                var page = pages.filter(function(p) { return p.id === id; })[0];
+                if (!page) return;
+                var newId = 'p' + Date.now();
+                var copy = { id: newId, name: (page.name || page.title || 'ページ') + 'のコピー', slug: '', type: page.type || 'page', isPrivate: page.isPrivate || false, title: page.title || '', description: page.description || '', content: page.content || '', language: page.language || 'ja', noindex: page.noindex || false };
+                pages = getPages();
+                var idx = pages.findIndex(function(p) { return p.id === id; });
+                if (idx < 0) idx = pages.length;
+                pages.splice(idx + 1, 0, copy);
+                setPages(pages);
+                renderSidebar();
+                select(currentSelection = newId);
+                alert('ページを複製しました。');
+            }
+
+            function select(id) {
+                currentSelection = id;
+                document.querySelectorAll('.sidebar-item').forEach(function(el) {
+                    el.classList.toggle('active', el.getAttribute('data-id') === id || (id === 'site' && el.id === 'sidebar-site-settings'));
+                });
+                document.getElementById('sidebar-site-settings').classList.toggle('active', id === 'site');
+                showPanel();
+
+                if (id === 'site') {
+                    var site = getSite();
+                    var urlEl = document.getElementById('site-url');
+                    urlEl.href = site.siteUrl || defaultSite.siteUrl;
+                    urlEl.textContent = site.siteUrl || defaultSite.siteUrl;
+                    document.getElementById('site-title').value = site.siteTitle || '';
+                    document.getElementById('site-description').value = site.siteDescription || '';
+                    document.getElementById('site-language').value = site.language || 'ja';
+                    initialSite = { siteTitle: site.siteTitle || '', siteDescription: site.siteDescription || '', language: site.language || 'ja', isPublic: site.isPublic !== false };
+                    updateSaveSiteVisibility();
+                    updateHeaderPublicToggle();
+                    return;
+                }
+                var page = pages.filter(function(p) { return p.id === id; })[0];
+                if (page) {
+                    var pageIdx = pages.indexOf(page);
+                    document.getElementById('page-id').value = page.id;
+                    document.getElementById('page-name').value = page.name || page.title || '';
+                    document.getElementById('page-path-display').textContent = '/' + getSlugForIndex(pageIdx);
+                    document.getElementById('page-description').value = page.description || '';
+                    initialPage = { name: page.name || page.title || '', description: page.description || '' };
+                    updateSavePageVisibility();
+                } else {
+                    document.getElementById('panel-empty').classList.remove('hidden');
+                    document.getElementById('panel-page-edit').classList.add('hidden');
+                }
+            }
+
+            document.getElementById('sidebar-site-settings').addEventListener('click', function() {
+                select(currentSelection = 'site');
+            });
+
+            function setupToggle(btnId, onChange) {
+                var btn = document.getElementById(btnId);
+                if (!btn) return;
+                btn.addEventListener('click', function() {
+                    var pressed = this.getAttribute('aria-pressed') === 'true';
+                    this.setAttribute('aria-pressed', pressed ? 'false' : 'true');
+                    if (onChange) onChange();
+                });
+            }
+            document.getElementById('header-public-toggle').addEventListener('click', function() {
+                var site = getSite();
+                var nextPublic = site.isPublic === false;
+                var next = Object.assign({}, site, { isPublic: nextPublic });
+                setSite(next);
+                initialSite = Object.assign({}, initialSite, { isPublic: nextPublic });
+                updateHeaderPublicToggle();
+                if (currentSelection === 'site') updateSaveSiteVisibility();
+            });
+
+            document.getElementById('btn-add-page').addEventListener('click', function() {
+                var newId = 'p' + Date.now();
+                pages = getPages();
+                pages.push({ id: newId, name: '新しいページ', slug: '', type: 'page', isPrivate: false, title: '', description: '', content: '', language: 'ja', noindex: false });
+                setPages(pages);
+                renderSidebar();
+                select(currentSelection = newId);
+            });
+
+            document.getElementById('save-site-settings').addEventListener('click', function() {
+                var data = getSiteFormValues();
+                setSite(data);
+                initialSite = { siteTitle: data.siteTitle || '', siteDescription: data.siteDescription || '', language: data.language || 'ja', isPublic: data.isPublic !== false };
+                document.getElementById('save-site-settings').classList.add('hidden');
+                updateHeaderPublicToggle();
+                alert('サイト設定を保存しました。');
+            });
+
+            document.getElementById('delete-site').addEventListener('click', function() {
+                if (!confirm('サイトを削除しますか？サイト設定とページデータがクリアされます。')) return;
+                localStorage.removeItem(STORAGE_SITE);
+                localStorage.removeItem(STORAGE_PAGES);
+                var def = defaultSite;
+                document.getElementById('site-url').href = def.siteUrl || '';
+                document.getElementById('site-url').textContent = def.siteUrl || '';
+                document.getElementById('site-title').value = def.siteTitle || '';
+                document.getElementById('site-description').value = def.siteDescription || '';
+                document.getElementById('site-language').value = def.language || 'ja';
+                initialSite = { siteTitle: def.siteTitle || '', siteDescription: def.siteDescription || '', language: def.language || 'ja', isPublic: def.isPublic !== false };
+                document.getElementById('save-site-settings').classList.add('hidden');
+                pages = defaultPages.slice();
+                setPages(pages);
+                renderSidebar();
+                select(currentSelection = 'site');
+                alert('サイトを削除しました。');
+            });
+
+            document.getElementById('save-page').addEventListener('click', function() {
+                var id = document.getElementById('page-id').value;
+                if (!id) return;
+                pages = getPages();
+                var idx = pages.findIndex(function(p) { return p.id === id; });
+                if (idx < 0) return;
+                var data = getPageFormValues();
+                var existing = pages[idx];
+                var slug = getSlugForIndex(idx);
+                pages[idx] = { id: existing.id, name: data.name, slug: slug, type: existing.type || 'page', isPrivate: existing.isPrivate || false, title: existing.title || '', description: data.description || '', content: existing.content || '', language: existing.language || 'ja', noindex: existing.noindex || false };
+                setPages(pages);
+                initialPage = data;
+                document.getElementById('page-path-display').textContent = '/' + slug;
+                document.getElementById('save-page').classList.add('hidden');
+                renderSidebar();
+                alert('ページを保存しました。');
+            });
+
+            document.addEventListener('click', function() {
+                document.querySelectorAll('.page-menu-dropdown').forEach(function(d) { d.classList.add('hidden'); });
+                var accountDrop = document.getElementById('header-account-dropdown');
+                if (accountDrop) accountDrop.classList.add('hidden');
+            });
+
+            document.getElementById('header-account-btn').addEventListener('click', function(e) {
+                e.stopPropagation();
+                var drop = document.getElementById('header-account-dropdown');
+                drop.classList.toggle('hidden');
+            });
+            document.getElementById('header-account-dropdown').addEventListener('click', function(e) { e.stopPropagation(); });
+            document.querySelector('.account-menu-help').addEventListener('click', function() {
+                document.getElementById('header-account-dropdown').classList.add('hidden');
+                alert('ヘルプ：サイドバーで「サイト設定」またはページを選択し、中央のフォームで内容を編集して保存してください。');
+            });
+            document.querySelector('.account-menu-settings').addEventListener('click', function() {
+                document.getElementById('header-account-dropdown').classList.add('hidden');
+                select('site');
+            });
+            document.querySelector('.account-menu-logout').addEventListener('click', function() {
+                document.getElementById('header-account-dropdown').classList.add('hidden');
+                if (confirm('ログアウトしますか？')) alert('ログアウトしました。（デモ）');
+            });
+
+            // サイト設定フォームの変更で保存ボタン表示 + プレビュー更新
+            ['site-title', 'site-description', 'site-language'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) { el.addEventListener('input', function() { updateSaveSiteVisibility(); updatePreview(); }); el.addEventListener('change', function() { updateSaveSiteVisibility(); updatePreview(); }); }
+            });
+            ['page-name', 'page-description'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el) { el.addEventListener('input', function() { updateSavePageVisibility(); updatePreview(); }); el.addEventListener('change', function() { updateSavePageVisibility(); updatePreview(); }); }
+            });
+
+            // 初期表示
+            var site = getSite();
+            document.getElementById('site-url').href = site.siteUrl || defaultSite.siteUrl;
+            document.getElementById('site-url').textContent = site.siteUrl || defaultSite.siteUrl;
+            document.getElementById('site-title').value = site.siteTitle || '';
+            document.getElementById('site-description').value = site.siteDescription || '';
+            document.getElementById('site-language').value = site.language || 'ja';
+            initialSite = { siteTitle: site.siteTitle || '', siteDescription: site.siteDescription || '', language: site.language || 'ja', isPublic: site.isPublic !== false };
+            updateHeaderPublicToggle();
+            renderSidebar();
+            select('site');
+        })();
+    </script>
+</body>
+</html>

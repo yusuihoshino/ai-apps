@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生徒詳細 - クラス 生徒</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-white min-h-screen flex flex-col">
+    <header class="bg-white border-b border-gray-300 px-6 py-4 shrink-0 flex justify-center">
+        <nav class="inline-flex rounded-2xl bg-white p-1.5 gap-1">
+            <a href="class-list.html" class="inline-flex items-center justify-center h-11 px-5 rounded-xl text-gray-600 text-base font-medium hover:bg-gray-100">クラス</a>
+            <a href="student-list.html" class="inline-flex items-center justify-center h-11 px-5 rounded-xl bg-gray-200 text-black text-base font-medium">生徒</a>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-8 py-8 flex-1 max-w-2xl">
+        <div class="flex items-center justify-between gap-4 mb-6">
+            <div class="flex items-center gap-2 min-w-0">
+                <a href="student-list.html" class="text-black hover:opacity-70 shrink-0" aria-label="戻る"><span class="material-icons text-2xl">arrow_back</span></a>
+                <h2 id="detail-title" class="text-lg font-bold text-black">青木れなの詳細</h2>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="student-edit.html" id="btn-edit" class="inline-flex items-center justify-center h-9 px-4 border-2 border-gray-400 rounded-2xl bg-white text-sm font-bold text-black hover:bg-gray-100">編集</a>
+                <button type="button" id="btn-delete" class="inline-flex items-center justify-center h-9 px-4 border-2 border-red-500 rounded-2xl bg-white text-sm font-bold text-red-600 hover:bg-red-50">削除</button>
+            </div>
+        </div>
+        <ul id="detail-list" class="list-disc list-inside space-y-1 text-sm font-medium text-gray-800 mb-8">
+            <li>性別: <span id="gender-text">女性</span></li>
+            <li id="class-list-item">所属クラス: <a id="class-link" href="class-detail.html?id=C1A" class="text-black font-bold underline hover:opacity-80">1年A組</a></li>
+        </ul>
+    </main>
+
+    <script>
+        (function() {
+            var students = {
+                'S1': { name: '青木れな', gender: '女性', classId: 'C1A', className: '1年A組' },
+                'S2': { name: '加藤まなぶ', gender: '男性', classId: 'C1A', className: '1年A組' },
+                'S3': { name: '斉藤たける', gender: '男性', classId: 'C1A', className: '1年A組' },
+                'S4': { name: '増田ゆうすけ', gender: '男性', classId: 'C2A', className: '2年A組' }
+            };
+            var id = (location.search.match(/[?&]id=([^&]+)/) || [])[1] || 'S1';
+            var s = students[id];
+            if (s) {
+                document.getElementById('detail-title').textContent = s.name + 'の詳細';
+                document.getElementById('btn-edit').href = 'student-edit.html?id=' + id;
+                document.getElementById('gender-text').textContent = s.gender || '—';
+                var linkEl = document.getElementById('class-link');
+                if (s.classId) {
+                    linkEl.href = 'class-detail.html?id=' + s.classId;
+                    linkEl.textContent = s.className || s.classId;
+                    linkEl.className = 'text-black font-bold underline hover:opacity-80';
+                } else {
+                    document.getElementById('class-list-item').innerHTML = '所属クラス: なし';
+                }
+            }
+            document.getElementById('btn-delete').addEventListener('click', function() {
+                if (confirm('この生徒を削除しますか？')) {
+                    alert('削除しました。一覧に戻ります。（デモ）');
+                    location.href = 'student-list.html';
+                }
+            });
+        })();
+    </script>
+</body>
+</html>

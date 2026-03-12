@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事故 - 管理システム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-white min-h-screen">
+    <header class="bg-white border-b border-gray-300 py-3">
+        <div class="container mx-auto px-8">
+            <nav class="inline-flex rounded-2xl bg-white p-1 gap-0.5">
+                <a href="customer-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">顧客</a>
+                <a href="contract-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">契約</a>
+                <a href="incident-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">事故</a>
+                <a href="application-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">申し込み</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-8 py-8">
+        <a href="incident-list.html" class="inline-flex items-center gap-1 text-xs text-black hover:opacity-70 mb-2" aria-label="一覧に戻る">
+            <span class="material-icons text-base">arrow_back</span>
+            <span>一覧に戻る</span>
+        </a>
+        <h1 class="text-lg font-bold text-black mb-4" id="page-title">事故 新規作成</h1>
+        <div id="not-found" class="hidden py-12 text-center">
+            <p class="font-medium text-black">事故が見つかりません。</p>
+            <a href="incident-list.html" class="inline-block mt-4 font-bold text-black hover:underline">一覧に戻る</a>
+        </div>
+        <form id="form" class="max-w-xl space-y-4 py-4">
+            <div>
+                <label class="block text-sm font-bold text-black mb-1">件名</label>
+                <input type="text" name="title" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black" required>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-black mb-1">発生日</label>
+                <input type="text" name="date" placeholder="YYYY-MM-DD" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-black mb-1">関連契約</label>
+                <select name="contractId" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black">
+                    <option value="">—</option>
+                    <option value="C001">C001 保守契約A</option>
+                    <option value="C002">C002 ライセンス契約B</option>
+                    <option value="C003">C003 サポート契約C</option>
+                    <option value="C004">C004 保守契約D</option>
+                    <option value="C005">C005 導入支援契約E</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-black mb-1">対応状況</label>
+                <select name="status" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black">
+                    <option value="未対応">未対応</option>
+                    <option value="調査中">調査中</option>
+                    <option value="対応中">対応中</option>
+                    <option value="対応済">対応済</option>
+                </select>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-black mb-1">内容・経過</label>
+                <textarea name="description" rows="4" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black"></textarea>
+            </div>
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-300">
+                <button type="button" id="btn-delete" class="hidden inline-flex items-center justify-center gap-2 h-10 px-4 border-2 border-gray-400 rounded-2xl bg-white text-sm font-bold text-black hover:bg-gray-100">削除</button>
+                <button type="submit" class="inline-flex items-center justify-center gap-2 h-10 px-6 bg-black text-white rounded-2xl text-sm font-bold hover:bg-gray-800">保存</button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        (function() {
+            var STORAGE_DELETED = 'incident_deleted';
+            var STORAGE_UPDATED = 'incident_updated';
+            var contractNames = { C001: '保守契約A', C002: 'ライセンス契約B', C003: 'サポート契約C', C004: '保守契約D', C005: '自動車保険' };
+            var baseList = [
+                { id: 'I001', date: '2025-02-10', title: 'サーバー障害によるサービス停止', contractId: 'C001', contractName: '保守契約A', status: '対応済', description: '深夜のメンテナンス作業中にサーバーがダウン。復旧まで約2時間。' },
+                { id: 'I002', date: '2025-02-05', title: '誤操作によるデータ削除', contractId: 'C003', contractName: 'サポート契約C', status: '調査中', description: '担当者の誤操作により一部データが削除。バックアップから復元作業を実施中。' },
+                { id: 'I003', date: '2025-01-28', title: 'ネットワーク遅延のクレーム', contractId: 'C002', contractName: 'ライセンス契約B', status: '対応済', description: '回線障害により一時的に遅延が発生。原因特定の上、対策済み。' },
+                { id: 'I004', date: '2025-01-15', title: '機器故障', contractId: 'C004', contractName: '保守契約D', status: '対応済', description: '稼働中の機器が故障。代替機に切り替え完了。' },
+                { id: 'I005', date: '2025-02-18', title: '物損事故（駐車場での接触）', contractId: 'C005', contractName: '自動車保険', status: '調査中', description: '駐車場でバック時に隣車両に接触。' }
+            ];
+
+            var id = (location.search.match(/[?&]id=([^&]+)/) || [])[1] ? decodeURIComponent((location.search.match(/[?&]id=([^&]+)/) || [])[1]) : '';
+            function getDeleted() { try { return JSON.parse(sessionStorage.getItem(STORAGE_DELETED) || '[]'); } catch (e) { return []; } }
+            function getUpdated() { try { return JSON.parse(sessionStorage.getItem(STORAGE_UPDATED) || '{}'); } catch (e) { return {}; } }
+            function getRecord() {
+                if (!id || getDeleted().indexOf(id) >= 0) return null;
+                var r = baseList.filter(function(x) { return x.id === id; })[0];
+                return r ? (getUpdated()[id] || r) : null;
+            }
+
+            var form = document.getElementById('form');
+            var notFound = document.getElementById('not-found');
+            var pageTitle = document.getElementById('page-title');
+            var btnDelete = document.getElementById('btn-delete');
+            var record = getRecord();
+
+            if (id && !record) {
+                notFound.classList.remove('hidden');
+                form.classList.add('hidden');
+            } else {
+                if (record) {
+                    pageTitle.textContent = '事故 編集';
+                    form.querySelector('[name="title"]').value = record.title || '';
+                    form.querySelector('[name="date"]').value = record.date || '';
+                    form.querySelector('[name="contractId"]').value = record.contractId || '';
+                    form.querySelector('[name="status"]').value = record.status || '未対応';
+                    form.querySelector('[name="description"]').value = record.description || '';
+                    btnDelete.classList.remove('hidden');
+                }
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var contractId = form.querySelector('[name="contractId"]').value;
+                    var payload = {
+                        id: record ? record.id : 'I' + String(Date.now()).slice(-6),
+                        date: form.querySelector('[name="date"]').value,
+                        title: form.querySelector('[name="title"]').value,
+                        contractId: contractId || '',
+                        contractName: contractNames[contractId] || '',
+                        status: form.querySelector('[name="status"]').value,
+                        description: form.querySelector('[name="description"]').value
+                    };
+                    var updated = getUpdated();
+                    updated[payload.id] = payload;
+                    sessionStorage.setItem(STORAGE_UPDATED, JSON.stringify(updated));
+                    alert('保存しました。');
+                    location.href = 'incident-detail.html?id=' + encodeURIComponent(payload.id);
+                });
+                btnDelete.addEventListener('click', function() {
+                    if (!confirm('この事故を削除しますか？')) return;
+                    var deleted = getDeleted();
+                    if (record && deleted.indexOf(record.id) < 0) deleted.push(record.id);
+                    sessionStorage.setItem(STORAGE_DELETED, JSON.stringify(deleted));
+                    alert('削除しました。');
+                    location.href = 'incident-list.html';
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

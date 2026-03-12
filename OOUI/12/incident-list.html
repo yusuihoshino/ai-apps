@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>事故一覧 - 管理システム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-white min-h-screen">
+    <header class="bg-white border-b border-gray-300 py-3">
+        <div class="container mx-auto px-8">
+            <nav class="inline-flex rounded-2xl bg-white p-1 gap-0.5">
+                <a href="customer-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">顧客</a>
+                <a href="contract-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">契約</a>
+                <a href="incident-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl bg-gray-200 text-black text-sm font-medium">事故</a>
+                <a href="application-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">申し込み</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-8 py-8">
+        <div class="w-full max-w-full">
+            <div class="flex items-center justify-between gap-3 mb-2">
+                <div class="flex items-center gap-3">
+                    <h1 class="text-lg font-bold text-black">事故</h1>
+                    <div class="relative">
+                        <input type="text" id="incident-search" placeholder="検索" class="h-9 w-56 pl-8 pr-3 rounded-2xl border border-gray-400 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-black">
+                        <span class="material-icons text-gray-500 text-base absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">search</span>
+                    </div>
+                    <div class="relative">
+                        <button type="button" id="filter-btn" class="inline-flex items-center justify-center h-9 px-4 border border-gray-400 rounded-2xl bg-white text-sm font-medium text-black hover:bg-gray-50">
+                            <span class="material-icons text-lg mr-1">filter_list</span>フィルター
+                        </button>
+                        <div id="filter-panel" class="hidden absolute right-0 top-full mt-1 z-30 w-56 py-3 px-4 border border-gray-300 rounded-2xl bg-white shadow-lg">
+                            <p class="text-xs font-bold text-black mb-2">対応状況</p>
+                            <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-black mb-1"><input type="checkbox" id="filter-done" class="rounded border-gray-400">対応済</label>
+                            <label class="flex items-center gap-2 cursor-pointer text-sm font-medium text-black"><input type="checkbox" id="filter-invest" class="rounded border-gray-400">調査中</label>
+                        </div>
+                    </div>
+                </div>
+                <a href="incident-edit.html" class="inline-flex items-center justify-center gap-2 h-9 px-4 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 shrink-0">
+                    <span class="material-icons text-lg">add</span>新規作成
+                </a>
+            </div>
+            <div class="overflow-x-auto border border-gray-300 rounded-2xl w-full">
+                <table class="w-full text-left">
+                <thead class="border-b-2 border-gray-300 bg-gray-50">
+                    <tr>
+                        <th class="pb-3 pt-3 pl-6 pr-8 text-sm font-bold text-black">ID</th>
+                        <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">件名</th>
+                        <th class="pb-3 pt-3 pr-12 text-sm font-bold text-black">顧客</th>
+                        <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">発生日時</th>
+                        <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">対応状況</th>
+                        <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">内容</th>
+                        <th class="pb-3 pt-3 pr-6 text-sm font-bold text-black w-12"></th>
+                    </tr>
+                </thead>
+                <tbody id="tbody">
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        (function() {
+            var STORAGE_DELETED = 'incident_deleted';
+            var STORAGE_UPDATED = 'incident_updated';
+            var baseList = [
+                { id: 'I001', date: '2025-02-10', time: '08:15', title: '人身事故（追突）', customerId: 'CU001', customerName: '山田 太郎', contractId: 'C001', status: '対応済', description: '交差点で停車中の前方車両に追突し、人身事故となったケース。' },
+                { id: 'I002', date: '2025-02-05', time: '18:40', title: '人身事故（交差点）', customerId: 'CU002', customerName: '佐藤 花子', contractId: 'C002', status: '調査中', description: '信号機のない交差点で出合い頭衝突が発生し、歩行者が負傷。' },
+                { id: 'I003', date: '2025-01-28', time: '07:20', title: '人身事故（自転車との接触）', customerId: 'CU003', customerName: '鈴木 一郎', contractId: 'C004', status: '対応済', description: '自転車との接触により相手方が軽傷を負った事故。' },
+                { id: 'I004', date: '2025-01-15', time: '22:05', title: '人身事故（歩行者との接触）', customerId: 'CU001', customerName: '山田 太郎', contractId: 'C003', status: '対応済', description: '横断歩道付近で歩行者との接触があり、人身事故として届出。' },
+                { id: 'I005', date: '2025-02-18', time: '14:30', title: '物損事故（駐車場での接触）', customerId: 'CU002', customerName: '佐藤 花子', contractId: 'C005', status: '調査中', description: '駐車場でバック時に隣車両に接触。' }
+            ];
+
+            function getDeleted() { try { return JSON.parse(sessionStorage.getItem(STORAGE_DELETED) || '[]'); } catch (e) { return []; } }
+            function getUpdated() { try { return JSON.parse(sessionStorage.getItem(STORAGE_UPDATED) || '{}'); } catch (e) { return {}; } }
+            function getList() {
+                return baseList.filter(function(r) { return getDeleted().indexOf(r.id) < 0; }).map(function(r) { return getUpdated()[r.id] || r; });
+            }
+
+            function renderStatus(status) {
+                if (!status) return '—';
+                var baseClass = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ';
+                if (status === '対応済') {
+                    return '<span class="' + baseClass + 'bg-emerald-50 text-gray-900 border-emerald-200">対応済</span>';
+                }
+                if (status === '調査中') {
+                    return '<span class="' + baseClass + 'bg-amber-50 text-gray-900 border-amber-200">調査中</span>';
+                }
+                return '<span class="' + baseClass + 'bg-gray-50 text-gray-900 border-gray-200">' + status + '</span>';
+            }
+
+            function render() {
+                var list = getList().slice().sort(function(a, b) {
+                    return (a.id || '').localeCompare(b.id || '') * -1;
+                });
+                var keyword = (document.getElementById('incident-search').value || '').toLowerCase();
+                if (keyword) {
+                    list = list.filter(function(r) {
+                        var datetime = (r.date || '') + (r.time ? ' ' + r.time : '');
+                        return (r.id || '').toLowerCase().indexOf(keyword) >= 0 ||
+                            (r.title || '').toLowerCase().indexOf(keyword) >= 0 ||
+                            (r.customerName || '').toLowerCase().indexOf(keyword) >= 0 ||
+                            datetime.toLowerCase().indexOf(keyword) >= 0 ||
+                            (r.description || '').toLowerCase().indexOf(keyword) >= 0;
+                    });
+                }
+                var done = document.getElementById('filter-done').checked;
+                var inv = document.getElementById('filter-invest').checked;
+                if (done || inv) {
+                    list = list.filter(function(r) {
+                        return (done && r.status === '対応済') || (inv && r.status === '調査中');
+                    });
+                }
+                var tbody = document.getElementById('tbody');
+                tbody.innerHTML = list.map(function(r) {
+                    var datetime = (r.date || '') + (r.time ? ' ' + r.time : '');
+                    return '<tr class="hover:bg-gray-50 cursor-pointer row-link" data-href="incident-detail.html?id=' + encodeURIComponent(r.id) + '">' +
+                        '<td class="py-3 pl-6 pr-8 text-sm font-medium text-gray-800">' + (r.id || '—') + '</td>' +
+                        '<td class="py-3 pr-8 font-bold text-black">' + (r.title || '') + '</td>' +
+                        '<td class="py-3 pr-12 text-sm font-medium text-gray-700">' + (r.customerName || '—') + '</td>' +
+                        '<td class="py-3 pr-8 text-sm font-medium text-gray-800">' + (datetime || '—') + '</td>' +
+                        '<td class="py-3 pr-8 text-sm font-medium">' + renderStatus(r.status) + '</td>' +
+                        '<td class="py-3 pr-8 text-sm font-medium text-gray-800 max-w-xs truncate" title="' + (r.description || '').replace(/"/g, '&quot;') + '">' + (r.description || '—') + '</td>' +
+                        '<td class="py-3 pr-6 row-actions relative">' +
+                        '<button type="button" class="menu-btn relative inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 text-gray-600" data-id="' + r.id + '" aria-label="メニュー">' +
+                        '<span class="material-icons text-lg">more_vert</span></button>' +
+                        '<div class="menu-dropdown hidden absolute right-0 top-full mt-1 z-20 w-32 py-1 border border-gray-300 rounded-xl bg-white shadow-lg">' +
+                        '<a href="incident-edit.html?id=' + encodeURIComponent(r.id) + '" class="block px-4 py-2 text-sm text-black hover:bg-gray-100">編集</a>' +
+                        '<button type="button" class="incident-delete block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50" data-id="' + r.id + '">削除</button>' +
+                        '</div></td></tr>';
+                }).join('');
+
+                tbody.querySelectorAll('tr.row-link').forEach(function(tr) {
+                    tr.addEventListener('click', function(e) {
+                        if (e.target.closest('.row-actions')) return;
+                        location.href = this.getAttribute('data-href');
+                    });
+                });
+                tbody.querySelectorAll('.menu-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var open = document.querySelector('.menu-dropdown:not(.hidden)');
+                        if (open && open !== this.nextElementSibling) open.classList.add('hidden');
+                        this.nextElementSibling.classList.toggle('hidden');
+                    });
+                });
+                tbody.querySelectorAll('.menu-dropdown').forEach(function(d) {
+                    d.addEventListener('click', function(e) { e.stopPropagation(); });
+                });
+                document.addEventListener('click', function() {
+                    document.querySelectorAll('.menu-dropdown').forEach(function(d) { d.classList.add('hidden'); });
+                });
+                document.querySelectorAll('.incident-delete').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var id = this.getAttribute('data-id');
+                        if (!confirm('この事故を削除しますか？')) return;
+                        var deleted = getDeleted();
+                        if (deleted.indexOf(id) < 0) deleted.push(id);
+                        sessionStorage.setItem(STORAGE_DELETED, JSON.stringify(deleted));
+                        render();
+                    });
+                });
+            }
+            document.getElementById('filter-btn').addEventListener('click', function(e) {
+                e.stopPropagation();
+                document.getElementById('filter-panel').classList.toggle('hidden');
+            });
+            document.addEventListener('click', function() { document.getElementById('filter-panel').classList.add('hidden'); });
+            document.getElementById('filter-panel').addEventListener('click', function(e) { e.stopPropagation(); });
+            document.getElementById('filter-done').addEventListener('change', render);
+            document.getElementById('filter-invest').addEventListener('change', render);
+            document.getElementById('incident-search').addEventListener('input', render);
+
+            render();
+        })();
+    </script>
+</body>
+</html>

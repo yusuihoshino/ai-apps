@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>企業情報編集</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="common.css">
+</head>
+<body class="min-h-screen bg-black">
+    <div class="iphone-frame flex flex-col">
+        <header class="app-header safe-top safe-x flex items-center justify-between px-4 bg-white border-b border-gray-200 shrink-0">
+            <a href="company-detail.html?id=C001" class="p-2 -ml-2 text-gray-600"><span class="material-icons">close</span></a>
+            <h1 class="text-lg font-semibold text-gray-900">企業情報編集</h1>
+            <button type="button" id="saveCompanyBtn" class="p-2 text-blue-600 font-medium">保存</button>
+        </header>
+
+        <main class="flex-1 overflow-y-auto safe-x safe-bottom has-bottom-nav px-4 py-6">
+            <form id="companyForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">企業名</label>
+                    <input type="text" name="name" value="株式会社山田食品" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">住所</label>
+                    <input type="text" name="address" value="〒150-0043 東京都渋谷区道玄坂1-2-3 山田ビル5F" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">電話番号</label>
+                    <input type="tel" name="tel" value="03-1234-5678" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">メールアドレス</label>
+                    <input type="email" name="email" value="info@yamada-food.co.jp" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">ホームページURL</label>
+                    <input type="url" name="url" value="https://yamada-food.co.jp" placeholder="https://" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                </div>
+            </form>
+        </main>
+
+        <nav class="bottom-nav">
+            <a href="company-list.html" class="active"><span class="material-icons">business</span>企業</a>
+            <a href="customer-list.html"><span class="material-icons">people</span>顧客</a>
+            <a href="case-list.html"><span class="material-icons">folder</span>案件</a>
+            <a href="material-list.html"><span class="material-icons">description</span>資料</a>
+            <a href="schedule-list.html"><span class="material-icons">event</span>予定</a>
+        </nav>
+    </div>
+    <script>
+        document.getElementById('saveCompanyBtn').addEventListener('click', function() {
+            alert('保存しました');
+            var id = new URLSearchParams(location.search).get('id') || 'C001';
+            location.href = 'company-detail.html?id=' + encodeURIComponent(id);
+        });
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="screenshot.js"></script>
+</body>
+</html>

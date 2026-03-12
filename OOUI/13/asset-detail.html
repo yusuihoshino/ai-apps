@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アセット詳細 - アセット管理システム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col" id="body-detail">
+    <header class="bg-white border-b border-gray-300 py-4 shrink-0">
+        <div class="container mx-auto px-6 flex items-center justify-between">
+            <a href="asset-list.html" class="inline-flex items-center gap-1 text-black hover:opacity-70 text-sm font-medium"><span class="material-icons">arrow_back</span>戻る</a>
+            <div class="flex items-center gap-2">
+                <button type="button" id="btn-download" class="inline-flex items-center justify-center gap-2 h-9 px-4 border border-blue-500 rounded-2xl bg-white text-sm font-bold text-blue-600 hover:bg-blue-50">
+                    <span class="material-icons text-lg">download</span>ダウンロード
+                </button>
+                <button type="button" id="btn-delete" class="inline-flex items-center justify-center gap-2 h-9 px-4 border border-red-500 rounded-2xl bg-white text-sm font-bold text-red-600 hover:bg-red-50">
+                    <span class="material-icons text-lg">delete</span>削除
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-8 py-8">
+        <div id="not-found" class="hidden py-12 text-center">
+            <p class="font-medium text-black">アセットが見つかりません。</p>
+            <a href="asset-list.html" class="inline-block mt-4 font-bold text-black hover:underline">一覧に戻る</a>
+        </div>
+
+        <div id="detail-content" class="grid grid-cols-1 lg:grid-cols-2 gap-8 py-6">
+            <div class="w-full max-w-md">
+                <button type="button" id="preview-wrap" class="relative aspect-square w-full bg-gray-200 overflow-hidden flex items-center justify-center cursor-pointer group border-0 p-0 focus:ring-2 focus:ring-black focus:ring-offset-2 focus:outline-none text-left">
+                    <img id="preview-img" src="" alt="" class="w-full h-full object-contain hidden pointer-events-none">
+                    <span id="preview-placeholder" class="material-icons text-8xl text-gray-500 pointer-events-none">image</span>
+                    <p id="image-meta" class="absolute bottom-2 right-2 px-2 py-1 rounded-lg bg-black/60 text-white text-xs font-medium pointer-events-none z-10"></p>
+                    <div id="saved-badge" class="hidden absolute top-2 right-2 inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-500 text-white text-xs font-bold shadow pointer-events-none z-10">
+                        <span class="material-icons text-sm">drive_file_rename_outline</span>変更済み
+                    </div>
+                    <span id="preview-change-hint" class="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/40 transition-colors pointer-events-none z-10">
+                        <span class="opacity-0 group-hover:opacity-100 transition-opacity inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/95 text-sm font-bold text-black shadow-lg">
+                            <span class="material-icons text-xl">sync</span>アセットを変更
+                        </span>
+                    </span>
+                </button>
+            </div>
+            <div class="space-y-4" id="detail-form-right">
+                <div>
+                    <label class="block text-sm font-bold text-black mb-1">アセット名</label>
+                    <input type="text" id="edit-name" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-black mb-1">説明</label>
+                    <textarea id="edit-description" rows="3" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black"></textarea>
+                </div>
+                <div class="space-y-1">
+                    <div class="grid grid-cols-2 gap-x-2 gap-y-0">
+                        <div>
+                            <p class="text-xs font-bold text-gray-500 mb-0.5">更新日</p>
+                            <p id="edit-updated" class="text-sm font-medium text-black"></p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-500 mb-0.5">更新者</p>
+                            <p id="edit-updatedBy" class="text-sm font-medium text-black"></p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-x-2 gap-y-0">
+                        <div>
+                            <p class="text-xs font-bold text-gray-500 mb-0.5">登録日</p>
+                            <p id="edit-registeredAt" class="text-sm font-medium text-black"></p>
+                        </div>
+                        <div>
+                            <p class="text-xs font-bold text-gray-500 mb-0.5">登録者</p>
+                            <p id="edit-registeredBy" class="text-sm font-medium text-black"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer id="detail-footer" class="hidden fixed bottom-0 left-0 right-0 z-20 bg-white border-t border-gray-300 px-6 py-3 flex justify-center">
+        <button type="button" id="btn-save" class="inline-flex items-center justify-center gap-2 h-10 px-6 bg-black text-white rounded-2xl text-sm font-bold hover:bg-gray-800">
+            <span class="material-icons text-lg">save</span>保存
+        </button>
+    </footer>
+
+    <script>
+        (function() {
+            var assets = [
+                { id: 'A001', name: 'ロゴマーク メイン', category: '画像', fileName: 'logo-main.png', updated: '2025-02-18', registeredAt: '2025-01-10', registeredBy: '山田太郎', updatedBy: '山田太郎', description: 'メインロゴ', resolution: '400×400', imageUrl: 'https://picsum.photos/seed/logo1/400/400' },
+                { id: 'A002', name: '製品写真 A', category: '画像', fileName: 'product-a.jpg', updated: '2025-02-17', registeredAt: '2025-01-12', registeredBy: '佐藤花子', updatedBy: '佐藤花子', description: '製品Aの写真', resolution: '1920×1080', imageUrl: 'https://picsum.photos/seed/product2/400/400' },
+                { id: 'A003', name: 'バナー 春キャンペーン', category: '画像', fileName: 'banner-spring.png', updated: '2025-02-17', registeredAt: '2025-01-15', registeredBy: '山田太郎', updatedBy: '鈴木一郎', description: '春キャンペーンバナー', resolution: '1200×630', imageUrl: 'https://picsum.photos/seed/banner3/400/400' },
+                { id: 'A004', name: '紹介動画 30秒', category: '動画', fileName: 'intro-30s.mp4', updated: '2025-02-16', registeredAt: '2025-01-20', registeredBy: '佐藤花子', updatedBy: '佐藤花子', description: '30秒紹介動画', resolution: '1920×1080', imageUrl: 'https://picsum.photos/seed/video4/400/300' },
+                { id: 'A005', name: '取扱説明書 PDF', category: 'ドキュメント', fileName: 'manual.pdf', updated: '2025-02-16', registeredAt: '2025-01-22', registeredBy: '鈴木一郎', updatedBy: '鈴木一郎', description: '製品取扱説明書', resolution: '—', imageUrl: 'https://picsum.photos/seed/doc5/400/400' },
+                { id: 'A006', name: 'アイコンセット', category: '画像', fileName: 'icons-v2.zip', updated: '2025-02-15', registeredAt: '2025-01-25', registeredBy: '山田太郎', updatedBy: '山田太郎', description: 'UI用アイコン一式', resolution: '—', imageUrl: 'https://picsum.photos/seed/icon6/400/400' },
+                { id: 'A007', name: 'サムネイル画像', category: '画像', fileName: 'thumb-default.jpg', updated: '2025-02-15', registeredAt: '2025-01-28', registeredBy: '佐藤花子', updatedBy: '佐藤花子', description: 'デフォルトサムネイル', resolution: '800×600', imageUrl: 'https://picsum.photos/seed/thumb7/400/400' },
+                { id: 'A008', name: 'プレゼン資料', category: 'ドキュメント', fileName: 'presentation.pptx', updated: '2025-02-14', registeredAt: '2025-02-01', registeredBy: '鈴木一郎', updatedBy: '鈴木一郎', description: '2025年度版', resolution: '—', imageUrl: 'https://picsum.photos/seed/slide8/400/400' }
+            ];
+
+            var id = (function() {
+                var m = location.search.match(/[?&]id=([^&]+)/);
+                return m ? decodeURIComponent(m[1]) : '';
+            })();
+
+            var content = document.getElementById('detail-content');
+            var notFound = document.getElementById('not-found');
+            var asset = assets.filter(function(a) { return a.id === id; })[0];
+            var initialName = '';
+            var initialDescription = '';
+
+            function isDirty() {
+                var name = document.getElementById('edit-name').value.trim();
+                var desc = document.getElementById('edit-description').value;
+                return name !== initialName || desc !== initialDescription;
+            }
+            function updateFooter() {
+                var footer = document.getElementById('detail-footer');
+                var body = document.getElementById('body-detail');
+                if (isDirty()) {
+                    footer.classList.remove('hidden');
+                    body.style.paddingBottom = '72px';
+                } else {
+                    footer.classList.add('hidden');
+                    body.style.paddingBottom = '';
+                }
+            }
+
+            if (!asset) {
+                content.classList.add('hidden');
+                notFound.classList.remove('hidden');
+            } else {
+                document.getElementById('edit-name').value = asset.name || '';
+                document.getElementById('edit-description').value = asset.description || '';
+                var ext = asset.fileName ? (asset.fileName.split('.').pop() || '').toUpperCase() : '';
+                var res = asset.resolution || '—';
+                document.getElementById('image-meta').textContent = ext ? ext + ' | ' + res : res;
+                document.getElementById('edit-registeredAt').textContent = asset.registeredAt || '—';
+                document.getElementById('edit-updated').textContent = asset.updated || '—';
+                document.getElementById('edit-registeredBy').textContent = asset.registeredBy || '—';
+                document.getElementById('edit-updatedBy').textContent = asset.updatedBy || '—';
+                initialName = asset.name || '';
+                initialDescription = asset.description || '';
+
+                var previewImg = document.getElementById('preview-img');
+                var previewPlaceholder = document.getElementById('preview-placeholder');
+                if (asset.imageUrl) {
+                    previewImg.src = asset.imageUrl;
+                    previewImg.classList.remove('hidden');
+                    previewImg.onerror = function() {
+                        previewImg.classList.add('hidden');
+                        previewPlaceholder.classList.remove('hidden');
+                    };
+                    previewPlaceholder.classList.add('hidden');
+                }
+
+                document.getElementById('edit-name').addEventListener('input', updateFooter);
+                document.getElementById('edit-description').addEventListener('input', updateFooter);
+                document.getElementById('btn-save').addEventListener('click', function() {
+                    asset.name = document.getElementById('edit-name').value.trim();
+                    asset.description = document.getElementById('edit-description').value;
+                    initialName = asset.name;
+                    initialDescription = asset.description;
+                    document.getElementById('detail-footer').classList.add('hidden');
+                    document.getElementById('body-detail').style.paddingBottom = '';
+                    document.getElementById('saved-badge').classList.remove('hidden');
+                    alert('保存しました。（デモ）');
+                });
+                document.getElementById('btn-download').addEventListener('click', function() {
+                    alert('ダウンロードしました。（デモ: ' + (asset.fileName || '') + '）');
+                });
+                document.getElementById('btn-delete').addEventListener('click', function() {
+                    if (confirm('このアセットを削除しますか？')) {
+                        alert('削除しました。一覧に戻ります。（デモ）');
+                        location.href = 'asset-list.html';
+                    }
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

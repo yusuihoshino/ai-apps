@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>トップ - イベント管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- サイドバー -->
+        <div class="w-64 bg-white border-r border-gray-200 flex flex-col shrink-0">
+            <div class="p-4 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-gray-900">イベント管理</h1>
+            </div>
+            <nav class="flex-1 p-4">
+                <a href="event-list.html" class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                    <span class="material-icons">event</span>
+                    <span>イベント</span>
+                </a>
+                <a href="material-list.html" class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                    <span class="material-icons">inventory_2</span>
+                    <span>資材</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- メインコンテンツ -->
+        <div class="flex-1 overflow-y-auto">
+            <div class="container mx-auto px-4 py-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">メニュー</h2>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <a href="event-list.html" class="flex items-center gap-4 p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 hover:shadow transition-colors">
+                        <span class="material-icons text-blue-600 text-3xl">event</span>
+                        <div>
+                            <div class="font-semibold text-gray-900">イベント</div>
+                            <div class="text-sm text-gray-500">イベント一覧・詳細・カレンダー</div>
+                        </div>
+                    </a>
+                    <a href="material-list.html" class="flex items-center gap-4 p-6 bg-white rounded-lg border border-gray-200 shadow-sm hover:border-blue-300 hover:shadow transition-colors">
+                        <span class="material-icons text-blue-600 text-3xl">inventory_2</span>
+                        <div>
+                            <div class="font-semibold text-gray-900">資材</div>
+                            <div class="text-sm text-gray-500">資材一覧・詳細</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

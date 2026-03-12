@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>カレンダー - イベント管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .calendar-day { min-height: 100px; }
+        .calendar-day.other-month { background-color: #f9fafb; color: #9ca3af; }
+        .segmented-active { background-color: #2563eb; color: #fff; }
+        .segmented-inactive { background-color: #f3f4f6; color: #374151; }
+        .segmented-inactive:hover { background-color: #e5e7eb; }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- サイドバー -->
+        <div class="w-64 bg-white border-r border-gray-200 flex flex-col shrink-0">
+            <div class="p-4 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-gray-900">イベント管理</h1>
+            </div>
+            <nav class="flex-1 p-4">
+                <a href="event-list.html" class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                    <span class="material-icons">event</span>
+                    <span>イベント</span>
+                </a>
+                <a href="material-list.html" class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                    <span class="material-icons">inventory_2</span>
+                    <span>資材</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- メインコンテンツ -->
+        <div class="flex-1 overflow-y-auto">
+            <div class="container mx-auto px-4 py-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">カレンダー</h2>
+
+                <!-- セグメントコントロール（イベント・資材を両方選択可能） -->
+                <div class="flex flex-wrap items-center gap-4 mb-6">
+                    <div class="inline-flex rounded-lg border border-gray-200 bg-gray-100 p-1" role="group">
+                        <button type="button" id="tab-event" class="segmented-active rounded-md px-4 py-2 text-sm font-medium transition-colors" data-mode="event">イベント</button>
+                        <button type="button" id="tab-material" class="segmented-inactive rounded-md px-4 py-2 text-sm font-medium transition-colors" data-mode="material">資材</button>
+                    </div>
+                    <div class="relative flex-1 min-w-[200px] max-w-xs">
+                        <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none text-lg">search</span>
+                        <input type="search" id="calendar-search" placeholder="項目名・IDで検索" class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm" aria-label="検索">
+                    </div>
+                </div>
+
+                <!-- カレンダー -->
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                        <button type="button" id="prev-month" class="p-2 rounded-lg hover:bg-gray-100">
+                            <span class="material-icons">chevron_left</span>
+                        </button>
+                        <h3 id="calendar-title" class="text-lg font-semibold text-gray-900">2025年3月</h3>
+                        <button type="button" id="next-month" class="p-2 rounded-lg hover:bg-gray-100">
+                            <span class="material-icons">chevron_right</span>
+                        </button>
+                    </div>
+                    <div class="p-4">
+                        <table class="w-full border-collapse">
+                            <thead>
+                                <tr class="text-left text-sm font-medium text-gray-500">
+                                    <th class="border border-gray-200 p-2">日</th>
+                                    <th class="border border-gray-200 p-2">月</th>
+                                    <th class="border border-gray-200 p-2">火</th>
+                                    <th class="border border-gray-200 p-2">水</th>
+                                    <th class="border border-gray-200 p-2">木</th>
+                                    <th class="border border-gray-200 p-2">金</th>
+                                    <th class="border border-gray-200 p-2">土</th>
+                                </tr>
+                            </thead>
+                            <tbody id="calendar-body">
+                                <!-- JS で生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script>
+        (function() {
+            var currentYear = 2025;
+            var currentMonth = 2; // 0-indexed: 3月
+
+            var events = [
+                { id: 'E001', name: '技術カンファレンス 2025', date: '2025-03-15', url: 'event-detail.html?id=E001' },
+                { id: 'E002', name: '営業研修会', date: '2025-03-20', url: 'event-detail.html?id=E002' },
+                { id: 'E003', name: '展示会 春の商談会', date: '2025-04-01', url: 'event-detail.html?id=E003' }
+            ];
+            var materials = [
+                { id: 'M001', name: 'プロジェクター', date: '2025-03-10', url: 'material-detail.html?id=M001' },
+                { id: 'M002', name: '音響機器レンタル', date: '2025-03-12', url: 'material-detail.html?id=M002' },
+                { id: 'M003', name: '展示ブース用パネル', date: '2025-03-25', url: 'material-detail.html?id=M003' }
+            ];
+
+            var showEvent = true;
+            var showMaterial = false;
+
+            function toggleEvent() {
+                showEvent = !showEvent;
+                document.getElementById('tab-event').classList.toggle('segmented-active', showEvent);
+                document.getElementById('tab-event').classList.toggle('segmented-inactive', !showEvent);
+                renderCalendar();
+            }
+            function toggleMaterial() {
+                showMaterial = !showMaterial;
+                document.getElementById('tab-material').classList.toggle('segmented-active', showMaterial);
+                document.getElementById('tab-material').classList.toggle('segmented-inactive', !showMaterial);
+                renderCalendar();
+            }
+
+            document.getElementById('tab-event').addEventListener('click', toggleEvent);
+            document.getElementById('tab-material').addEventListener('click', toggleMaterial);
+            document.getElementById('calendar-search').addEventListener('input', function() { renderCalendar(); });
+
+            document.getElementById('prev-month').addEventListener('click', function() {
+                currentMonth--;
+                if (currentMonth < 0) { currentYear--; currentMonth = 11; }
+                renderCalendar();
+            });
+            document.getElementById('next-month').addEventListener('click', function() {
+                currentMonth++;
+                if (currentMonth > 11) { currentYear++; currentMonth = 0; }
+                renderCalendar();
+            });
+
+            function matchesSearch(item, q) {
+                if (!q || !q.trim()) return true;
+                q = q.trim().toLowerCase();
+                return (item.name && item.name.toLowerCase().indexOf(q) >= 0) ||
+                       (item.id && item.id.toLowerCase().indexOf(q) >= 0);
+            }
+
+            function getItemsForDate(ymd) {
+                var list = [];
+                var q = document.getElementById('calendar-search').value;
+                if (showEvent) {
+                    events.forEach(function(e) {
+                        if (e.date === ymd && matchesSearch(e, q)) list.push({ type: 'event', item: e });
+                    });
+                }
+                if (showMaterial) {
+                    materials.forEach(function(m) {
+                        if (m.date === ymd && matchesSearch(m, q)) list.push({ type: 'material', item: m });
+                    });
+                }
+                return list;
+            }
+
+            function renderCalendar() {
+                document.getElementById('calendar-title').textContent = currentYear + '年' + (currentMonth + 1) + '月';
+                var first = new Date(currentYear, currentMonth, 1);
+                var last = new Date(currentYear, currentMonth + 1, 0);
+                var startDay = first.getDay();
+                var daysInMonth = last.getDate();
+                var prevLast = new Date(currentYear, currentMonth, 0);
+                var prevDays = prevLast.getDate();
+                var totalCells = 42;
+                var dayNum = 1 - startDay;
+
+                var html = '';
+                for (var i = 0; i < totalCells; i++) {
+                    if (i % 7 === 0) html += '<tr>';
+                    var cellDay, ymd, isOther = false;
+                    if (dayNum < 1) {
+                        cellDay = prevDays + dayNum;
+                        var pY = currentMonth === 0 ? currentYear - 1 : currentYear;
+                        var pM = currentMonth === 0 ? 11 : currentMonth - 1;
+                        ymd = pY + '-' + String(pM + 1).padStart(2, '0') + '-' + String(cellDay).padStart(2, '0');
+                        isOther = true;
+                    } else if (dayNum > daysInMonth) {
+                        cellDay = dayNum - daysInMonth;
+                        var nY = currentMonth === 11 ? currentYear + 1 : currentYear;
+                        var nM = currentMonth === 11 ? 0 : currentMonth + 1;
+                        ymd = nY + '-' + String(nM + 1).padStart(2, '0') + '-' + String(cellDay).padStart(2, '0');
+                        isOther = true;
+                    } else {
+                        cellDay = dayNum;
+                        ymd = currentYear + '-' + String(currentMonth + 1).padStart(2, '0') + '-' + String(cellDay).padStart(2, '0');
+                    }
+                    dayNum++;
+                    var items = getItemsForDate(ymd);
+                    var content = '<div class="text-xs font-medium text-gray-500 mb-1">' + cellDay + '</div>';
+                    items.forEach(function(o) {
+                        var bg = o.type === 'event' ? 'bg-blue-100 text-blue-800' : 'bg-amber-100 text-amber-900';
+                        content += '<a href="' + o.item.url + '" class="block text-xs truncate rounded px-1 py-0.5 ' + bg + ' mb-0.5" title="' + o.item.name + '">' + o.item.name + '</a>';
+                    });
+                    html += '<td class="border border-gray-200 p-2 align-top calendar-day' + (isOther ? ' other-month' : '') + '">' + content + '</td>';
+                    if (i % 7 === 6) html += '</tr>';
+                }
+                document.getElementById('calendar-body').innerHTML = html;
+            }
+
+            renderCalendar();
+        })();
+    </script>
+</body>
+</html>

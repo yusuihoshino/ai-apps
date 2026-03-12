@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>資材一覧</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .id-tooltip { position: fixed; z-index: 50; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; color: #fff; background-color: #2563eb; white-space: nowrap; pointer-events: none; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- サイドバー -->
+        <div class="w-64 bg-white border-r border-gray-200 flex flex-col shrink-0">
+            <div class="p-4 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-gray-900">イベント管理</h1>
+            </div>
+            <nav class="flex-1 p-4">
+                <a href="event-list.html" class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                    <span class="material-icons">event</span>
+                    <span>イベント</span>
+                </a>
+                <a href="material-list.html" class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-900 bg-blue-50 text-blue-600 rounded-lg transition-colors">
+                    <span class="material-icons">inventory_2</span>
+                    <span>資材</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- メインコンテンツ -->
+        <div class="flex-1 overflow-y-auto">
+            <div class="container mx-auto px-4 py-8">
+                <!-- 見出しは表の外、その下に検索・白背景の表 -->
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">資材一覧</h2>
+                </div>
+                <div class="mb-4 flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-2 min-h-0">
+                        <div class="relative w-full max-w-xs shrink-0">
+                            <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">search</span>
+                            <input type="search" id="material-search" placeholder="項目名・IDで検索できます" class="pl-10 pr-4 h-10 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500" aria-label="検索">
+                        </div>
+                        <div class="relative shrink-0">
+                            <button type="button" id="filter-toggle" class="inline-flex items-center justify-center gap-1.5 h-10 px-4 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 whitespace-nowrap shrink-0">
+                                <span class="material-icons text-lg">tune</span>検索条件
+                            </button>
+                            <div id="filter-panel" class="hidden absolute left-0 top-full mt-1 z-10 w-80 bg-white rounded-lg border border-gray-200 shadow-lg py-3 px-4">
+                                <div class="space-y-2 text-sm">
+                                    <div><label class="block text-gray-600 mb-0.5">資材名</label><input type="text" id="f-name" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm" placeholder="含む"></div>
+                                    <div><label class="block text-gray-600 mb-0.5">金額</label><input type="text" id="f-amount" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm" placeholder="含む"></div>
+                                    <div><label class="block text-gray-600 mb-0.5">納入日</label><input type="text" id="f-date" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm" placeholder="含む"></div>
+                                    <div><label class="block text-gray-600 mb-0.5">メーカー</label><input type="text" id="f-maker" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm" placeholder="含む"></div>
+                                    <div><label class="block text-gray-600 mb-0.5">担当者</label><input type="text" id="f-person" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm" placeholder="含む"></div>
+                                </div>
+                                <div class="mt-3 flex justify-end gap-2">
+                                    <button type="button" id="filter-clear" class="inline-flex items-center justify-center h-10 px-4 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">クリア</button>
+                                    <button type="button" id="filter-apply" class="inline-flex items-center justify-center h-10 px-4 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700">適用</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="material-detail.html" class="inline-flex items-center justify-center gap-2 h-10 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium shrink-0 mr-1">
+                        <span class="material-icons text-lg">add</span>新規作成
+                    </a>
+                </div>
+
+                <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">資材名</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">金額</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">納入日</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">メーカー</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">担当者</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200">
+                            <tr class="material-row hover:bg-gray-50 cursor-pointer" onclick="location.href='material-detail.html?id=M001'" data-name="プロジェクター" data-amount="120000" data-date="2025-03-10" data-maker="日本電機" data-person="山田太郎">
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900 relative" data-id="M001">プロジェクター</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">¥120,000</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">2025-03-10</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">日本電機</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">山田太郎</td>
+                            </tr>
+                            <tr class="material-row hover:bg-gray-50 cursor-pointer" onclick="location.href='material-detail.html?id=M002'" data-name="音響機器レンタル" data-amount="85000" data-date="2025-03-12" data-maker="山田音響" data-person="佐藤花子">
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900 relative" data-id="M002">音響機器レンタル</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">¥85,000</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">2025-03-12</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">山田音響</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">佐藤花子</td>
+                            </tr>
+                            <tr class="material-row hover:bg-gray-50 cursor-pointer" onclick="location.href='material-detail.html?id=M003'" data-name="展示ブース用パネル" data-amount="45000" data-date="2025-03-25" data-maker="長谷川展示" data-person="田中一郎">
+                                <td class="px-4 py-3 text-sm font-medium text-gray-900 relative" data-id="M003">展示ブース用パネル</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">¥45,000</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">2025-03-25</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">長谷川展示</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">田中一郎</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="id-tooltip" class="id-tooltip hidden"></div>
+    <script>
+        (function() {
+            var filterPanel = document.getElementById('filter-panel');
+            var filterToggle = document.getElementById('filter-toggle');
+            filterToggle.addEventListener('click', function(e) { e.stopPropagation(); filterPanel.classList.toggle('hidden'); });
+            document.getElementById('filter-apply').addEventListener('click', function() {
+                filterPanel.classList.add('hidden');
+                applyMaterialFilter();
+            });
+            document.getElementById('filter-clear').addEventListener('click', function() {
+                document.getElementById('f-name').value = '';
+                document.getElementById('f-amount').value = '';
+                document.getElementById('f-date').value = '';
+                document.getElementById('f-maker').value = '';
+                document.getElementById('f-person').value = '';
+                applyMaterialFilter();
+            });
+            document.addEventListener('click', function() { filterPanel.classList.add('hidden'); });
+            filterPanel.addEventListener('click', function(e) { e.stopPropagation(); });
+            function applyMaterialFilter() {
+                var name = (document.getElementById('f-name').value || '').trim().toLowerCase();
+                var amount = (document.getElementById('f-amount').value || '').trim().toLowerCase();
+                var date = (document.getElementById('f-date').value || '').trim().toLowerCase();
+                var maker = (document.getElementById('f-maker').value || '').trim().toLowerCase();
+                var person = (document.getElementById('f-person').value || '').trim().toLowerCase();
+                document.querySelectorAll('.material-row').forEach(function(row) {
+                    var show = (!name || (row.getAttribute('data-name') || '').toLowerCase().indexOf(name) >= 0) &&
+                        (!amount || (row.getAttribute('data-amount') || '').toLowerCase().indexOf(amount) >= 0) &&
+                        (!date || (row.getAttribute('data-date') || '').toLowerCase().indexOf(date) >= 0) &&
+                        (!maker || (row.getAttribute('data-maker') || '').toLowerCase().indexOf(maker) >= 0) &&
+                        (!person || (row.getAttribute('data-person') || '').toLowerCase().indexOf(person) >= 0);
+                    row.style.display = show ? '' : 'none';
+                });
+            }
+
+            var tip = document.getElementById('id-tooltip');
+            document.querySelectorAll('[data-id]').forEach(function(el) {
+                el.addEventListener('mouseenter', function(e) {
+                    var id = el.getAttribute('data-id');
+                    if (!id) return;
+                    tip.textContent = 'ID: ' + id;
+                    tip.classList.remove('hidden');
+                    tip.style.visibility = 'hidden';
+                    requestAnimationFrame(function() {
+                        tip.style.left = (e.clientX - tip.offsetWidth / 2) + 'px';
+                        tip.style.top = (e.clientY - tip.offsetHeight - 8) + 'px';
+                        tip.style.visibility = 'visible';
+                    });
+                });
+                el.addEventListener('mousemove', function(e) {
+                    if (!tip.classList.contains('hidden')) {
+                        tip.style.left = (e.clientX - tip.offsetWidth / 2) + 'px';
+                        tip.style.top = (e.clientY - tip.offsetHeight - 8) + 'px';
+                    }
+                });
+                el.addEventListener('mouseleave', function() { tip.classList.add('hidden'); });
+            });
+        })();
+    </script>
+</body>
+</html>

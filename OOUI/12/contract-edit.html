@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>契約 - 管理システム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-white min-h-screen">
+    <header class="bg-white border-b border-gray-300 py-3">
+        <div class="container mx-auto px-8">
+            <nav class="inline-flex rounded-2xl bg-white p-1 gap-0.5">
+                <a href="customer-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">顧客</a>
+                <a href="contract-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">契約</a>
+                <a href="incident-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">事故</a>
+                <a href="application-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">申し込み</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-8 py-8">
+        <a href="contract-list.html" class="inline-flex items-center gap-1 text-xs text-black hover:opacity-70 mb-2" aria-label="一覧に戻る">
+            <span class="material-icons text-base">arrow_back</span>
+            <span>一覧に戻る</span>
+        </a>
+        <h1 class="text-lg font-bold text-black mb-4" id="page-title">契約 新規作成</h1>
+        <div id="not-found" class="hidden py-12 text-center">
+            <p class="font-medium text-black">契約が見つかりません。</p>
+            <a href="contract-list.html" class="inline-block mt-4 font-bold text-black hover:underline">一覧に戻る</a>
+        </div>
+        <form id="form" class="max-w-xl space-y-4 py-4">
+            <div>
+                <label class="block text-sm font-bold text-black mb-1">契約名</label>
+                <input type="text" name="name" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black" required>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-black mb-1">顧客</label>
+                <select name="customerId" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black">
+                    <option value="CU001">株式会社山田商事</option>
+                    <option value="CU002">佐藤工業株式会社</option>
+                    <option value="CU003">有限会社鈴木製作所</option>
+                </select>
+            </div>
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-bold text-black mb-1">契約開始日</label>
+                    <input type="text" name="startDate" placeholder="YYYY-MM-DD" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-black mb-1">契約終了日</label>
+                    <input type="text" name="endDate" placeholder="YYYY-MM-DD" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black">
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-black mb-1">料金</label>
+                <input type="text" name="amount" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black" placeholder="例: 月額50,000円">
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-black mb-1">支払状況</label>
+                <select name="paymentStatus" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black">
+                    <option value="納付済">納付済</option>
+                    <option value="未納">未納</option>
+                </select>
+            </div>
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-300">
+                <button type="button" id="btn-delete" class="hidden inline-flex items-center justify-center gap-2 h-10 px-4 border-2 border-gray-400 rounded-2xl bg-white text-sm font-bold text-black hover:bg-gray-100">削除</button>
+                <button type="submit" class="inline-flex items-center justify-center gap-2 h-10 px-6 bg-black text-white rounded-2xl text-sm font-bold hover:bg-gray-800">保存</button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        (function() {
+            var STORAGE_DELETED = 'contract_deleted';
+            var STORAGE_UPDATED = 'contract_updated';
+            var customerNames = { CU001: '株式会社山田商事', CU002: '佐藤工業株式会社', CU003: '有限会社鈴木製作所' };
+            var baseList = [
+                { id: 'C001', name: '保守契約A', customerId: 'CU001', customerName: '株式会社山田商事', startDate: '2024-04-01', endDate: '2025-03-31', amount: '月額50,000円', paymentStatus: '納付済' },
+                { id: 'C002', name: 'ライセンス契約B', customerId: 'CU002', customerName: '佐藤工業株式会社', startDate: '2024-06-01', endDate: '2025-05-31', amount: '年額120,000円', paymentStatus: '未納' },
+                { id: 'C003', name: 'サポート契約C', customerId: 'CU001', customerName: '株式会社山田商事', startDate: '2024-10-01', endDate: '2025-09-30', amount: '月額30,000円', paymentStatus: '納付済' },
+                { id: 'C004', name: '保守契約D', customerId: 'CU003', customerName: '有限会社鈴木製作所', startDate: '2024-01-15', endDate: '2025-01-14', amount: '月額80,000円', paymentStatus: '未納' },
+                { id: 'C005', name: '導入支援契約E', customerId: 'CU002', customerName: '佐藤工業株式会社', startDate: '2025-01-01', endDate: '2025-12-31', amount: '一括200,000円', paymentStatus: '納付済' }
+            ];
+
+            var id = (location.search.match(/[?&]id=([^&]+)/) || [])[1] ? decodeURIComponent((location.search.match(/[?&]id=([^&]+)/) || [])[1]) : '';
+            function getDeleted() { try { return JSON.parse(sessionStorage.getItem(STORAGE_DELETED) || '[]'); } catch (e) { return []; } }
+            function getUpdated() { try { return JSON.parse(sessionStorage.getItem(STORAGE_UPDATED) || '{}'); } catch (e) { return {}; } }
+            function getRecord() {
+                if (!id || getDeleted().indexOf(id) >= 0) return null;
+                var updated = getUpdated();
+                var r = baseList.filter(function(x) { return x.id === id; })[0];
+                return r ? (updated[id] || r) : null;
+            }
+
+            var form = document.getElementById('form');
+            var notFound = document.getElementById('not-found');
+            var pageTitle = document.getElementById('page-title');
+            var btnDelete = document.getElementById('btn-delete');
+            var record = getRecord();
+
+            if (id && !record) {
+                notFound.classList.remove('hidden');
+                form.classList.add('hidden');
+            } else {
+                if (record) {
+                    pageTitle.textContent = '契約 編集';
+                    form.querySelector('[name="name"]').value = record.name || '';
+                    form.querySelector('[name="customerId"]').value = record.customerId || '';
+                    form.querySelector('[name="startDate"]').value = record.startDate || '';
+                    form.querySelector('[name="endDate"]').value = record.endDate || '';
+                    form.querySelector('[name="amount"]').value = record.amount || '';
+                    form.querySelector('[name="paymentStatus"]').value = record.paymentStatus || '納付済';
+                    btnDelete.classList.remove('hidden');
+                }
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var customerId = form.querySelector('[name="customerId"]').value;
+                    var payload = {
+                        id: record ? record.id : 'C' + String(Date.now()).slice(-6),
+                        name: form.querySelector('[name="name"]').value,
+                        customerId: customerId,
+                        customerName: customerNames[customerId] || '',
+                        startDate: form.querySelector('[name="startDate"]').value,
+                        endDate: form.querySelector('[name="endDate"]').value,
+                        amount: form.querySelector('[name="amount"]').value,
+                        paymentStatus: form.querySelector('[name="paymentStatus"]').value
+                    };
+                    var updated = getUpdated();
+                    updated[payload.id] = payload;
+                    sessionStorage.setItem(STORAGE_UPDATED, JSON.stringify(updated));
+                    alert('保存しました。');
+                    location.href = 'contract-detail.html?id=' + encodeURIComponent(payload.id);
+                });
+                btnDelete.addEventListener('click', function() {
+                    if (!confirm('この契約を削除しますか？')) return;
+                    var deleted = getDeleted();
+                    if (record && deleted.indexOf(record.id) < 0) deleted.push(record.id);
+                    sessionStorage.setItem(STORAGE_DELETED, JSON.stringify(deleted));
+                    alert('削除しました。');
+                    location.href = 'contract-list.html';
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

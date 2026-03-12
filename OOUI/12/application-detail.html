@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>申し込み詳細 - 管理システム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-white min-h-screen">
+    <header class="bg-white border-b border-gray-300 py-3">
+        <div class="container mx-auto px-8 flex items-center justify-between">
+            <nav class="inline-flex rounded-2xl bg-white p-1 gap-0.5">
+                <a href="customer-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">顧客</a>
+                <a href="contract-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">契約</a>
+                <a href="incident-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">事故</a>
+                <a href="application-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl bg-gray-200 text-black text-sm font-medium">申し込み</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-8 py-8">
+        <a href="application-list.html" class="inline-flex items-center gap-1 text-xs text-black hover:opacity-70 mb-2" aria-label="一覧に戻る">
+            <span class="material-icons text-base">arrow_back</span>
+            <span>一覧に戻る</span>
+        </a>
+        <div class="flex items-center justify-between gap-4 mb-4">
+            <h1 class="text-lg font-bold text-black">申し込み詳細</h1>
+        </div>
+        <div id="not-found" class="hidden py-12 text-center">
+            <p class="font-medium text-black">申し込みが見つかりません。</p>
+            <a href="application-list.html" class="inline-block mt-4 font-bold text-black hover:underline">一覧に戻る</a>
+        </div>
+        <div id="content" class="hidden">
+            <div class="overflow-x-auto border border-gray-300 rounded-2xl w-full">
+                <table class="w-full text-left table-fixed">
+                    <tbody class="divide-y divide-gray-300">
+                        <tr><th class="py-3 pl-4 pr-6 text-sm font-bold text-black bg-gray-50 w-32 text-left">ID</th><td id="d-id" class="py-3 pr-4 text-sm font-medium text-gray-800"></td></tr>
+                        <tr><th class="py-3 pl-4 pr-6 text-sm font-bold text-black bg-gray-50 text-left">申込日</th><td id="d-date" class="py-3 pr-4 text-sm font-medium text-gray-800"></td></tr>
+                        <tr><th class="py-3 pl-4 pr-6 text-sm font-bold text-black bg-gray-50 text-left">顧客名</th><td id="d-applicant" class="py-3 pr-4 text-sm font-medium text-gray-800"></td></tr>
+                        <tr><th class="py-3 pl-4 pr-6 text-sm font-bold text-black bg-gray-50 text-left">申込内容</th><td id="d-subject" class="py-3 pr-4 text-sm font-medium text-gray-800"></td></tr>
+                        <tr><th class="py-3 pl-4 pr-6 text-sm font-bold text-black bg-gray-50 text-left">対応状況</th><td id="d-status" class="py-3 pr-4 text-sm font-medium text-gray-800"></td></tr>
+                        <tr><th class="py-3 pl-4 pr-6 text-sm font-bold text-black bg-gray-50 text-left">備考</th><td id="d-notes" class="py-3 pr-4 text-sm font-medium text-gray-800"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <section class="pt-8 mt-8" id="related-contract-section">
+                <div class="flex items-center justify-between gap-4 mb-4">
+                    <h2 class="text-base font-bold text-black">関連する契約</h2>
+                    <a id="btn-add-contract" href="contract-edit.html" class="inline-flex items-center justify-center gap-2 h-9 px-4 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 shrink-0">
+                        <span class="material-icons text-lg">add</span>新規追加
+                    </a>
+                </div>
+                <div id="related-contract-empty" class="text-sm text-gray-500 py-2 hidden">関連する契約はありません。</div>
+                <div id="related-contract-content" class="hidden overflow-x-auto border border-gray-300 rounded-2xl w-full">
+                    <table class="w-full text-left">
+                        <thead class="border-b-2 border-gray-300 bg-gray-50">
+                            <tr>
+                                <th class="pb-3 pt-3 pl-6 pr-8 text-sm font-bold text-black">ID</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">契約内容</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">顧客</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">契約期間</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">支払状況</th>
+                                <th class="pb-3 pt-3 pr-6 text-sm font-bold text-black w-12"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="related-contract-tbody" class="divide-y divide-gray-300">
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        (function() {
+            var STORAGE_DELETED = 'application_deleted';
+            var STORAGE_UPDATED = 'application_updated';
+            var baseList = [
+                { id: 'AP001', date: '2025-02-15', subject: '火災保険（持ち家）の新規申込', customerId: 'CU001', contractId: 'C001', applicant: '山田 太郎', applicantContact: '山田 太郎', status: '審査中', notes: '初めて火災保険に加入するための申込。' },
+                { id: 'AP002', date: '2025-02-10', subject: '自動車保険の契約を更新', customerId: 'CU002', contractId: 'C002', applicant: '佐藤 花子', applicantContact: '佐藤 花子', status: '承認', notes: '前年と同条件での更新。' },
+                { id: 'AP003', date: '2025-02-01', subject: '自動車保険の個人情報更新依頼', customerId: 'CU003', contractId: 'C004', applicant: '鈴木 一郎', applicantContact: '鈴木 一郎', status: '審査中', notes: '住所・連絡先の変更に伴う情報更新。' },
+                { id: 'AP004', date: '2025-01-25', subject: '医療保険の契約を更新', customerId: 'CU001', contractId: 'C003', applicant: '山田 太郎', applicantContact: '山田 太郎', status: '却下', notes: '告知内容に不備があり差し戻し。' },
+                { id: 'AP005', date: '2025-02-20', subject: '自動車保険の特約追加申込', customerId: 'CU002', contractId: 'C005', applicant: '佐藤 花子', applicantContact: '佐藤 花子', status: '審査中', notes: '弁護士費用特約の追加を希望。' }
+            ];
+
+            var baseContracts = [
+                { id: 'C001', name: '火災保険（持ち家）', customerName: '山田 太郎', startDate: '2024-04-01', endDate: '2025-03-31', paymentStatus: '納付済' },
+                { id: 'C002', name: '自動車保険', customerName: '佐藤 花子', startDate: '2024-06-01', endDate: '2025-05-31', paymentStatus: '未納' },
+                { id: 'C003', name: '医療保険', customerName: '山田 太郎', startDate: '2024-10-01', endDate: '2025-09-30', paymentStatus: '納付済' },
+                { id: 'C004', name: '火災保険（賃貸）', customerName: '鈴木 一郎', startDate: '2024-01-15', endDate: '2025-01-14', paymentStatus: '未納' },
+                { id: 'C005', name: '自動車保険', customerName: '佐藤 花子', startDate: '2025-01-01', endDate: '2025-12-31', paymentStatus: '納付済' }
+            ];
+
+            var id = (location.search.match(/[?&]id=([^&]+)/) || [])[1] ? decodeURIComponent((location.search.match(/[?&]id=([^&]+)/) || [])[1]) : '';
+            function getDeleted() { try { return JSON.parse(sessionStorage.getItem(STORAGE_DELETED) || '[]'); } catch (e) { return []; } }
+            function getUpdated() { try { return JSON.parse(sessionStorage.getItem(STORAGE_UPDATED) || '{}'); } catch (e) { return {}; } }
+            function getRecord() {
+                if (getDeleted().indexOf(id) >= 0) return null;
+                var r = baseList.filter(function(x) { return x.id === id; })[0];
+                return r ? (getUpdated()[id] || r) : null;
+            }
+
+            var record = getRecord();
+            var notFound = document.getElementById('not-found');
+            var content = document.getElementById('content');
+
+            if (!record) {
+                notFound.classList.remove('hidden');
+            } else {
+                content.classList.remove('hidden');
+                document.getElementById('d-id').textContent = record.id || '—';
+                document.getElementById('d-date').textContent = record.date || '—';
+                document.getElementById('d-applicant').innerHTML = record.customerId
+                    ? '<a href="customer-detail.html?id=' + encodeURIComponent(record.customerId) + '" class="underline">' + (record.applicant || '—') + '</a>'
+                    : (record.applicant || '—');
+                document.getElementById('d-subject').textContent = record.subject || '—';
+
+                function renderAppStatus(s) {
+                    if (!s) return '—';
+                    var c = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ';
+                    if (s === '審査中') return '<span class="' + c + 'bg-amber-50 text-gray-900 border-amber-200">審査中</span>';
+                    if (s === '承認') return '<span class="' + c + 'bg-emerald-50 text-gray-900 border-emerald-200">承認</span>';
+                    if (s === '却下') return '<span class="' + c + 'bg-red-50 text-gray-900 border-red-200">却下</span>';
+                    return '<span class="' + c + 'bg-gray-50 text-gray-900 border-gray-200">' + s + '</span>';
+                }
+                document.getElementById('d-status').innerHTML = renderAppStatus(record.status);
+                document.getElementById('d-notes').textContent = record.notes || '—';
+
+                document.getElementById('btn-add-contract').href = 'application-edit.html?customerId=' + encodeURIComponent(record.customerId || '');
+
+                var contract = baseContracts.filter(function(c) { return c.id === record.contractId; })[0];
+                var relatedEmpty = document.getElementById('related-contract-empty');
+                var relatedContent = document.getElementById('related-contract-content');
+                var relatedTbody = document.getElementById('related-contract-tbody');
+                if (contract) {
+                    relatedEmpty.classList.add('hidden');
+                    relatedContent.classList.remove('hidden');
+                    var period = (contract.startDate || '') + ' ～ ' + (contract.endDate || '');
+                    var payClass = contract.paymentStatus === '未納' ? 'bg-red-50 text-gray-900 border-red-200' : 'bg-emerald-50 text-gray-900 border-emerald-200';
+                    relatedTbody.innerHTML = '<tr class="hover:bg-gray-50 cursor-pointer row-link" data-href="contract-detail.html?id=' + encodeURIComponent(contract.id) + '">' +
+                        '<td class="py-3 pl-6 pr-8 text-sm font-medium text-gray-800">' + (contract.id || '—') + '</td>' +
+                        '<td class="py-3 pr-8 font-bold text-black">' + (contract.name || '') + '</td>' +
+                        '<td class="py-3 pr-8 text-sm font-medium text-gray-800">' + (contract.customerName || '—') + '</td>' +
+                        '<td class="py-3 pr-8 text-sm font-medium text-gray-700">' + (period || '—') + '</td>' +
+                        '<td class="py-3 pr-8 text-sm font-medium"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ' + payClass + '">' + (contract.paymentStatus || '—') + '</span></td>' +
+                        '<td class="py-3 pr-6 row-actions relative">' +
+                        '<button type="button" class="menu-btn inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 text-gray-600" aria-label="メニュー">' +
+                        '<span class="material-icons text-lg">more_vert</span></button>' +
+                        '<div class="menu-dropdown hidden absolute right-0 top-full mt-1 z-20 w-32 py-1 border border-gray-300 rounded-xl bg-white shadow-lg">' +
+                        '<a href="contract-edit.html?id=' + encodeURIComponent(contract.id) + '" class="block px-4 py-2 text-sm text-black hover:bg-gray-100">編集</a>' +
+                        '<button type="button" class="contract-row-delete block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50" data-id="' + contract.id + '">削除</button>' +
+                        '</div></td></tr>';
+                } else {
+                    relatedContent.classList.add('hidden');
+                    relatedEmpty.classList.remove('hidden');
+                }
+
+                content.querySelectorAll('.menu-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var open = document.querySelector('.menu-dropdown:not(.hidden)');
+                        if (open && open !== this.nextElementSibling) open.classList.add('hidden');
+                        this.nextElementSibling.classList.toggle('hidden');
+                    });
+                });
+                content.querySelectorAll('.menu-dropdown').forEach(function(d) {
+                    d.addEventListener('click', function(e) { e.stopPropagation(); });
+                });
+                document.addEventListener('click', function() {
+                    document.querySelectorAll('.menu-dropdown').forEach(function(d) { d.classList.add('hidden'); });
+                });
+                document.getElementById('related-contract-tbody').addEventListener('click', function(e) {
+                    if (e.target.closest('.row-actions')) return;
+                    var tr = e.target.closest('tr.row-link');
+                    if (tr) location.href = tr.getAttribute('data-href');
+                });
+                content.querySelectorAll('.contract-row-delete').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var id = this.getAttribute('data-id');
+                        if (!confirm('この契約を削除しますか？')) return;
+                        var del = JSON.parse(sessionStorage.getItem('contract_deleted') || '[]');
+                        if (del.indexOf(id) < 0) del.push(id);
+                        sessionStorage.setItem('contract_deleted', JSON.stringify(del));
+                        location.reload();
+                    });
+                });
+
+            }
+        })();
+    </script>
+</body>
+</html>

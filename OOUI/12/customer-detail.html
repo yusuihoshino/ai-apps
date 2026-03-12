@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>顧客詳細 - 管理システム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-white min-h-screen">
+    <header class="bg-white border-b border-gray-300 px-6 py-3">
+        <div class="flex items-center justify-between">
+            <nav class="inline-flex rounded-2xl bg-white p-1 gap-0.5">
+                <a href="customer-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl bg-gray-200 text-black text-sm font-medium">顧客</a>
+                <a href="contract-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">契約</a>
+                <a href="incident-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">事故</a>
+                <a href="application-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">申し込み</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-8 py-8">
+        <a href="customer-list.html" class="inline-flex items-center gap-1 text-xs text-black hover:opacity-70 mb-2" aria-label="一覧に戻る">
+            <span class="material-icons text-base">arrow_back</span>
+            <span>一覧に戻る</span>
+        </a>
+        <div class="flex items-center justify-between gap-4 mb-4">
+            <h1 class="text-lg font-bold text-black">顧客詳細</h1>
+        </div>
+        <div id="not-found" class="hidden py-12 text-center">
+            <p class="font-medium text-black">顧客が見つかりません。</p>
+            <a href="customer-list.html" class="inline-block mt-4 font-bold text-black hover:underline">一覧に戻る</a>
+        </div>
+        <div id="content" class="hidden">
+            <div class="overflow-x-auto border border-gray-300 rounded-2xl w-full mb-8">
+                <table class="w-full text-left table-fixed">
+                    <tbody class="divide-y divide-gray-300">
+                        <tr><th class="py-3 pl-4 pr-6 text-sm font-bold text-black bg-gray-50 w-28 text-left">ID</th><td id="d-id" class="py-3 pr-4 text-sm font-medium text-gray-800"></td></tr>
+                        <tr><th class="py-3 pl-4 pr-6 text-sm font-bold text-black bg-gray-50 text-left">氏名</th><td id="d-name" class="py-3 pr-4 text-sm font-medium text-gray-800"></td></tr>
+                        <tr><th class="py-3 pl-4 pr-6 text-sm font-bold text-black bg-gray-50 text-left">電話番号</th><td id="d-phone" class="py-3 pr-4 text-sm font-medium text-gray-800"></td></tr>
+                        <tr><th class="py-3 pl-4 pr-6 text-sm font-bold text-black bg-gray-50 text-left">メール</th><td id="d-email" class="py-3 pr-4 text-sm font-medium text-gray-800"></td></tr>
+                        <tr><th class="py-3 pl-4 pr-6 text-sm font-bold text-black bg-gray-50 text-left">住所</th><td id="d-address" class="py-3 pr-4 text-sm font-medium text-gray-800"></td></tr>
+                        <tr><th class="py-3 pl-4 pr-6 text-sm font-bold text-black bg-gray-50 text-left">担当者</th><td id="d-contact" class="py-3 pr-4 text-sm font-medium text-gray-800"></td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <section class="pt-8 mt-8">
+                <div class="flex items-center justify-between gap-4 mb-4">
+                    <h2 class="text-base font-bold text-black">契約</h2>
+                    <a id="btn-add-contract" href="contract-edit.html" class="inline-flex items-center justify-center gap-2 h-9 px-4 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 shrink-0">
+                        <span class="material-icons text-lg">add</span>新規追加
+                    </a>
+                </div>
+                <div class="overflow-x-auto border border-gray-300 rounded-2xl w-full">
+                    <table class="w-full text-left">
+                        <thead class="border-b-2 border-gray-300 bg-gray-50">
+                            <tr>
+                                <th class="pb-3 pt-3 pl-6 pr-8 text-sm font-bold text-black">ID</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">契約内容</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">顧客</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">契約期間</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">料金</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">支払状況</th>
+                                <th class="pb-3 pt-3 pr-6 text-sm font-bold text-black w-12"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="contract-tbody" class="divide-y divide-gray-300">
+                        </tbody>
+                    </table>
+                </div>
+                <p id="contract-empty" class="hidden text-sm text-gray-500 py-4">契約はありません。</p>
+            </section>
+
+            <section class="pt-8 mt-8">
+                <div class="flex items-center justify-between gap-4 mb-4">
+                    <h2 class="text-base font-bold text-black">事故</h2>
+                    <a id="btn-add-incident" href="incident-edit.html" class="inline-flex items-center justify-center gap-2 h-9 px-4 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 shrink-0">
+                        <span class="material-icons text-lg">add</span>新規追加
+                    </a>
+                </div>
+                <div class="overflow-x-auto border border-gray-300 rounded-2xl w-full">
+                    <table class="w-full text-left">
+                        <thead class="border-b-2 border-gray-300 bg-gray-50">
+                            <tr>
+                                <th class="pb-3 pt-3 pl-6 pr-8 text-sm font-bold text-black">ID</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">件名</th>
+                                <th class="pb-3 pt-3 pr-12 text-sm font-bold text-black">顧客</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">発生日時</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">対応状況</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">内容</th>
+                                <th class="pb-3 pt-3 pr-6 text-sm font-bold text-black w-12"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="incident-tbody" class="divide-y divide-gray-300">
+                        </tbody>
+                    </table>
+                </div>
+                <p id="incident-empty" class="hidden text-sm text-gray-500 py-4">事故はありません。</p>
+            </section>
+
+            <section class="pt-8 mt-8">
+                <div class="flex items-center justify-between gap-4 mb-4">
+                    <h2 class="text-base font-bold text-black">申し込み</h2>
+                    <a id="btn-add-application" href="application-edit.html" class="inline-flex items-center justify-center gap-2 h-9 px-4 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 shrink-0">
+                        <span class="material-icons text-lg">add</span>新規追加
+                    </a>
+                </div>
+                <div class="overflow-x-auto border border-gray-300 rounded-2xl w-full">
+                    <table class="w-full text-left">
+                        <thead class="border-b-2 border-gray-300 bg-gray-50">
+                            <tr>
+                                <th class="pb-3 pt-3 pl-6 pr-8 text-sm font-bold text-black">ID</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">申込内容</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">顧客名</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">申込日</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">対応状況</th>
+                                <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">備考</th>
+                                <th class="pb-3 pt-3 pr-6 text-sm font-bold text-black w-12"></th>
+                            </tr>
+                        </thead>
+                        <tbody id="application-tbody" class="divide-y divide-gray-300">
+                        </tbody>
+                    </table>
+                </div>
+                <p id="application-empty" class="hidden text-sm text-gray-500 py-4">申し込みはありません。</p>
+            </section>
+        </div>
+    </main>
+
+    <script>
+        (function() {
+            var CUSTOMER_DELETED = 'customer_deleted';
+            var CUSTOMER_UPDATED = 'customer_updated';
+            var CONTRACT_DELETED = 'contract_deleted';
+            var CONTRACT_UPDATED = 'contract_updated';
+            var baseCustomers = [
+                { id: 'CU001', name: '山田 太郎', contact: '山田 太郎', phone: '03-1234-5678', email: 'taro.yamada@example.co.jp', address: '東京都中央区〇〇1-2-3', date: '2024-04-01' },
+                { id: 'CU002', name: '佐藤 花子', contact: '佐藤 花子', phone: '06-9876-5432', email: 'hanako.sato@example.co.jp', address: '大阪府大阪市△△4-5-6', date: '2024-06-15' },
+                { id: 'CU003', name: '鈴木 一郎', contact: '鈴木 一郎', phone: '052-111-2222', email: 'ichiro.suzuki@example.co.jp', address: '愛知県名古屋市□□7-8-9', date: '2024-10-01' }
+            ];
+            var baseContracts = [
+                { id: 'C001', name: '火災保険（持ち家）', customerId: 'CU001', customerName: '山田 太郎', startDate: '2024-04-01', endDate: '2025-03-31', amount: '年額60,000円', paymentStatus: '納付済' },
+                { id: 'C002', name: '自動車保険', customerId: 'CU002', customerName: '佐藤 花子', startDate: '2024-06-01', endDate: '2025-05-31', amount: '年額80,000円', paymentStatus: '未納' },
+                { id: 'C003', name: '医療保険', customerId: 'CU001', customerName: '山田 太郎', startDate: '2024-10-01', endDate: '2025-09-30', amount: '月額8,000円', paymentStatus: '納付済' },
+                { id: 'C004', name: '火災保険（賃貸）', customerId: 'CU003', customerName: '鈴木 一郎', startDate: '2024-01-15', endDate: '2025-01-14', amount: '年額20,000円', paymentStatus: '未納' },
+                { id: 'C005', name: '自動車保険', customerId: 'CU002', customerName: '佐藤 花子', startDate: '2025-01-01', endDate: '2025-12-31', amount: '年額90,000円', paymentStatus: '納付済' }
+            ];
+
+            var baseIncidents = [
+                { id: 'I001', date: '2025-02-10', time: '08:15', title: '人身事故（追突）', customerId: 'CU001', customerName: '山田 太郎', contractId: 'C001', status: '対応済', description: '交差点で停車中の前方車両に追突し、人身事故となったケース。' },
+                { id: 'I002', date: '2025-02-05', time: '18:40', title: '人身事故（交差点）', customerId: 'CU002', customerName: '佐藤 花子', contractId: 'C002', status: '調査中', description: '信号機のない交差点で出合い頭衝突が発生し、歩行者が負傷。' },
+                { id: 'I003', date: '2025-01-28', time: '07:20', title: '人身事故（自転車との接触）', customerId: 'CU003', customerName: '鈴木 一郎', contractId: 'C004', status: '対応済', description: '自転車との接触により相手方が軽傷を負った事故。' },
+                { id: 'I004', date: '2025-01-15', time: '22:05', title: '人身事故（歩行者との接触）', customerId: 'CU001', customerName: '山田 太郎', contractId: 'C003', status: '対応済', description: '横断歩道付近で歩行者との接触があり、人身事故として届出。' },
+                { id: 'I005', date: '2025-02-18', time: '14:30', title: '物損事故（駐車場での接触）', customerId: 'CU002', customerName: '佐藤 花子', contractId: 'C005', status: '調査中', description: '駐車場でバック時に隣車両に接触。' }
+            ];
+
+            var baseApplications = [
+                { id: 'AP001', date: '2025-02-15', subject: '火災保険（持ち家）の新規申込', customerId: 'CU001', contractId: 'C001', applicant: '山田 太郎', applicantContact: '山田 太郎', status: '審査中', notes: '初めて火災保険に加入するための申込。' },
+                { id: 'AP002', date: '2025-02-10', subject: '自動車保険の契約を更新', customerId: 'CU002', contractId: 'C002', applicant: '佐藤 花子', applicantContact: '佐藤 花子', status: '承認', notes: '前年と同条件での更新。' },
+                { id: 'AP003', date: '2025-02-01', subject: '自動車保険の個人情報更新依頼', customerId: 'CU003', contractId: 'C004', applicant: '鈴木 一郎', applicantContact: '鈴木 一郎', status: '審査中', notes: '住所・連絡先の変更に伴う情報更新。' },
+                { id: 'AP004', date: '2025-01-25', subject: '医療保険の契約を更新', customerId: 'CU001', contractId: 'C003', applicant: '山田 太郎', applicantContact: '山田 太郎', status: '却下', notes: '告知内容に不備があり差し戻し。' },
+                { id: 'AP005', date: '2025-02-20', subject: '自動車保険の特約追加申込', customerId: 'CU002', contractId: 'C005', applicant: '佐藤 花子', applicantContact: '佐藤 花子', status: '審査中', notes: '弁護士費用特約の追加を希望。' }
+            ];
+
+            var id = (location.search.match(/[?&]id=([^&]+)/) || [])[1] ? decodeURIComponent((location.search.match(/[?&]id=([^&]+)/) || [])[1]) : '';
+            function getCustomerDeleted() { try { return JSON.parse(sessionStorage.getItem(CUSTOMER_DELETED) || '[]'); } catch (e) { return []; } }
+            function getCustomerUpdated() { try { return JSON.parse(sessionStorage.getItem(CUSTOMER_UPDATED) || '{}'); } catch (e) { return {}; } }
+            function getContractDeleted() { try { return JSON.parse(sessionStorage.getItem(CONTRACT_DELETED) || '[]'); } catch (e) { return []; } }
+            function getContractUpdated() { try { return JSON.parse(sessionStorage.getItem(CONTRACT_UPDATED) || '{}'); } catch (e) { return {}; } }
+
+            function getCustomer() {
+                if (getCustomerDeleted().indexOf(id) >= 0) return null;
+                var updated = getCustomerUpdated();
+                var r = baseCustomers.filter(function(x) { return x.id === id; })[0];
+                return r ? (updated[id] || r) : null;
+            }
+            function getContractsForCustomer(customerId) {
+                var deleted = getContractDeleted();
+                var updated = getContractUpdated();
+                return baseContracts
+                    .filter(function(r) { return r.customerId === customerId && deleted.indexOf(r.id) < 0; })
+                    .map(function(r) { return updated[r.id] || r; });
+            }
+
+            function getIncidentsForCustomer(customerId) {
+                return baseIncidents.filter(function(r) { return r.customerId === customerId; });
+            }
+
+            function getApplicationsForCustomer(customerId) {
+                return baseApplications.filter(function(r) { return r.customerId === customerId; });
+            }
+            function renderPaymentStatus(status) {
+                if (!status) return '—';
+                var baseClass = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ';
+                if (status === '未納') {
+                    return '<span class="' + baseClass + 'bg-red-50 text-gray-900 border-red-200">未納</span>';
+                }
+                return '<span class="' + baseClass + 'bg-emerald-50 text-gray-900 border-emerald-200">' + status + '</span>';
+            }
+            function renderIncidentStatus(s) {
+                if (!s) return '—';
+                var c = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ';
+                if (s === '対応済') return '<span class="' + c + 'bg-emerald-50 text-gray-900 border-emerald-200">対応済</span>';
+                if (s === '調査中') return '<span class="' + c + 'bg-amber-50 text-gray-900 border-amber-200">調査中</span>';
+                return '<span class="' + c + 'bg-gray-50 text-gray-900 border-gray-200">' + s + '</span>';
+            }
+            function renderAppStatus(s) {
+                if (!s) return '—';
+                var c = 'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ';
+                if (s === '審査中') return '<span class="' + c + 'bg-amber-50 text-gray-900 border-amber-200">審査中</span>';
+                if (s === '承認') return '<span class="' + c + 'bg-emerald-50 text-gray-900 border-emerald-200">承認</span>';
+                if (s === '却下') return '<span class="' + c + 'bg-red-50 text-gray-900 border-red-200">却下</span>';
+                return '<span class="' + c + 'bg-gray-50 text-gray-900 border-gray-200">' + s + '</span>';
+            }
+
+            var record = getCustomer();
+            var notFound = document.getElementById('not-found');
+            var content = document.getElementById('content');
+
+            if (!record) {
+                notFound.classList.remove('hidden');
+            } else {
+                content.classList.remove('hidden');
+                document.getElementById('d-name').textContent = record.name || '—';
+                document.getElementById('d-id').textContent = record.id || '—';
+                document.getElementById('d-contact').textContent = record.contact || '—';
+                document.getElementById('d-phone').textContent = record.phone || '—';
+                document.getElementById('d-email').textContent = record.email || '—';
+                document.getElementById('d-address').textContent = record.address || '—';
+
+                document.getElementById('btn-add-contract').href = 'application-edit.html?customerId=' + encodeURIComponent(record.id);
+                document.getElementById('btn-add-incident').href = 'incident-edit.html?customerId=' + encodeURIComponent(record.id);
+                document.getElementById('btn-add-application').href = 'application-edit.html?customerId=' + encodeURIComponent(record.id);
+
+                // 契約一覧
+                var contracts = getContractsForCustomer(record.id);
+                var tbody = document.getElementById('contract-tbody');
+                var emptyMsg = document.getElementById('contract-empty');
+                if (contracts.length === 0) {
+                    tbody.innerHTML = '';
+                    emptyMsg.classList.remove('hidden');
+                } else {
+                    emptyMsg.classList.add('hidden');
+                    tbody.innerHTML = contracts.map(function(r) {
+                        var period = (r.startDate || '') + ' ～ ' + (r.endDate || '');
+                        return '<tr class="hover:bg-gray-50 cursor-pointer row-link" data-href="contract-detail.html?id=' + encodeURIComponent(r.id) + '">' +
+                            '<td class="py-3 pl-6 pr-8 text-sm font-medium text-gray-800">' + (r.id || '—') + '</td>' +
+                            '<td class="py-3 pr-8 font-bold text-black">' + (r.name || '') + '</td>' +
+                            '<td class="py-3 pr-8 text-sm font-medium text-gray-800">' + (r.customerName || '—') + '</td>' +
+                            '<td class="py-3 pr-8 text-sm font-medium text-gray-700">' + (period || '—') + '</td>' +
+                            '<td class="py-3 pr-8 text-sm font-medium text-gray-800">' + (r.amount || '—') + '</td>' +
+                            '<td class="py-3 pr-8 text-sm font-medium">' + renderPaymentStatus(r.paymentStatus) + '</td>' +
+                            '<td class="py-3 pr-6 row-actions relative">' +
+                            '<button type="button" class="menu-btn inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 text-gray-600" aria-label="メニュー">' +
+                            '<span class="material-icons text-lg">more_vert</span></button>' +
+                            '<div class="menu-dropdown hidden absolute right-0 top-full mt-1 z-20 w-32 py-1 border border-gray-300 rounded-xl bg-white shadow-lg">' +
+                            '<a href="contract-edit.html?id=' + encodeURIComponent(r.id) + '" class="block px-4 py-2 text-sm text-black hover:bg-gray-100">編集</a>' +
+                            '<button type="button" class="contract-row-delete block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50" data-id="' + r.id + '">削除</button>' +
+                            '</div></td></tr>';
+                    }).join('');
+                }
+
+                // 事故一覧
+                var incidents = getIncidentsForCustomer(record.id);
+                var incidentTbody = document.getElementById('incident-tbody');
+                var incidentEmpty = document.getElementById('incident-empty');
+                if (incidents.length === 0) {
+                    incidentTbody.innerHTML = '';
+                    incidentEmpty.classList.remove('hidden');
+                } else {
+                    incidentEmpty.classList.add('hidden');
+                    incidentTbody.innerHTML = incidents.map(function(r) {
+                        var datetime = (r.date || '') + (r.time ? ' ' + r.time : '');
+                        return '<tr class="hover:bg-gray-50 cursor-pointer row-link" data-href="incident-detail.html?id=' + encodeURIComponent(r.id) + '">' +
+                            '<td class="py-3 pl-6 pr-8 text-sm font-medium text-gray-800">' + (r.id || '—') + '</td>' +
+                            '<td class="py-3 pr-8 font-bold text-black">' + (r.title || '') + '</td>' +
+                            '<td class="py-3 pr-12 text-sm font-medium text-gray-700">' + (r.customerName || '—') + '</td>' +
+                            '<td class="py-3 pr-8 text-sm font-medium text-gray-800">' + (datetime || '—') + '</td>' +
+                            '<td class="py-3 pr-8 text-sm font-medium">' + renderIncidentStatus(r.status) + '</td>' +
+                            '<td class="py-3 pr-8 text-sm font-medium text-gray-800 max-w-xs truncate" title="' + (r.description || '').replace(/"/g, '&quot;') + '">' + (r.description || '—') + '</td>' +
+                            '<td class="py-3 pr-6 row-actions relative">' +
+                            '<button type="button" class="menu-btn inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 text-gray-600" aria-label="メニュー">' +
+                            '<span class="material-icons text-lg">more_vert</span></button>' +
+                            '<div class="menu-dropdown hidden absolute right-0 top-full mt-1 z-20 w-32 py-1 border border-gray-300 rounded-xl bg-white shadow-lg">' +
+                            '<a href="incident-edit.html?id=' + encodeURIComponent(r.id) + '" class="block px-4 py-2 text-sm text-black hover:bg-gray-100">編集</a>' +
+                            '<button type="button" class="incident-row-delete block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50" data-id="' + r.id + '">削除</button>' +
+                            '</div></td></tr>';
+                    }).join('');
+                }
+
+                // 申し込み一覧
+                var applications = getApplicationsForCustomer(record.id);
+                var appTbody = document.getElementById('application-tbody');
+                var appEmpty = document.getElementById('application-empty');
+                if (applications.length === 0) {
+                    appTbody.innerHTML = '';
+                    appEmpty.classList.remove('hidden');
+                } else {
+                    appEmpty.classList.add('hidden');
+                    appTbody.innerHTML = applications.map(function(r) {
+                        return '<tr class="hover:bg-gray-50 cursor-pointer row-link" data-href="application-detail.html?id=' + encodeURIComponent(r.id) + '">' +
+                            '<td class="py-3 pl-6 pr-8 text-sm font-medium text-gray-800">' + (r.id || '—') + '</td>' +
+                            '<td class="py-3 pr-8 font-bold text-black">' + (r.subject || '') + '</td>' +
+                            '<td class="py-3 pr-8 text-sm font-medium text-gray-800">' + (r.applicant || '—') + '</td>' +
+                            '<td class="py-3 pr-8 text-sm font-medium text-gray-800">' + (r.date || '—') + '</td>' +
+                            '<td class="py-3 pr-8 text-sm font-medium">' + renderAppStatus(r.status) + '</td>' +
+                            '<td class="py-3 pr-8 text-sm font-medium text-gray-800 max-w-xs truncate" title="' + (r.notes || '').replace(/"/g, '&quot;') + '">' + (r.notes || '—') + '</td>' +
+                            '<td class="py-3 pr-6 row-actions relative">' +
+                            '<button type="button" class="menu-btn inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 text-gray-600" aria-label="メニュー">' +
+                            '<span class="material-icons text-lg">more_vert</span></button>' +
+                            '<div class="menu-dropdown hidden absolute right-0 top-full mt-1 z-20 w-32 py-1 border border-gray-300 rounded-xl bg-white shadow-lg">' +
+                            '<a href="application-edit.html?id=' + encodeURIComponent(r.id) + '" class="block px-4 py-2 text-sm text-black hover:bg-gray-100">編集</a>' +
+                            '<button type="button" class="application-row-delete block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50" data-id="' + r.id + '">削除</button>' +
+                            '</div></td></tr>';
+                    }).join('');
+                }
+
+                document.getElementById('contract-tbody').addEventListener('click', function(e) {
+                    if (e.target.closest('.row-actions')) return;
+                    var tr = e.target.closest('tr.row-link');
+                    if (tr) location.href = tr.getAttribute('data-href');
+                });
+                document.getElementById('incident-tbody').addEventListener('click', function(e) {
+                    if (e.target.closest('.row-actions')) return;
+                    var tr = e.target.closest('tr.row-link');
+                    if (tr) location.href = tr.getAttribute('data-href');
+                });
+                document.getElementById('application-tbody').addEventListener('click', function(e) {
+                    if (e.target.closest('.row-actions')) return;
+                    var tr = e.target.closest('tr.row-link');
+                    if (tr) location.href = tr.getAttribute('data-href');
+                });
+
+                content.querySelectorAll('.menu-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var open = document.querySelector('.menu-dropdown:not(.hidden)');
+                        if (open && open !== this.nextElementSibling) open.classList.add('hidden');
+                        this.nextElementSibling.classList.toggle('hidden');
+                    });
+                });
+                content.querySelectorAll('.menu-dropdown').forEach(function(d) {
+                    d.addEventListener('click', function(e) { e.stopPropagation(); });
+                });
+                document.addEventListener('click', function() {
+                    document.querySelectorAll('.menu-dropdown').forEach(function(d) { d.classList.add('hidden'); });
+                });
+                content.querySelectorAll('.contract-row-delete').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var id = this.getAttribute('data-id');
+                        if (!confirm('この契約を削除しますか？')) return;
+                        var del = JSON.parse(sessionStorage.getItem(CONTRACT_DELETED) || '[]');
+                        if (del.indexOf(id) < 0) del.push(id);
+                        sessionStorage.setItem(CONTRACT_DELETED, JSON.stringify(del));
+                        location.reload();
+                    });
+                });
+                content.querySelectorAll('.incident-row-delete').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var id = this.getAttribute('data-id');
+                        if (!confirm('この事故を削除しますか？')) return;
+                        var del = JSON.parse(sessionStorage.getItem('incident_deleted') || '[]');
+                        if (del.indexOf(id) < 0) del.push(id);
+                        sessionStorage.setItem('incident_deleted', JSON.stringify(del));
+                        location.reload();
+                    });
+                });
+                content.querySelectorAll('.application-row-delete').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var id = this.getAttribute('data-id');
+                        if (!confirm('この申し込みを削除しますか？')) return;
+                        var del = JSON.parse(sessionStorage.getItem('application_deleted') || '[]');
+                        if (del.indexOf(id) < 0) del.push(id);
+                        sessionStorage.setItem('application_deleted', JSON.stringify(del));
+                        location.reload();
+                    });
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生徒一覧 - クラス 生徒</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-white min-h-screen flex flex-col">
+    <header class="bg-white border-b border-gray-300 px-6 py-4 shrink-0 flex justify-center">
+        <nav class="inline-flex rounded-2xl bg-white p-1.5 gap-1">
+            <a href="class-list.html" class="inline-flex items-center justify-center h-11 px-5 rounded-xl text-gray-600 text-base font-medium hover:bg-gray-100">クラス</a>
+            <a href="student-list.html" class="inline-flex items-center justify-center h-11 px-5 rounded-xl bg-gray-200 text-black text-base font-medium">生徒</a>
+        </nav>
+    </header>
+
+    <main class="container mx-auto px-8 py-8 flex-1 max-w-2xl">
+        <div class="flex items-center gap-4 mb-6">
+            <input type="search" id="search" placeholder="検索" class="flex-1 min-w-0 px-4 py-2 border border-gray-300 rounded-2xl text-sm font-medium text-black placeholder-gray-500 focus:ring-2 focus:ring-black focus:border-black">
+            <a href="student-edit.html" class="inline-flex items-center justify-center gap-2 h-9 px-4 bg-black text-white rounded-2xl text-sm font-bold hover:bg-gray-800 shrink-0">
+                <span class="material-icons text-lg">add</span>新規追加
+            </a>
+        </div>
+        <div id="student-list" class="flex flex-col gap-4"></div>
+    </main>
+
+    <script>
+        (function() {
+            var students = [
+                { id: 'S1', name: '青木れな', classId: 'C1A', className: '1年A組' },
+                { id: 'S2', name: '加藤まなぶ', classId: 'C1A', className: '1年A組' },
+                { id: 'S3', name: '斉藤たける', classId: 'C1A', className: '1年A組' },
+                { id: 'S4', name: '増田ゆうすけ', classId: 'C2A', className: '2年A組' }
+            ];
+            var container = document.getElementById('student-list');
+            var searchEl = document.getElementById('search');
+            function render(q) {
+                var list = !q ? students : students.filter(function(s) {
+                    return (s.name + ' ' + (s.className || '')).toLowerCase().indexOf(q.toLowerCase()) >= 0;
+                });
+                container.innerHTML = list.length ? list.map(function(s) {
+                    return '<div class="relative flex items-center justify-between p-4 border border-gray-300 rounded-2xl hover:bg-gray-50 transition-colors group">' +
+                        '<a href="student-detail.html?id=' + s.id + '" class="flex-1 min-w-0"><span class="text-base font-bold text-black">' + s.name + '</span></a>' +
+                        '<button type="button" class="p-1 rounded-full hover:bg-gray-200 text-gray-600 shrink-0 card-menu-btn" data-id="' + s.id + '" aria-label="メニュー"><span class="material-icons text-xl">more_vert</span></button>' +
+                        '<div class="card-menu hidden absolute right-4 top-full mt-1 py-1 bg-white border border-gray-300 rounded-xl shadow-lg z-10 min-w-[120px]">' +
+                        '<a href="student-detail.html?id=' + s.id + '" class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100">詳細</a>' +
+                        '<a href="student-edit.html?id=' + s.id + '" class="block px-4 py-2 text-sm text-gray-800 hover:bg-gray-100">編集</a>' +
+                        '<button type="button" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100">削除</button></div></div>';
+                }).join('') : '<p class="text-sm text-gray-500 py-4">該当する生徒がいません</p>';
+                container.querySelectorAll('.card-menu-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        var menu = this.nextElementSibling;
+                        document.querySelectorAll('.card-menu').forEach(function(m) { if (m !== menu) m.classList.add('hidden'); });
+                        menu.classList.toggle('hidden');
+                    });
+                });
+            }
+            searchEl.addEventListener('input', function() { render(this.value.trim()); });
+            document.addEventListener('click', function() {
+                document.querySelectorAll('.card-menu').forEach(function(m) { m.classList.add('hidden'); });
+            });
+            render();
+        })();
+    </script>
+</body>
+</html>

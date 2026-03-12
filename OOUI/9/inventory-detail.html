@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>棚卸し詳細</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- サイドバー -->
+        <div class="w-64 bg-white border-r border-gray-200 flex flex-col">
+            <div class="p-4 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-gray-900">KANRI</h1>
+            </div>
+            <nav class="flex-1 p-4">
+                <a 
+                    href="purchase-list.html"
+                    class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                    <span class="material-icons">shopping_cart</span>
+                    <span>仕入れ</span>
+                </a>
+                <a 
+                    href="product-list.html"
+                    class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                    <span class="material-icons">inventory</span>
+                    <span>商品</span>
+                </a>
+                <a 
+                    href="inventory-list.html"
+                    class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-900 bg-blue-50 text-blue-600 rounded-lg transition-colors"
+                >
+                    <span class="material-icons">checklist</span>
+                    <span>棚卸し</span>
+                </a>
+                <a 
+                    href="report-list.html"
+                    class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                    <span class="material-icons">assessment</span>
+                    <span>レポート</span>
+                </a>
+                <a 
+                    href="history.html"
+                    class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                    <span class="material-icons">history</span>
+                    <span>変更履歴</span>
+                </a>
+            </nav>
+            <!-- ユーザー情報 -->
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
+                        <span class="material-icons text-gray-600">person</span>
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-gray-900">星野結水</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- メインコンテンツ -->
+        <div class="flex-1 overflow-y-auto">
+            <div class="container mx-auto px-4 py-8">
+                <!-- ヘッダー -->
+        <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center gap-4">
+                <a href="inventory-list.html" class="text-blue-600 hover:text-blue-700 transition-colors">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6"/>
+                    </svg>
+                </a>
+                <h1 id="pageTitle" class="text-2xl font-bold text-gray-900">棚卸し詳細</h1>
+            </div>
+        </div>
+
+        <!-- 棚卸し詳細 -->
+        <div id="inventoryDetail">
+            <!-- 棚卸し情報 -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6 relative">
+                <div id="actionButtons" class="absolute top-6 right-6 flex items-center gap-2">
+                    <!-- 編集・削除ボタン（動的に生成） -->
+                </div>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-medium text-gray-600 w-24">日付:</span>
+                        <span id="inventoryDateDisplay" class="text-lg text-gray-900"></span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-medium text-gray-600 w-24">全商品数:</span>
+                        <span id="inventoryItemCount" class="text-lg text-gray-900"></span>
+                    </div>
+                    <div class="flex items-center gap-4">
+                        <span class="text-sm font-medium text-gray-600 w-24">棚卸し高:</span>
+                        <span id="inventoryTotalAmount" class="text-lg text-gray-900"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 在庫商品一覧 -->
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                <h2 class="text-xl font-semibold text-gray-900 mb-4">在庫商品一覧</h2>
+                <div class="overflow-x-auto">
+                    <div class="min-w-[600px]">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900 cursor-pointer hover:bg-gray-100 select-none" data-sort="name">商品名<span class="sort-indicator ml-1"></span></th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900 cursor-pointer hover:bg-gray-100 select-none" data-sort="quantity">個数<span class="sort-indicator ml-1"></span></th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900 cursor-pointer hover:bg-gray-100 select-none" data-sort="price">単価<span class="sort-indicator ml-1"></span></th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900 cursor-pointer hover:bg-gray-100 select-none" data-sort="total">残高<span class="sort-indicator ml-1"></span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="inventoryItemsBody" class="divide-y divide-gray-200">
+                                <!-- JavaScriptで動的に生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // URLパラメータからIDを取得
+        const urlParams = new URLSearchParams(window.location.search);
+        const inventoryId = urlParams.get('id');
+
+        // サンプルデータ（棚卸しは年1回）
+        const sampleInventories = [
+            {
+                id: 'I001',
+                date: '2025-12-01',
+                totalAmount: 12500,
+                items: [
+                    { id: 'PRD001', name: '米', quantity: 10, price: 500 },
+                    { id: 'PRD002', name: '卵', quantity: 20, price: 300 },
+                    { id: 'PRD003', name: '牛乳', quantity: 6, price: 200 }
+                ]
+            },
+            {
+                id: 'I002',
+                date: '2024-12-01',
+                totalAmount: 8500,
+                items: [
+                    { id: 'PRD004', name: 'トマト', quantity: 15, price: 200 },
+                    { id: 'PRD005', name: '玉ねぎ', quantity: 10, price: 150 },
+                    { id: 'PRD006', name: 'にんじん', quantity: 8, price: 100 }
+                ]
+            },
+            {
+                id: 'I003',
+                date: '2023-12-01',
+                totalAmount: 15600,
+                items: [
+                    { id: 'PRD007', name: '鶏肉', quantity: 5, price: 800 },
+                    { id: 'PRD008', name: '豚肉', quantity: 4, price: 1200 },
+                    { id: 'PRD009', name: 'じゃがいも', quantity: 12, price: 150 }
+                ]
+            },
+            {
+                id: 'I004',
+                date: '2022-12-01',
+                totalAmount: 7200,
+                items: [
+                    { id: 'PRD010', name: 'バター', quantity: 6, price: 400 },
+                    { id: 'PRD011', name: 'チーズ', quantity: 4, price: 600 }
+                ]
+            },
+            {
+                id: 'I005',
+                date: '2021-12-01',
+                totalAmount: 9500,
+                items: [
+                    { id: 'PRD012', name: '魚', quantity: 3, price: 1500 },
+                    { id: 'PRD013', name: '小麦粉', quantity: 5, price: 300 }
+                ]
+            }
+        ];
+
+        // データ（localStorageから読み込み、なければサンプルデータを使用）
+        let inventories = JSON.parse(localStorage.getItem('inventories') || '[]');
+        
+        // データが空の場合はサンプルデータを設定
+        if (inventories.length === 0) {
+            inventories = sampleInventories;
+            localStorage.setItem('inventories', JSON.stringify(inventories));
+        }
+        
+        // 金額をフォーマット
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('ja-JP').format(amount);
+        }
+
+        // 日付を日本語表示形式にフォーマット
+        function formatDateDisplay(dateStr) {
+            const date = new Date(dateStr);
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            return `${year}年${month}月${day}日`;
+        }
+
+        // 棚卸し詳細を表示
+        function renderInventoryDetail() {
+            const inventory = inventories.find(i => i.id === inventoryId);
+            
+            if (!inventory) {
+                document.getElementById('inventoryDateDisplay').textContent = '棚卸しが見つかりません';
+                return;
+            }
+
+            // タイトルを更新
+            document.getElementById('pageTitle').textContent = `${formatDateDisplay(inventory.date)}の棚卸し`;
+
+            // アクションボタンを生成
+            const actionButtons = document.getElementById('actionButtons');
+            actionButtons.innerHTML = '';
+            
+            // 編集ボタン
+            const editBtn = document.createElement('button');
+            editBtn.className = 'p-2 text-gray-600 hover:text-blue-600 transition-colors';
+            editBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+            `;
+            editBtn.title = '編集';
+            editBtn.addEventListener('click', () => {
+                // 編集処理（後で実装）
+            });
+            
+            // 削除ボタン
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'p-2 text-gray-600 hover:text-red-600 transition-colors';
+            deleteBtn.innerHTML = `
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                </svg>
+            `;
+            deleteBtn.title = '削除';
+            deleteBtn.addEventListener('click', () => {
+                if (confirm('この棚卸しを削除しますか？')) {
+                    inventories = inventories.filter(i => i.id !== inventoryId);
+                    localStorage.setItem('inventories', JSON.stringify(inventories));
+                    window.location.href = 'inventory-list.html';
+                }
+            });
+            
+            actionButtons.appendChild(editBtn);
+            actionButtons.appendChild(deleteBtn);
+
+            document.getElementById('inventoryDateDisplay').textContent = formatDateDisplay(inventory.date);
+            document.getElementById('inventoryItemCount').textContent = '100個';
+            document.getElementById('inventoryTotalAmount').textContent = `¥${formatCurrency(inventory.totalAmount)}`;
+
+            // 商品一覧を表示
+            renderInventoryItems(inventory.items);
+        }
+
+        let inventoryItemSortKey = 'name';
+        let inventoryItemSortDir = 'asc';
+
+        function renderInventoryItems(items) {
+            const tbody = document.getElementById('inventoryItemsBody');
+            tbody.innerHTML = '';
+
+            const getSortVal = (item, key) => {
+                if (key === 'name') return item.name || '';
+                if (key === 'quantity') return item.quantity || 0;
+                if (key === 'price') return item.price || 0;
+                if (key === 'total') return item.quantity || 0; // 残高として個数を返す
+                return 0;
+            };
+            const sortedItems = [...items].sort((a, b) => {
+                const va = getSortVal(a, inventoryItemSortKey);
+                const vb = getSortVal(b, inventoryItemSortKey);
+                let cmp = (typeof va === 'string') ? (va.localeCompare(vb)) : (va - vb);
+                return inventoryItemSortDir === 'asc' ? cmp : -cmp;
+            });
+
+            sortedItems.forEach(item => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+                
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-sm">
+                        <a href="product-detail.html?productId=${item.id}" class="text-blue-600 hover:text-blue-800 underline transition-colors">${item.name}</a>
+                    </td>
+                    <td class="px-4 py-3 text-sm text-gray-900">${item.quantity}個</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">¥${formatCurrency(item.price)}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">${item.quantity}個</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+
+            document.querySelectorAll('thead th[data-sort]').forEach(th => {
+                const key = th.getAttribute('data-sort');
+                const span = th.querySelector('.sort-indicator');
+                if (span) span.textContent = (inventoryItemSortKey === key) ? (inventoryItemSortDir === 'asc' ? ' ▲' : ' ▼') : '';
+            });
+        }
+
+        function setupInventoryItemSort() {
+            document.querySelectorAll('thead th[data-sort]').forEach(th => {
+                th.onclick = () => {
+                    const key = th.getAttribute('data-sort');
+                    if (inventoryItemSortKey === key) inventoryItemSortDir = inventoryItemSortDir === 'asc' ? 'desc' : 'asc';
+                    else { inventoryItemSortKey = key; inventoryItemSortDir = 'asc'; }
+                    const inventory = inventories.find(i => i.id === inventoryId);
+                    if (inventory) renderInventoryItems(inventory.items);
+                };
+            });
+        }
+
+        // 初期化
+        if (inventoryId) {
+            renderInventoryDetail();
+            setupInventoryItemSort();
+        } else {
+            document.getElementById('inventoryDateDisplay').textContent = '棚卸しIDが指定されていません';
+        }
+    </script>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

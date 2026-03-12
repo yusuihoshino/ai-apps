@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>アセット一覧 - Asset</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .view-tab-active { background-color: #111 !important; color: #fff !important; }
+        .view-tab-active .material-icons { color: #fff !important; }
+        .view-tab-inactive { background-color: transparent !important; color: #374151 !important; }
+        .view-tab-inactive .material-icons { color: #374151 !important; }
+        .view-tab-inactive:hover { background-color: #f3f4f6 !important; }
+        body { padding-top: 72px; }
+        .img-fit-fill { object-fit: cover; }
+        .img-fit-fill .material-icons { font-size: 4rem; }
+        .img-fit-contain { object-fit: contain; }
+        .img-fit-contain .material-icons { font-size: 3.5rem; }
+        .asset-cell.selected, .asset-row.selected { background-color: #e5e7eb; }
+        .asset-cell { cursor: pointer; user-select: none; }
+        .header-action-disabled { opacity: 0.4; pointer-events: none; }
+        .delete-btn-disabled { border-color: #d1d5db !important; color: #4b5563 !important; }
+        .delete-btn-disabled:hover { background-color: #f9fafb !important; }
+        .asset-row { cursor: pointer; user-select: none; }
+        .sort-option.active { background-color: #f3f4f6; font-weight: 700; color: #111; }
+        .sort-option.active .material-icons { font-size: 1rem; color: #111; }
+        #main-content.list-view-padding { padding-left: 0.75rem; padding-right: 0.75rem; }
+    </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+    <!-- 固定ヘッダー（1行: 左＝Asset・検索・並び・グリッド/リスト / 右＝追加・ダウンロード・削除） -->
+    <header class="fixed top-0 left-0 right-0 z-20 bg-white border-b border-gray-300">
+        <div class="container mx-auto px-6 py-3 flex flex-wrap items-center justify-between gap-3">
+            <!-- 左: アプリ名 + 検索 + 並び + グリッド/リスト表示 -->
+            <div class="flex flex-wrap items-center gap-2">
+                <h1 class="text-xl font-bold text-black shrink-0 mr-1">Asset</h1>
+                <div class="relative w-48 min-w-[180px] max-w-xs">
+                    <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-xl">search</span>
+                    <input type="search" id="search" placeholder="検索" class="w-full pl-10 pr-4 h-9 border border-gray-300 rounded-2xl bg-white text-sm font-medium text-black placeholder-gray-500 focus:ring-2 focus:ring-black focus:border-black">
+                </div>
+                <div class="relative">
+                    <button type="button" id="sort-toggle" class="inline-flex items-center justify-center h-9 w-9 rounded-2xl border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 transition-colors" aria-label="並び替え" aria-expanded="false" aria-haspopup="true">
+                        <span class="material-icons text-xl">sort</span>
+                    </button>
+                    <div id="sort-dropdown" class="hidden absolute left-0 top-full mt-1 py-1 min-w-[140px] bg-white border border-gray-300 rounded-2xl shadow-lg z-30">
+                        <button type="button" class="sort-option w-full text-left px-4 py-2 text-sm font-medium rounded-xl flex items-center justify-between gap-2" data-key="name" data-dir="1"><span>アセット名順</span><span class="material-icons sort-option-check text-base hidden">check</span></button>
+                        <button type="button" class="sort-option w-full text-left px-4 py-2 text-sm font-medium rounded-xl flex items-center justify-between gap-2" data-key="updated" data-dir="-1"><span>更新日順</span><span class="material-icons sort-option-check text-base hidden">check</span></button>
+                        <button type="button" class="sort-option w-full text-left px-4 py-2 text-sm font-medium rounded-xl flex items-center justify-between gap-2" data-key="category" data-dir="1"><span>種類別</span><span class="material-icons sort-option-check text-base hidden">check</span></button>
+                    </div>
+                </div>
+                <div class="inline-flex rounded-2xl border border-gray-300 bg-white p-1 gap-0.5" role="tablist">
+                    <button type="button" id="view-tile" class="view-tab-active inline-flex items-center justify-center h-9 w-9 rounded-xl transition-colors" aria-label="タイル表示"><span class="material-icons text-xl">grid_view</span></button>
+                    <button type="button" id="view-list" class="view-tab-inactive inline-flex items-center justify-center h-9 w-9 rounded-xl transition-colors" aria-label="リスト表示"><span class="material-icons text-xl">view_list</span></button>
+                </div>
+            </div>
+            <!-- 右: 追加・ダウンロード・削除 -->
+            <div class="flex items-center gap-2 shrink-0">
+                <a href="asset-add.html" class="inline-flex items-center justify-center gap-2 h-9 px-4 bg-black text-white rounded-2xl text-sm font-bold hover:bg-gray-800 transition-colors">
+                    <span class="material-icons text-lg">add</span>追加
+                </a>
+                <button type="button" id="batch-download" class="inline-flex items-center justify-center gap-2 h-9 px-4 border-2 rounded-2xl bg-white text-sm font-bold transition-colors border-gray-300 text-gray-700 hover:bg-gray-50">
+                    <span class="material-icons text-lg">download</span>ダウンロード
+                </button>
+                <button type="button" id="batch-delete" class="inline-flex items-center justify-center gap-2 h-9 px-4 border-2 border-red-500 rounded-2xl bg-white text-sm font-bold text-red-600 hover:bg-red-50 transition-colors">
+                    <span class="material-icons text-lg">delete</span>削除
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-8 py-8" id="main-content">
+        <!-- タイル表示（マス目状の罫線・画像大きめ） -->
+        <div id="panel-tile">
+            <div id="asset-grid" class="grid gap-4">
+            </div>
+        </div>
+
+        <!-- リスト表示 -->
+        <div id="panel-list" class="hidden overflow-x-auto w-full border border-gray-300 rounded-2xl">
+            <table class="w-full min-w-full text-left table-auto">
+                <thead class="border-b-2 border-gray-300 bg-gray-50">
+                    <tr>
+                        <th class="py-3 pl-4 pr-4 text-sm font-bold text-black w-20"></th>
+                        <th id="th-name" class="list-sort-th py-3 pl-4 pr-4 text-sm font-bold text-black cursor-pointer hover:bg-gray-100 select-none" data-sort="name" data-label="アセット名" title="クリックでソート">アセット名</th>
+                        <th id="th-category" class="list-sort-th py-3 pl-4 pr-4 text-sm font-bold text-black cursor-pointer hover:bg-gray-100 select-none" data-sort="category" data-label="種類" title="クリックでソート">種類</th>
+                        <th class="py-3 pl-4 pr-4 text-sm font-bold text-black">画素数</th>
+                        <th id="th-updated" class="list-sort-th py-3 pl-4 pr-4 text-sm font-bold text-black cursor-pointer hover:bg-gray-100 select-none" data-sort="updated" data-label="更新日" title="クリックでソート">更新日</th>
+                    </tr>
+                </thead>
+                <tbody id="asset-tbody" class="divide-y divide-gray-300">
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script>
+        (function() {
+            var assets = [
+                { id: 'A001', name: 'ロゴマーク メイン', category: '画像', fileName: 'logo-main.png', updated: '2025-02-18', resolution: '400×400', desc: 'メインロゴ', imageUrl: 'https://picsum.photos/seed/logo1/400/400' },
+                { id: 'A002', name: '製品写真 A', category: '画像', fileName: 'product-a.jpg', updated: '2025-02-17', resolution: '1920×1080', desc: '製品Aの写真', imageUrl: 'https://picsum.photos/seed/product2/400/400' },
+                { id: 'A003', name: 'バナー 春キャンペーン', category: '画像', fileName: 'banner-spring.png', updated: '2025-02-17', resolution: '1200×630', desc: '春キャンペーンバナー', imageUrl: 'https://picsum.photos/seed/banner3/400/400' },
+                { id: 'A004', name: '紹介動画 30秒', category: '動画', fileName: 'intro-30s.mp4', updated: '2025-02-16', resolution: '1920×1080', desc: '30秒紹介動画', imageUrl: 'https://picsum.photos/seed/video4/400/300' },
+                { id: 'A005', name: '取扱説明書 PDF', category: 'ドキュメント', fileName: 'manual.pdf', updated: '2025-02-16', resolution: '—', desc: '製品取扱説明書', imageUrl: 'https://picsum.photos/seed/doc5/400/400' },
+                { id: 'A006', name: 'アイコンセット', category: '画像', fileName: 'icons-v2.zip', updated: '2025-02-15', resolution: '—', desc: 'UI用アイコン一式', imageUrl: 'https://picsum.photos/seed/icon6/400/400' },
+                { id: 'A007', name: 'サムネイル画像', category: '画像', fileName: 'thumb-default.jpg', updated: '2025-02-15', resolution: '800×600', desc: 'デフォルトサムネイル', imageUrl: 'https://picsum.photos/seed/thumb7/400/400' },
+                { id: 'A008', name: 'プレゼン資料', category: 'ドキュメント', fileName: 'presentation.pptx', updated: '2025-02-14', resolution: '—', desc: '2025年度版', imageUrl: 'https://picsum.photos/seed/slide8/400/400' }
+            ];
+
+            var viewMode = 'tile';
+            var selectedIds = [];
+            var lastClickedId = null; // 範囲選択用
+            var displayOptions = { name: true, fileName: true, category: true, updated: true };
+            var imageFit = 'fill'; // 'fill' = cover, 'contain' = contain
+            var cardSize = 'medium'; // 'small' | 'medium' | 'large'
+            var cardSizePresets = {
+                small:  { grid: 'grid-cols-4 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8', cellMinH: 'min-h-[220px]', imgMinH: 'min-h-[140px]', iconClass: 'text-5xl' },
+                medium: { grid: 'grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4',            cellMinH: 'min-h-[300px]', imgMinH: 'min-h-[240px]', iconClass: 'text-7xl' },
+                large:  { grid: 'grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3',            cellMinH: 'min-h-[380px]', imgMinH: 'min-h-[300px]', iconClass: 'text-8xl' }
+            };
+            var listSortKey = 'name'; // 'name' | 'category' | 'fileName' | 'updated'
+            var listSortDir = 1;     // 1 = asc, -1 = desc
+
+            function getFilteredList() {
+                var q = (document.getElementById('search').value || '').trim().toLowerCase();
+                return assets.filter(function(a) {
+                    return !q || (a.name + ' ' + (a.fileName || '') + ' ' + (a.category || '')).toLowerCase().indexOf(q) >= 0;
+                });
+            }
+
+            function getSortedList() {
+                var list = getFilteredList().slice();
+                if (listSortKey) {
+                    var key = listSortKey;
+                    var dir = listSortDir;
+                    list.sort(function(a, b) {
+                        var va = (a[key] || '').toString();
+                        var vb = (b[key] || '').toString();
+                        var c = va.localeCompare(vb, 'ja');
+                        return dir * (c || 0);
+                    });
+                }
+                return list;
+            }
+
+            function renderTile() {
+                var grid = document.getElementById('asset-grid');
+                var list = getSortedList();
+                var preset = cardSizePresets[cardSize] || cardSizePresets.medium;
+                grid.className = 'grid gap-0 ' + preset.grid;
+                var fitClass = imageFit === 'fill' ? 'img-fit-fill' : 'img-fit-contain';
+                var imgTop = cardSize === 'small' ? 'mt-2' : 'mt-6';
+                grid.innerHTML = list.map(function(a) {
+                    var selected = selectedIds.indexOf(a.id) >= 0;
+                    var ext = (a.fileName || '').split('.').pop().toUpperCase() || '';
+                    var res = a.resolution || '—';
+                    var metaOverlay = ext ? ext + ' | ' + res : res;
+                    var nameJa = a.name || '';
+                    var updatedStr = a.updated || '';
+                    var metaRow = nameJa || updatedStr;
+                    return '<div class="asset-cell ' + preset.cellMinH + ' flex flex-col p-2 flex-1 min-h-0 rounded-xl overflow-hidden' + (selected ? ' selected' : '') + '" data-id="' + a.id + '">' +
+                        '<div class="relative flex-1 flex flex-col min-h-0">' +
+                        '<div class="flex-1 ' + preset.imgMinH + ' relative flex items-center justify-center overflow-hidden ' + imgTop + ' bg-gray-100">' +
+                        '<img src="' + (a.imageUrl || '') + '" alt="" class="w-full h-full ' + fitClass + '" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'">' +
+                        '<span class="material-icons ' + preset.iconClass + ' text-gray-400 absolute inset-0 flex items-center justify-center bg-gray-100 pointer-events-none" style="display:none">image</span>' +
+                        '<span class="absolute bottom-1 right-1 px-1.5 py-0.5 rounded bg-black/60 text-white text-xs font-medium">' + metaOverlay + '</span></div>' +
+                        (metaRow ? '<div class="p-1.5 flex flex-col gap-0.5 min-h-0 flex-shrink-0 min-w-0">' +
+                            (nameJa ? '<span class="text-base font-bold text-black truncate">' + nameJa + '</span>' : '') +
+                            (updatedStr ? '<span class="text-xs text-gray-600">' + updatedStr + '</span>' : '') +
+                            '</div>' : '') +
+                        '</div></div>';
+                }).join('');
+                bindAssetCells();
+            }
+
+            function renderList() {
+                var tbody = document.getElementById('asset-tbody');
+                var list = getSortedList();
+                document.querySelectorAll('.list-sort-th').forEach(function(th) {
+                    var k = th.getAttribute('data-sort');
+                    var label = th.getAttribute('data-label') || '';
+                    var showArrow = (k === listSortKey);
+                    th.textContent = label + (showArrow ? (listSortDir === 1 ? ' ↑' : ' ↓') : '');
+                });
+                ['name','category','updated'].forEach(function(k) {
+                    var key = k === 'name' ? 'name' : k;
+                    var el = document.getElementById('th-' + k);
+                    if (el) el.style.display = displayOptions[key] !== false ? '' : 'none';
+                });
+                tbody.innerHTML = list.map(function(a) {
+                    var selected = selectedIds.indexOf(a.id) >= 0;
+                    var ext = (a.fileName || '').split('.').pop().toUpperCase() || '';
+                    var nameTd = displayOptions.name ? '<td class="py-3 pl-4 pr-4 font-bold text-black">' + (a.name || '') + '</td>' : '';
+                    var typeTd = displayOptions.category ? '<td class="py-3 pl-4 pr-4 text-sm font-medium text-gray-800">' + (a.category || ext) + '</td>' : '';
+                    var resolutionTd = '<td class="py-3 pl-4 pr-4 text-sm font-medium text-gray-700">' + (a.resolution || '—') + '</td>';
+                    var upTd = displayOptions.updated ? '<td class="py-3 pl-4 pr-4 text-sm font-medium text-gray-600">' + (a.updated || '') + '</td>' : '';
+                    return '<tr class="asset-row hover:bg-gray-50' + (selected ? ' selected' : '') + '" data-id="' + a.id + '">' +
+                        '<td class="py-3 pl-4 pr-4"><div class="w-14 h-14 rounded-xl overflow-hidden shrink-0 bg-gray-100"><img src="' + (a.imageUrl || '') + '" alt="" class="w-full h-full object-cover" onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\'"><span class="w-full h-full min-h-[3.5rem] flex items-center justify-center bg-gray-200 text-gray-500" style="display:none"><span class="material-icons">image</span></span></div></td>' +
+                        nameTd + typeTd + resolutionTd + upTd + '</tr>';
+                }).join('');
+                bindAssetRows();
+            }
+
+            function applySelection(id, shiftKey, ctrlOrMeta) {
+                var list = getSortedList();
+                var currentIndex = list.findIndex(function(a) { return a.id === id; });
+                if (currentIndex < 0) return;
+
+                if (shiftKey && lastClickedId !== null) {
+                    var lastIndex = list.findIndex(function(a) { return a.id === lastClickedId; });
+                    if (lastIndex < 0) lastIndex = currentIndex;
+                    var from = Math.min(lastIndex, currentIndex);
+                    var to = Math.max(lastIndex, currentIndex);
+                    selectedIds = [];
+                    for (var i = from; i <= to; i++) selectedIds.push(list[i].id);
+                } else if (ctrlOrMeta) {
+                    var idx = selectedIds.indexOf(id);
+                    if (idx >= 0) selectedIds.splice(idx, 1);
+                    else selectedIds.push(id);
+                } else {
+                    selectedIds = [id];
+                }
+                lastClickedId = id;
+                selectedIds = selectedIds.filter(function(i) { return assets.some(function(a) { return a.id === i; }); });
+                updateBatchFooter();
+                if (viewMode === 'tile') renderTile(); else renderList();
+            }
+
+            function bindAssetCells() {
+                document.querySelectorAll('.asset-cell').forEach(function(el) {
+                    var id = el.getAttribute('data-id');
+                    el.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        applySelection(id, e.shiftKey, e.ctrlKey || e.metaKey);
+                    });
+                    el.addEventListener('dblclick', function(e) {
+                        e.preventDefault();
+                        location.href = 'asset-detail.html?id=' + encodeURIComponent(id);
+                    });
+                });
+            }
+
+            function bindAssetRows() {
+                document.querySelectorAll('.asset-row').forEach(function(el) {
+                    var id = el.getAttribute('data-id');
+                    el.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        applySelection(id, e.shiftKey, e.ctrlKey || e.metaKey);
+                    });
+                    el.addEventListener('dblclick', function(e) {
+                        e.preventDefault();
+                        location.href = 'asset-detail.html?id=' + encodeURIComponent(id);
+                    });
+                });
+            }
+
+            function updateBatchFooter() {
+                var disabled = selectedIds.length === 0;
+                var dl = document.getElementById('batch-download');
+                var del = document.getElementById('batch-delete');
+                if (dl) {
+                    if (disabled) {
+                        dl.classList.add('header-action-disabled');
+                        dl.classList.remove('border-blue-500', 'text-blue-600', 'hover:bg-blue-50');
+                        dl.classList.add('border-gray-300', 'text-gray-700', 'hover:bg-gray-50');
+                    } else {
+                        dl.classList.remove('header-action-disabled');
+                        dl.classList.remove('border-gray-300', 'text-gray-700', 'hover:bg-gray-50');
+                        dl.classList.add('border-blue-500', 'text-blue-600', 'hover:bg-blue-50');
+                    }
+                }
+                if (del) {
+                    if (disabled) {
+                        del.classList.add('header-action-disabled', 'delete-btn-disabled');
+                    } else {
+                        del.classList.remove('header-action-disabled', 'delete-btn-disabled');
+                    }
+                }
+            }
+
+            function updateViewUI() {
+                var isTile = viewMode === 'tile';
+                var tilePanel = document.getElementById('panel-tile');
+                var listPanel = document.getElementById('panel-list');
+                var btnTile = document.getElementById('view-tile');
+                var btnList = document.getElementById('view-list');
+                var main = document.getElementById('main-content');
+                if (isTile) {
+                    tilePanel.classList.remove('hidden');
+                    listPanel.classList.add('hidden');
+                    btnTile.classList.add('view-tab-active');
+                    btnTile.classList.remove('view-tab-inactive');
+                    btnList.classList.add('view-tab-inactive');
+                    btnList.classList.remove('view-tab-active');
+                    if (main) { main.classList.remove('list-view-padding'); main.classList.add('px-8'); }
+                } else {
+                    tilePanel.classList.add('hidden');
+                    listPanel.classList.remove('hidden');
+                    btnList.classList.add('view-tab-active');
+                    btnList.classList.remove('view-tab-inactive');
+                    btnTile.classList.add('view-tab-inactive');
+                    btnTile.classList.remove('view-tab-active');
+                    if (main) { main.classList.add('list-view-padding'); main.classList.remove('px-8'); }
+                }
+            }
+            document.getElementById('view-tile').addEventListener('click', function() {
+                viewMode = 'tile';
+                updateViewUI();
+                renderTile();
+            });
+            document.getElementById('view-list').addEventListener('click', function() {
+                viewMode = 'list';
+                updateViewUI();
+                renderList();
+            });
+            document.getElementById('search').addEventListener('input', function() {
+                if (viewMode === 'tile') renderTile(); else renderList();
+            });
+
+            function updateSortDropdownUI() {
+                document.querySelectorAll('.sort-option').forEach(function(btn) {
+                    var key = btn.getAttribute('data-key');
+                    var dir = parseInt(btn.getAttribute('data-dir'), 10);
+                    var check = btn.querySelector('.sort-option-check');
+                    if (listSortKey === key && listSortDir === dir) {
+                        btn.classList.add('active');
+                        if (check) check.classList.remove('hidden');
+                    } else {
+                        btn.classList.remove('active');
+                        if (check) check.classList.add('hidden');
+                    }
+                });
+            }
+
+            document.getElementById('sort-toggle').addEventListener('click', function(e) {
+                e.stopPropagation();
+                var dd = document.getElementById('sort-dropdown');
+                var open = !dd.classList.contains('hidden');
+                dd.classList.toggle('hidden', open);
+                this.setAttribute('aria-expanded', !open);
+            });
+            document.querySelectorAll('.sort-option').forEach(function(btn) {
+                btn.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    listSortKey = this.getAttribute('data-key');
+                    listSortDir = parseInt(this.getAttribute('data-dir'), 10);
+                    document.getElementById('sort-dropdown').classList.add('hidden');
+                    document.getElementById('sort-toggle').setAttribute('aria-expanded', 'false');
+                    updateSortDropdownUI();
+                    if (viewMode === 'tile') renderTile(); else renderList();
+                });
+            });
+            document.addEventListener('click', function() {
+                document.getElementById('sort-dropdown').classList.add('hidden');
+                var t = document.getElementById('sort-toggle');
+                if (t) t.setAttribute('aria-expanded', 'false');
+            });
+            var elImgFill = document.getElementById('img-fill');
+            var elImgContain = document.getElementById('img-contain');
+            if (elImgFill) {
+                elImgFill.addEventListener('click', function() {
+                    imageFit = 'fill';
+                    if (elImgFill) elImgFill.classList.add('bg-black', 'text-white');
+                    if (elImgFill) elImgFill.classList.remove('text-gray-600');
+                    if (elImgContain) elImgContain.classList.remove('bg-black', 'text-white');
+                    if (elImgContain) elImgContain.classList.add('text-gray-600');
+                    if (viewMode === 'tile') renderTile();
+                });
+            }
+            if (elImgContain) {
+                elImgContain.addEventListener('click', function() {
+                    imageFit = 'contain';
+                    if (elImgContain) elImgContain.classList.add('bg-black', 'text-white');
+                    if (elImgContain) elImgContain.classList.remove('text-gray-600');
+                    if (elImgFill) elImgFill.classList.remove('bg-black', 'text-white');
+                    if (elImgFill) elImgFill.classList.add('text-gray-600');
+                    if (viewMode === 'tile') renderTile();
+                });
+            }
+
+            function updateCardSizeButtons() {
+                ['card-size-s', 'card-size-m', 'card-size-l'].forEach(function(id) {
+                    var btn = document.getElementById(id);
+                    if (!btn) return;
+                    var isActive = (btn.getAttribute('data-size') === cardSize);
+                    if (isActive) {
+                        btn.classList.add('bg-black', 'text-white');
+                        btn.classList.remove('text-gray-600');
+                        btn.classList.add('font-bold');
+                    } else {
+                        btn.classList.remove('bg-black', 'text-white');
+                        btn.classList.add('text-gray-600');
+                        btn.classList.remove('font-bold');
+                    }
+                });
+            }
+            var cardSizeS = document.getElementById('card-size-s');
+            var cardSizeM = document.getElementById('card-size-m');
+            var cardSizeL = document.getElementById('card-size-l');
+            if (cardSizeS) cardSizeS.addEventListener('click', function() { cardSize = 'small'; updateCardSizeButtons(); if (viewMode === 'tile') renderTile(); });
+            if (cardSizeM) cardSizeM.addEventListener('click', function() { cardSize = 'medium'; updateCardSizeButtons(); if (viewMode === 'tile') renderTile(); });
+            if (cardSizeL) cardSizeL.addEventListener('click', function() { cardSize = 'large'; updateCardSizeButtons(); if (viewMode === 'tile') renderTile(); });
+
+            document.getElementById('batch-delete').addEventListener('click', function() {
+                if (selectedIds.length && confirm('選択した ' + selectedIds.length + ' 件を削除しますか？')) {
+                    assets = assets.filter(function(a) { return selectedIds.indexOf(a.id) < 0; });
+                    selectedIds = [];
+                    updateBatchFooter();
+                    if (viewMode === 'tile') renderTile(); else renderList();
+                }
+            });
+            document.getElementById('batch-download').addEventListener('click', function() {
+                if (selectedIds.length) alert('選択した ' + selectedIds.length + ' 件をダウンロードします。（デモ）');
+            });
+
+            updateSortDropdownUI();
+            updateBatchFooter();
+            updateViewUI();
+            renderTile();
+            renderList();
+        })();
+    </script>
+</body>
+</html>

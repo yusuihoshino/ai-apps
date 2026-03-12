@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>申し込み - 管理システム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-white min-h-screen">
+    <header class="bg-white border-b border-gray-300 py-3">
+        <div class="container mx-auto px-8">
+            <nav class="inline-flex rounded-2xl bg-white p-1 gap-0.5">
+                <a href="customer-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">顧客</a>
+                <a href="contract-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">契約</a>
+                <a href="incident-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">事故</a>
+                <a href="application-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">申し込み</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-8 py-8">
+        <a href="application-list.html" class="inline-flex items-center gap-1 text-xs text-black hover:opacity-70 mb-2" aria-label="一覧に戻る">
+            <span class="material-icons text-base">arrow_back</span>
+            <span>一覧に戻る</span>
+        </a>
+        <h1 class="text-lg font-bold text-black mb-4" id="page-title">申し込み 新規作成</h1>
+        <div id="not-found" class="hidden py-12 text-center">
+            <p class="font-medium text-black">申し込みが見つかりません。</p>
+            <a href="application-list.html" class="inline-block mt-4 font-bold text-black hover:underline">一覧に戻る</a>
+        </div>
+        <form id="form" class="max-w-xl space-y-4 py-4">
+            <div>
+                <label class="block text-sm font-bold text-black mb-1">申込内容</label>
+                <input type="text" name="subject" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black" required>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-black mb-1">顧客</label>
+                <input type="text" name="applicant" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black" placeholder="顧客名を入力">
+            </div>
+            <div id="contract-mode-section" class="pt-4 border-t border-gray-300">
+                <label class="block text-sm font-bold text-black mb-3">契約</label>
+                <div class="flex gap-2 mb-4">
+                    <button type="button" id="tab-new" class="contract-tab px-4 py-2 rounded-xl text-sm font-medium border-2 border-gray-300 transition-colors" data-mode="new">新規契約</button>
+                    <button type="button" id="tab-existing" class="contract-tab px-4 py-2 rounded-xl text-sm font-medium border-2 border-gray-300 transition-colors" data-mode="existing">既存契約の更新</button>
+                </div>
+                <div id="contract-section" class="space-y-4 pt-2">
+                <div>
+                    <label class="block text-sm font-bold text-black mb-1">契約名</label>
+                    <input type="text" name="contractName" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black" placeholder="例: 火災保険（持ち家）">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-bold text-black mb-1">契約開始日</label>
+                        <input type="text" name="startDate" placeholder="YYYY-MM-DD" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-black mb-1">契約終了日</label>
+                        <input type="text" name="endDate" placeholder="YYYY-MM-DD" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-black mb-1">料金</label>
+                    <input type="text" name="amount" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black" placeholder="例: 年額60,000円">
+                </div>
+                </div>
+                <div id="existing-contract-section" class="hidden pt-2">
+                    <label class="block text-sm font-bold text-black mb-1">既存契約の更新を選択</label>
+                    <select name="contractId" id="contract-select" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black">
+                        <option value="">— 選択してください —</option>
+                    </select>
+                </div>
+            </div>
+            <div>
+                <label class="block text-sm font-bold text-black mb-1">備考</label>
+                <textarea name="notes" rows="3" class="w-full px-4 py-2.5 border-2 border-gray-300 rounded-2xl bg-white text-black font-medium focus:ring-2 focus:ring-black focus:border-black"></textarea>
+            </div>
+            <div class="flex justify-end gap-3 pt-4 border-t border-gray-300">
+                <button type="button" id="btn-delete" class="hidden inline-flex items-center justify-center gap-2 h-10 px-4 border-2 border-gray-400 rounded-2xl bg-white text-sm font-bold text-black hover:bg-gray-100">削除</button>
+                <button type="submit" class="inline-flex items-center justify-center gap-2 h-10 px-6 bg-black text-white rounded-2xl text-sm font-bold hover:bg-gray-800">保存</button>
+            </div>
+        </form>
+    </main>
+
+    <script>
+        (function() {
+            var STORAGE_DELETED = 'application_deleted';
+            var STORAGE_UPDATED = 'application_updated';
+            var CONTRACT_DELETED = 'contract_deleted';
+            var CONTRACT_UPDATED = 'contract_updated';
+            var baseList = [
+                { id: 'AP001', date: '2025-02-15', subject: '火災保険（持ち家）の新規申込', customerId: 'CU001', contractId: 'C001', applicant: '山田 太郎', status: '審査中', notes: '初めて火災保険に加入するための申込。' },
+                { id: 'AP002', date: '2025-02-10', subject: '自動車保険の契約を更新', customerId: 'CU002', contractId: 'C002', applicant: '佐藤 花子', status: '承認', notes: '前年と同条件での更新。' },
+                { id: 'AP003', date: '2025-02-01', subject: '自動車保険の個人情報更新依頼', customerId: 'CU003', contractId: 'C004', applicant: '鈴木 一郎', status: '審査中', notes: '住所・連絡先の変更に伴う情報更新。' },
+                { id: 'AP004', date: '2025-01-25', subject: '医療保険の契約を更新', customerId: 'CU001', contractId: 'C003', applicant: '山田 太郎', status: '却下', notes: '告知内容に不備があり差し戻し。' },
+                { id: 'AP005', date: '2025-02-20', subject: '自動車保険の特約追加申込', customerId: 'CU002', contractId: 'C005', applicant: '佐藤 花子', status: '審査中', notes: '弁護士費用特約の追加を希望。' }
+            ];
+
+            var baseContracts = [
+                { id: 'C001', name: '火災保険（持ち家）', customerId: 'CU001', customerName: '山田 太郎', startDate: '2024-04-01', endDate: '2025-03-31', amount: '年額60,000円', paymentStatus: '納付済' },
+                { id: 'C002', name: '自動車保険', customerId: 'CU002', customerName: '佐藤 花子', startDate: '2024-06-01', endDate: '2025-05-31', amount: '年額80,000円', paymentStatus: '未納' },
+                { id: 'C003', name: '医療保険', customerId: 'CU001', customerName: '山田 太郎', startDate: '2024-10-01', endDate: '2025-09-30', amount: '月額8,000円', paymentStatus: '納付済' },
+                { id: 'C004', name: '火災保険（賃貸）', customerId: 'CU003', customerName: '鈴木 一郎', startDate: '2024-01-15', endDate: '2025-01-14', amount: '年額20,000円', paymentStatus: '未納' },
+                { id: 'C005', name: '自動車保険', customerId: 'CU002', customerName: '佐藤 花子', startDate: '2025-01-01', endDate: '2025-12-31', amount: '年額90,000円', paymentStatus: '納付済' }
+            ];
+            var id = (location.search.match(/[?&]id=([^&]+)/) || [])[1] ? decodeURIComponent((location.search.match(/[?&]id=([^&]+)/) || [])[1]) : '';
+            var urlContractId = (location.search.match(/[?&]contractId=([^&]+)/) || [])[1] ? decodeURIComponent((location.search.match(/[?&]contractId=([^&]+)/) || [])[1]) : '';
+            var urlCustomerId = (location.search.match(/[?&]customerId=([^&]+)/) || [])[1] ? decodeURIComponent((location.search.match(/[?&]customerId=([^&]+)/) || [])[1]) : '';
+            function getDeleted() { try { return JSON.parse(sessionStorage.getItem(STORAGE_DELETED) || '[]'); } catch (e) { return []; } }
+            function getUpdated() { try { return JSON.parse(sessionStorage.getItem(STORAGE_UPDATED) || '{}'); } catch (e) { return {}; } }
+            function getContractDeleted() { try { return JSON.parse(sessionStorage.getItem(CONTRACT_DELETED) || '[]'); } catch (e) { return []; } }
+            function getContractUpdated() { try { return JSON.parse(sessionStorage.getItem(CONTRACT_UPDATED) || '{}'); } catch (e) { return {}; } }
+            function getRecord() {
+                if (!id || getDeleted().indexOf(id) >= 0) return null;
+                var r = baseList.filter(function(x) { return x.id === id; })[0];
+                return r ? (getUpdated()[id] || r) : null;
+            }
+            function getContracts() {
+                var deleted = getContractDeleted();
+                var updated = getContractUpdated();
+                var baseIds = {};
+                baseContracts.forEach(function(c) { baseIds[c.id] = true; });
+                var result = baseContracts
+                    .filter(function(c) { return deleted.indexOf(c.id) < 0; })
+                    .map(function(c) { return updated[c.id] || c; });
+                Object.keys(updated).forEach(function(k) {
+                    if (!baseIds[k] && deleted.indexOf(k) < 0) result.push(updated[k]);
+                });
+                return result;
+            }
+
+            var form = document.getElementById('form');
+            var notFound = document.getElementById('not-found');
+            var pageTitle = document.getElementById('page-title');
+            var btnDelete = document.getElementById('btn-delete');
+            var contractSection = document.getElementById('contract-section');
+            var existingContractSection = document.getElementById('existing-contract-section');
+            var contractSelect = document.getElementById('contract-select');
+            var tabNew = document.getElementById('tab-new');
+            var tabExisting = document.getElementById('tab-existing');
+            var record = getRecord();
+
+            function setContractMode(mode) {
+                if (mode === 'new') {
+                    contractSection.classList.remove('hidden');
+                    existingContractSection.classList.add('hidden');
+                    tabNew.classList.add('border-black', 'bg-gray-100');
+                    tabNew.classList.remove('border-gray-300');
+                    tabExisting.classList.add('border-gray-300');
+                    tabExisting.classList.remove('border-black', 'bg-gray-100');
+                } else {
+                    contractSection.classList.add('hidden');
+                    existingContractSection.classList.remove('hidden');
+                    tabExisting.classList.add('border-black', 'bg-gray-100');
+                    tabExisting.classList.remove('border-gray-300');
+                    tabNew.classList.add('border-gray-300');
+                    tabNew.classList.remove('border-black', 'bg-gray-100');
+                }
+            }
+            function fillContractSelect(selectedId) {
+                var contracts = getContracts();
+                contractSelect.innerHTML = '<option value="">— 選択してください —</option>' +
+                    contracts.map(function(c) {
+                        var label = (c.id || '') + ' ' + (c.name || '');
+                        var sel = (selectedId && c.id === selectedId) ? ' selected' : '';
+                        return '<option value="' + (c.id || '') + '"' + sel + '>' + label + '</option>';
+                    }).join('');
+            }
+
+            if (id && !record) {
+                notFound.classList.remove('hidden');
+                form.classList.add('hidden');
+            } else {
+                if (record) {
+                    pageTitle.textContent = '申し込み 編集';
+                    form.querySelector('[name="subject"]').value = record.subject || '';
+                    form.querySelector('[name="applicant"]').value = record.applicant || '';
+                    form.querySelector('[name="status"]').value = record.status || '受付';
+                    form.querySelector('[name="notes"]').value = record.notes || '';
+                    setContractMode('existing');
+                    fillContractSelect(record.contractId || '');
+                    btnDelete.classList.remove('hidden');
+                } else {
+                    if (urlCustomerId) {
+                        var customerNames = { CU001: '山田 太郎', CU002: '佐藤 花子', CU003: '鈴木 一郎' };
+                        form.querySelector('[name="applicant"]').value = customerNames[urlCustomerId] || '';
+                    }
+                    fillContractSelect(urlContractId || '');
+                    if (urlContractId) {
+                        setContractMode('existing');
+                    } else {
+                        setContractMode('new');
+                    }
+                }
+                tabNew.addEventListener('click', function() { setContractMode('new'); });
+                tabExisting.addEventListener('click', function() { setContractMode('existing'); });
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    var applicant = form.querySelector('[name="applicant"]').value.trim();
+                    var today = new Date().toISOString().slice(0, 10);
+                    var contractId = '';
+                    var isNewContractMode = !contractSection.classList.contains('hidden');
+
+                    if (isNewContractMode) {
+                        var contractName = form.querySelector('[name="contractName"]').value;
+                        if (!contractName) {
+                            alert('契約名を入力してください。');
+                            return;
+                        }
+                        contractId = 'C' + String(Date.now()).slice(-6);
+                        var contractPayload = {
+                            id: contractId,
+                            name: contractName,
+                            customerId: '',
+                            customerName: applicant,
+                            startDate: form.querySelector('[name="startDate"]').value,
+                            endDate: form.querySelector('[name="endDate"]').value,
+                            amount: form.querySelector('[name="amount"]').value,
+                            paymentStatus: '納付済'
+                        };
+                        var contractUpdated = getContractUpdated();
+                        contractUpdated[contractPayload.id] = contractPayload;
+                        sessionStorage.setItem(CONTRACT_UPDATED, JSON.stringify(contractUpdated));
+                    } else {
+                        contractId = contractSelect.value;
+                        if (!contractId) {
+                            alert('既存契約の更新を選択してください。');
+                            return;
+                        }
+                    }
+
+                    var payload = {
+                        id: record ? record.id : 'AP' + String(Date.now()).slice(-6),
+                        date: record ? record.date : today,
+                        subject: form.querySelector('[name="subject"]').value,
+                        customerId: record ? record.customerId : '',
+                        contractId: contractId,
+                        applicant: applicant,
+                        status: record ? record.status : '受付',
+                        notes: form.querySelector('[name="notes"]').value
+                    };
+                    var updated = getUpdated();
+                    updated[payload.id] = payload;
+                    sessionStorage.setItem(STORAGE_UPDATED, JSON.stringify(updated));
+                    alert('保存しました。');
+                    location.href = 'application-detail.html?id=' + encodeURIComponent(payload.id);
+                });
+                btnDelete.addEventListener('click', function() {
+                    if (!confirm('この申し込みを削除しますか？')) return;
+                    var deleted = getDeleted();
+                    if (record && deleted.indexOf(record.id) < 0) deleted.push(record.id);
+                    sessionStorage.setItem(STORAGE_DELETED, JSON.stringify(deleted));
+                    alert('削除しました。');
+                    location.href = 'application-list.html';
+                });
+            }
+        })();
+    </script>
+</body>
+</html>

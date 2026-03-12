@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>商品一覧</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50">
+    <div class="container mx-auto px-4 py-8">
+        <!-- タブ -->
+        <div class="flex gap-2 mb-4 border-b border-gray-200">
+            <a 
+                href="index.html"
+                class="px-4 py-2 font-semibold text-gray-600 hover:text-gray-900 transition-colors"
+            >
+                仕入れ
+            </a>
+            <button 
+                class="px-4 py-2 font-semibold text-gray-900 border-b-2 border-blue-600 transition-colors"
+            >
+                商品
+            </button>
+        </div>
+
+        <!-- タイトルと追加ボタン -->
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-2xl font-bold text-gray-900">商品一覧</h2>
+            <button 
+                id="addProductBtn"
+                class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            >
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 5v14M5 12h14"/>
+                </svg>
+                <span>商品追加</span>
+            </button>
+        </div>
+
+        <!-- 商品テーブル -->
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
+            <div class="min-w-[600px]">
+                <table class="w-full">
+                    <thead class="bg-gray-50 border-b border-gray-200">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">ID</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">名前</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">値段</th>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody" class="divide-y divide-gray-200">
+                        <!-- JavaScriptで動的に生成 -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // サンプルデータ
+        const sampleProducts = [
+            { id: 'PRD001', transactionDate: '2025-02-11', purchaseDate: '2025-02-10', purchaseId: 'P001', quantity: 10, name: '米', price: 500 },
+            { id: 'PRD002', transactionDate: '2025-02-11', purchaseDate: '2025-02-10', purchaseId: 'P001', quantity: 20, name: '卵', price: 300 },
+            { id: 'PRD003', transactionDate: '2025-02-11', purchaseDate: '2025-02-10', purchaseId: 'P001', quantity: 6, name: '牛乳', price: 200 },
+            { id: 'PRD004', transactionDate: '2025-02-09', purchaseDate: '2025-02-08', purchaseId: 'P002', quantity: 15, name: 'トマト', price: 200 },
+            { id: 'PRD005', transactionDate: '2025-02-09', purchaseDate: '2025-02-08', purchaseId: 'P002', quantity: 10, name: '玉ねぎ', price: 150 },
+            { id: 'PRD006', transactionDate: '2025-02-09', purchaseDate: '2025-02-08', purchaseId: 'P002', quantity: 8, name: 'にんじん', price: 100 },
+            { id: 'PRD007', transactionDate: '2025-02-06', purchaseDate: '2025-02-05', purchaseId: 'P003', quantity: 5, name: '鶏肉', price: 800 },
+            { id: 'PRD008', transactionDate: '2025-02-06', purchaseDate: '2025-02-05', purchaseId: 'P003', quantity: 4, name: '豚肉', price: 1200 },
+            { id: 'PRD009', transactionDate: '2025-02-06', purchaseDate: '2025-02-05', purchaseId: 'P003', quantity: 12, name: 'じゃがいも', price: 150 },
+            { id: 'PRD010', transactionDate: '2025-02-04', purchaseDate: '2025-02-03', purchaseId: 'P004', quantity: 6, name: 'バター', price: 400 },
+            { id: 'PRD011', transactionDate: '2025-02-04', purchaseDate: '2025-02-03', purchaseId: 'P004', quantity: 4, name: 'チーズ', price: 600 },
+            { id: 'PRD012', transactionDate: '2025-02-02', purchaseDate: '2025-02-01', purchaseId: 'P005', quantity: 3, name: '魚', price: 1500 },
+            { id: 'PRD013', transactionDate: '2025-02-02', purchaseDate: '2025-02-01', purchaseId: 'P005', quantity: 5, name: '小麦粉', price: 300 }
+        ];
+
+        // データ（localStorageから読み込み、なければサンプルデータを使用）
+        let storedProducts = JSON.parse(localStorage.getItem('products') || '[]');
+        let products;
+        
+        // データが空の場合、または古いデータ形式の場合はサンプルデータを設定
+        if (storedProducts.length === 0 || !storedProducts[0] || !storedProducts[0].name || !storedProducts[0].price) {
+            products = sampleProducts;
+            localStorage.setItem('products', JSON.stringify(products));
+        } else {
+            products = storedProducts;
+        }
+
+
+        // 商品一覧を描画
+        function renderProducts() {
+            const tbody = document.getElementById('productTableBody');
+            tbody.innerHTML = '';
+
+            if (products.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = '<td colspan="4" class="px-4 py-8 text-center text-gray-500">商品データがありません</td>';
+                tbody.appendChild(row);
+                return;
+            }
+
+            // 商品名順にソート
+            const sortedProducts = [...products].sort((a, b) => {
+                return a.name.localeCompare(b.name);
+            });
+
+            // 金額をフォーマット
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('ja-JP').format(amount);
+            }
+
+            sortedProducts.forEach((product) => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors';
+                
+                const actionsCell = document.createElement('td');
+                actionsCell.className = 'px-4 py-3 text-sm';
+                actionsCell.style.width = '100px';
+                
+                const actionsDiv = document.createElement('div');
+                actionsDiv.className = 'flex items-center gap-2';
+                
+                // 編集ボタン
+                const editBtn = document.createElement('button');
+                editBtn.className = 'p-1 text-gray-600 hover:text-blue-600 transition-colors';
+                editBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                `;
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    // 編集処理（後で実装）
+                });
+                
+                // 削除ボタン
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'p-1 text-gray-600 hover:text-red-600 transition-colors';
+                deleteBtn.innerHTML = `
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                    </svg>
+                `;
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (confirm('この商品を削除しますか？')) {
+                        products = products.filter(p => p.id !== product.id);
+                        localStorage.setItem('products', JSON.stringify(products));
+                        renderProducts();
+                    }
+                });
+                
+                actionsDiv.appendChild(editBtn);
+                actionsDiv.appendChild(deleteBtn);
+                actionsCell.appendChild(actionsDiv);
+                
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-sm text-gray-900 cursor-pointer" onclick="window.location.href='detail.html?productId=${product.id}'">${product.id}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900 cursor-pointer" onclick="window.location.href='detail.html?productId=${product.id}'">${product.name}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900 cursor-pointer" onclick="window.location.href='detail.html?productId=${product.id}'">¥${formatCurrency(product.price)}</td>
+                `;
+                row.appendChild(actionsCell);
+
+                tbody.appendChild(row);
+            });
+        }
+
+        // 初期化
+        renderProducts();
+    </script>
+</body>
+</html>

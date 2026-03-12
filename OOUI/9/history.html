@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>変更履歴</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- サイドバー -->
+        <div class="w-64 bg-white border-r border-gray-200 flex flex-col">
+            <div class="p-4 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-gray-900">KANRI</h1>
+            </div>
+            <nav class="flex-1 p-4">
+                <a 
+                    href="purchase-list.html"
+                    class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                    <span class="material-icons">shopping_cart</span>
+                    <span>仕入れ</span>
+                </a>
+                <a 
+                    href="product-list.html"
+                    class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                    <span class="material-icons">inventory</span>
+                    <span>商品</span>
+                </a>
+                <a 
+                    href="inventory-list.html"
+                    class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                    <span class="material-icons">checklist</span>
+                    <span>棚卸し</span>
+                </a>
+                <a 
+                    href="report-list.html"
+                    class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                    <span class="material-icons">assessment</span>
+                    <span>レポート</span>
+                </a>
+                <a 
+                    href="history.html"
+                    class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-900 bg-blue-50 text-blue-600 rounded-lg transition-colors"
+                >
+                    <span class="material-icons">history</span>
+                    <span>変更履歴</span>
+                </a>
+            </nav>
+            <!-- ユーザー情報 -->
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
+                        <span class="material-icons text-gray-600">person</span>
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-gray-900">星野結水</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- メインコンテンツ -->
+        <div class="flex-1 overflow-y-auto">
+            <div class="container mx-auto px-4 py-8">
+                <h1 class="text-2xl font-bold text-gray-900 mb-6">変更履歴</h1>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900 relative" data-sort="datetime">
+                                        <div class="flex items-center gap-2">
+                                            <span>日時</span>
+                                            <button class="sort-menu-btn p-1 text-gray-200 hover:text-gray-400 transition-colors" data-sort-key="datetime">
+                                                <span class="sort-icon text-lg">▼</span>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900 relative" data-sort="user">
+                                        <div class="flex items-center gap-2">
+                                            <span class="material-icons text-gray-500 text-base">person</span>
+                                            <span>操作者</span>
+                                            <button class="sort-menu-btn p-1 text-gray-200 hover:text-gray-400 transition-colors" data-sort-key="user">
+                                                <span class="sort-icon text-lg">▼</span>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900 relative" data-sort="target">
+                                        <div class="flex items-center gap-2">
+                                            <span>対象</span>
+                                            <button class="sort-menu-btn p-1 text-gray-200 hover:text-gray-400 transition-colors" data-sort-key="target">
+                                                <span class="sort-icon text-lg">▼</span>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900 relative" data-sort="action">
+                                        <div class="flex items-center gap-2">
+                                            <span>操作</span>
+                                            <button class="sort-menu-btn p-1 text-gray-200 hover:text-gray-400 transition-colors" data-sort-key="action">
+                                                <span class="sort-icon text-lg">▼</span>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th class="px-4 py-3 text-right text-sm font-semibold text-gray-900 w-12"></th>
+                                </tr>
+                            </thead>
+                            <tbody id="historyTableBody" class="divide-y divide-gray-200">
+                                <!-- JavaScriptで動的に生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // サンプルデータ（誰が・追加/編集/削除・何を・詳細リンク・diff）
+        const sampleHistory = [
+            { datetime: '2025-02-18 14:20', user: '山田太郎', action: '追加', target: '仕入れ P001', link: 'purchase-detail.html?id=P001', diff: { lines: [ { type: 'add', text: '日付: 2025年2月10日' }, { type: 'add', text: '会社名: 株式会社山田食品' }, { type: 'add', text: '合計金額: ¥12,500' }, { type: 'add', text: '商品: 米 10個, 卵 20個, 牛乳 6個' } ] } },
+            { datetime: '2025-02-18 14:15', user: '佐藤花子', action: '編集', target: '仕入れ P001', link: 'purchase-detail.html?id=P001', diff: { lines: [ { type: 'context', text: '仕入れID: P001' }, { type: 'remove', text: '合計金額: ¥12,000' }, { type: 'add', text: '合計金額: ¥12,500' } ] } },
+            { datetime: '2025-02-18 13:45', user: '佐藤花子', action: '編集', target: '商品 米', link: 'product-detail.html?productId=PRD001', diff: { lines: [ { type: 'context', text: '商品名: 米' }, { type: 'remove', text: '単価: ¥450' }, { type: 'add', text: '単価: ¥500' }, { type: 'context', text: 'カテゴリ: 食品' } ] } },
+            { datetime: '2025-02-18 12:10', user: '鈴木一郎', action: '追加', target: '棚卸し I001', link: 'inventory-detail.html?id=I001', diff: { lines: [ { type: 'add', text: '棚卸日: 2025年12月1日' }, { type: 'add', text: '棚卸し高: ¥12,500' }, { type: 'add', text: '対象商品: 米, 卵, 牛乳 他' } ] } },
+            { datetime: '2025-02-18 11:30', user: '田中次郎', action: '編集', target: '仕入れ P002', link: 'purchase-detail.html?id=P002', diff: { lines: [ { type: 'context', text: '仕入れID: P002' }, { type: 'remove', text: '日付: 2025年2月7日' }, { type: 'add', text: '日付: 2025年2月8日' }, { type: 'remove', text: '合計金額: ¥8,000' }, { type: 'add', text: '合計金額: ¥8,500' } ] } },
+            { datetime: '2025-02-18 10:15', user: '高橋美咲', action: '追加', target: '商品 卵', link: 'product-detail.html?productId=PRD002', diff: { lines: [ { type: 'add', text: '商品名: 卵' }, { type: 'add', text: '単価: ¥300' }, { type: 'add', text: 'カテゴリ: 食品' } ] } },
+            { datetime: '2025-02-18 09:30', user: '山田太郎', action: '削除', target: '仕入れ P005', link: 'purchase-detail.html?id=P005', diff: { lines: [ { type: 'remove', text: '仕入れID: P005' }, { type: 'remove', text: '日付: 2025年2月1日' }, { type: 'remove', text: '会社名: 鮮魚卸・高橋水産' }, { type: 'remove', text: '合計金額: ¥9,500' } ] } },
+            { datetime: '2025-02-18 09:00', user: '山田太郎', action: '編集', target: '仕入れ P003', link: 'purchase-detail.html?id=P003', diff: { lines: [ { type: 'context', text: '仕入れID: P003' }, { type: 'remove', text: '合計金額: ¥15,000' }, { type: 'add', text: '合計金額: ¥15,600' } ] } },
+            { datetime: '2025-02-17 17:45', user: '佐藤花子', action: '追加', target: '商品 牛乳', link: 'product-detail.html?productId=PRD003', diff: { lines: [ { type: 'add', text: '商品名: 牛乳' }, { type: 'add', text: '単価: ¥200' }, { type: 'add', text: 'カテゴリ: 食品' } ] } },
+            { datetime: '2025-02-17 17:00', user: '鈴木一郎', action: '削除', target: '商品 サラダ油', link: 'product-detail.html?productId=PRD014', diff: { lines: [ { type: 'remove', text: '商品名: サラダ油' }, { type: 'remove', text: '単価: ¥400' }, { type: 'remove', text: 'カテゴリ: 食品' } ] } },
+            { datetime: '2025-02-17 16:20', user: '鈴木一郎', action: '編集', target: '棚卸し I002', link: 'inventory-detail.html?id=I002', diff: { lines: [ { type: 'context', text: '棚卸日: 2024年12月1日' }, { type: 'remove', text: '棚卸し高: ¥8,000' }, { type: 'add', text: '棚卸し高: ¥8,500' } ] } },
+            { datetime: '2025-02-17 15:30', user: '田中次郎', action: '削除', target: '棚卸し I003', link: 'inventory-detail.html?id=I003', diff: { lines: [ { type: 'remove', text: '棚卸日: 2023年12月1日' }, { type: 'remove', text: '棚卸し高: ¥15,600' }, { type: 'remove', text: '対象商品: 鶏肉, 豚肉, じゃがいも' } ] } },
+            { datetime: '2025-02-17 15:00', user: '田中次郎', action: '追加', target: '仕入れ P004', link: 'purchase-detail.html?id=P004', diff: { lines: [ { type: 'add', text: '日付: 2025年2月3日' }, { type: 'add', text: '会社名: 乳業卸・佐藤フード' }, { type: 'add', text: '合計金額: ¥7,200' }, { type: 'add', text: '商品: バター 6個, チーズ 4個' } ] } },
+            { datetime: '2025-02-17 14:10', user: '高橋美咲', action: '編集', target: '商品 トマト', link: 'product-detail.html?productId=PRD004', diff: { lines: [ { type: 'context', text: '商品名: トマト' }, { type: 'remove', text: '単価: ¥180' }, { type: 'add', text: '単価: ¥200' } ] } },
+        ];
+
+        let historyItems = JSON.parse(localStorage.getItem('history') || '[]');
+        if (historyItems.length === 0) {
+            historyItems = sampleHistory;
+            localStorage.setItem('history', JSON.stringify(historyItems));
+        } else {
+            // 既存履歴に「削除しました」サンプルをマージ（削除が1件も無い場合）
+            const hasDelete = historyItems.some(h => h.action === '削除');
+            if (!hasDelete) {
+                const deleteSamples = sampleHistory.filter(h => h.action === '削除');
+                historyItems = [...deleteSamples, ...historyItems];
+                historyItems.sort((a, b) => new Date(b.datetime.replace(' ', 'T')) - new Date(a.datetime.replace(' ', 'T')));
+                localStorage.setItem('history', JSON.stringify(historyItems));
+            }
+            // 仕入れ P001 の「編集しました」を2行目に表示するため、編集履歴が無ければマージ
+            const p001Edit = sampleHistory.find(h => (h.target || '') === '仕入れ P001' && h.action === '編集');
+            const hasP001Edit = historyItems.some(h => (h.target || '') === '仕入れ P001' && h.action === '編集');
+            if (p001Edit && !hasP001Edit) {
+                historyItems = [p001Edit, ...historyItems];
+                historyItems.sort((a, b) => new Date(b.datetime.replace(' ', 'T')) - new Date(a.datetime.replace(' ', 'T')));
+                localStorage.setItem('history', JSON.stringify(historyItems));
+            }
+        }
+
+        // 仕入れデータを取得（会社名を取得するため）
+        let purchases = JSON.parse(localStorage.getItem('purchases') || '[]');
+        // 棚卸しデータを取得（日付を表示するため）
+        let inventories = JSON.parse(localStorage.getItem('inventories') || '[]');
+        // 商品データを取得（商品詳細リンクを導出するため）
+        let products = JSON.parse(localStorage.getItem('products') || '[]');
+
+        function formatDateDisplay(dateStr) {
+            const date = new Date(dateStr);
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            return `${year}年${month}月${day}日`;
+        }
+
+        let historySortKey = 'datetime';
+        let historySortDir = 'desc';
+
+        // link がない古いデータ用に target から URL を推測
+        function getDetailLink(item) {
+            if (item.link) return item.link;
+            const t = (item.target || '').trim();
+            const mPurchase = t.match(/^仕入れ\s+(P\d+)$/);
+            if (mPurchase) return `purchase-detail.html?id=${mPurchase[1]}`;
+            const mInventory = t.match(/^棚卸し\s+(I\d+)$/);
+            if (mInventory) return `inventory-detail.html?id=${mInventory[1]}`;
+            const mProduct = t.match(/^商品\s+(.+)$/);
+            if (mProduct) {
+                const name = mProduct[1].trim();
+                const product = products.find(p => (p.name || '').trim() === name);
+                if (product && product.id) return `product-detail.html?productId=${product.id}`;
+            }
+            return null;
+        }
+
+        // 仕入れIDから会社名、棚卸しIDから日付を取得して表示テキストを生成
+        function getDisplayTarget(item) {
+            const t = (item.target || '').trim();
+            const mPurchase = t.match(/^仕入れ\s+(P\d+)$/);
+            if (mPurchase) {
+                const purchaseId = mPurchase[1];
+                const purchase = purchases.find(p => p.id === purchaseId);
+                if (purchase && purchase.companyName) {
+                    return `仕入れ ${purchase.companyName}`;
+                }
+            }
+            const mInventory = t.match(/^棚卸し\s+(I\d+)$/);
+            if (mInventory) {
+                const inv = inventories.find(i => i.id === mInventory[1]);
+                if (inv && inv.date) {
+                    return `棚卸し ${formatDateDisplay(inv.date)}`;
+                }
+            }
+            return item.target;
+        }
+
+        // 対象のタグとラベルに分解（商品・仕入れ・棚卸しをタグ表示用）
+        function getDisplayTargetParts(item) {
+            const t = (item.target || '').trim();
+            const tagClass = 'inline-flex items-center px-2 py-0.5 rounded text-xs font-medium';
+            if (t.startsWith('仕入れ ')) {
+                const rest = t.slice(3).trim();
+                const m = rest.match(/^P\d+$/);
+                const purchase = m ? purchases.find(p => p.id === m[0]) : null;
+                const label = purchase && purchase.companyName ? purchase.companyName : rest;
+                return { tag: '仕入れ', tagClass: tagClass + ' bg-blue-100 text-blue-800', label };
+            }
+            if (t.startsWith('商品 ')) {
+                const label = t.slice(2).trim();
+                return { tag: '商品', tagClass: tagClass + ' bg-green-100 text-green-800', label };
+            }
+            if (t.startsWith('棚卸し ')) {
+                const invId = t.slice(3).trim();
+                const inv = invId.match(/^I\d+$/) ? inventories.find(i => i.id === invId) : null;
+                const label = inv && inv.date ? formatDateDisplay(inv.date) : invId;
+                return { tag: '棚卸し', tagClass: tagClass + ' bg-amber-100 text-amber-800', label };
+            }
+            return { tag: null, tagClass: '', label: t || '—' };
+        }
+
+        function renderHistory() {
+            const tbody = document.getElementById('historyTableBody');
+            tbody.innerHTML = '';
+
+            const getSortVal = (item, key) => {
+                if (key === 'datetime') return new Date(item.datetime.replace(' ', 'T') || 0).getTime();
+                if (key === 'user') return item.user || '';
+                if (key === 'action') return item.action || '';
+                if (key === 'target') {
+                    // ソート用には元のtargetを使用（IDベース）
+                    return item.target || '';
+                }
+                return 0;
+            };
+            const sortedItems = [...historyItems].sort((a, b) => {
+                const va = getSortVal(a, historySortKey);
+                const vb = getSortVal(b, historySortKey);
+                let cmp = (typeof va === 'string') ? (va.localeCompare(vb)) : (va - vb);
+                return historySortDir === 'asc' ? cmp : -cmp;
+            });
+
+            sortedItems.forEach((item, sortedIndex) => {
+                const row = document.createElement('tr');
+                const globalIndex = historyItems.findIndex(h => h.datetime === item.datetime && h.user === item.user && (h.target || '') === (item.target || ''));
+                const detailIndex = globalIndex >= 0 ? globalIndex : sortedIndex;
+                row.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
+                row.addEventListener('click', (e) => {
+                    if (!e.target.closest('button[data-history-detail]')) {
+                        window.location.href = 'history-detail.html?index=' + encodeURIComponent(detailIndex);
+                    }
+                });
+                const actionText = item.action === '追加' ? '追加しました。' : item.action === '編集' ? '編集しました。' : item.action === '削除' ? '削除しました。' : (item.action || '') + 'しました。';
+                const parts = getDisplayTargetParts(item);
+                const targetCellHtml = parts.tag
+                    ? `<span class="${parts.tagClass}">${parts.tag}</span> <span class="text-gray-900">${parts.label}</span>`
+                    : `<span class="text-gray-900">${parts.label}</span>`;
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-sm text-gray-900">${item.datetime}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">
+                        <div class="flex items-center gap-2">
+                            <span class="material-icons text-gray-500 text-base">person</span>
+                            <span>${item.user}</span>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-sm">${targetCellHtml}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">${actionText}</td>
+                    <td class="px-4 py-3 text-right">
+                        <button type="button" class="p-1 text-gray-500 hover:text-gray-700 rounded" aria-label="詳細" data-history-detail data-history-index="${detailIndex}">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
+                        </button>
+                    </td>
+                `;
+                const detailBtn = row.querySelector('button[data-history-detail]');
+                if (detailBtn) {
+                    detailBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        window.location.href = 'history-detail.html?index=' + encodeURIComponent(detailBtn.getAttribute('data-history-index'));
+                    });
+                }
+                tbody.appendChild(row);
+            });
+
+            // ソートアイコンを更新
+            updateHistorySortIcons();
+        }
+
+        // ソートアイコンを更新
+        function updateHistorySortIcons() {
+            document.querySelectorAll('.sort-menu-btn').forEach(btn => {
+                const sortKey = btn.getAttribute('data-sort-key');
+                const icon = btn.querySelector('.sort-icon');
+                if (icon) {
+                    if (historySortKey === sortKey) {
+                        icon.textContent = historySortDir === 'asc' ? '▲' : '▼';
+                        icon.className = 'sort-icon text-lg text-blue-900 font-bold';
+                    } else {
+                        icon.textContent = '▼';
+                        icon.className = 'sort-icon text-lg text-gray-200';
+                    }
+                }
+            });
+        }
+
+        function setupHistorySort() {
+            // 既存のクリックイベントは削除（新しいメニューシステムを使用）
+        }
+
+        // ソートメニューの表示/非表示
+        function setupHistorySortMenus() {
+            let currentMenu = null;
+            let currentSortKey = null;
+
+            document.querySelectorAll('.sort-menu-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const sortKey = btn.getAttribute('data-sort-key');
+                    const th = btn.closest('th');
+                    const rect = th.getBoundingClientRect();
+                    
+                    if (currentMenu) {
+                        currentMenu.classList.add('hidden');
+                    }
+                    
+                    const menu = document.getElementById('sortMenu');
+                    menu.style.top = `${rect.bottom}px`;
+                    menu.style.left = `${rect.right - 120}px`;
+                    menu.classList.remove('hidden');
+                    currentMenu = menu;
+                    currentSortKey = sortKey;
+                });
+            });
+
+            document.querySelectorAll('.sort-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const sortDir = option.getAttribute('data-sort-dir');
+                    if (currentSortKey) {
+                        historySortKey = currentSortKey;
+                        historySortDir = sortDir;
+                        renderHistory();
+                    }
+                    if (currentMenu) {
+                        currentMenu.classList.add('hidden');
+                    }
+                    currentMenu = null;
+                    currentSortKey = null;
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.sort-menu-btn') && !e.target.closest('#sortMenu')) {
+                    if (currentMenu) {
+                        currentMenu.classList.add('hidden');
+                    }
+                    currentMenu = null;
+                    currentSortKey = null;
+                }
+            });
+        }
+
+        renderHistory();
+        setupHistorySort();
+        setupHistorySortMenus();
+    </script>
+
+    <!-- ソートメニュー -->
+    <div id="sortMenu" class="hidden absolute bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[120px]">
+        <div class="py-1">
+            <button class="sort-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-sort-dir="asc">
+                昇順
+            </button>
+            <button class="sort-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-sort-dir="desc">
+                降順
+            </button>
+        </div>
+    </div>
+</body>
+</html>

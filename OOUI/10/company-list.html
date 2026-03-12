@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>企業一覧</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="common.css">
+</head>
+<body class="min-h-screen bg-black">
+    <div class="iphone-frame flex flex-col">
+        <header class="app-header safe-top safe-x flex items-center justify-between px-4 bg-white border-b border-gray-200 shrink-0">
+            <div class="w-10"></div>
+            <h1 class="text-lg font-semibold text-gray-900">企業一覧</h1>
+            <a href="company-edit.html" class="p-2 text-blue-600" aria-label="追加"><span class="material-icons">add</span></a>
+        </header>
+
+        <main class="flex-1 overflow-y-auto safe-x safe-bottom has-bottom-nav px-4 py-4">
+            <div class="relative mb-4">
+                <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xl">search</span>
+                <input type="search" id="companySearch" placeholder="企業名、IDで検索" class="w-full pl-10 pr-4 py-2.5 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+
+            <ul id="companyList" class="space-y-2">
+                <li class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <a href="company-detail.html?id=C001" class="flex items-center gap-3 p-4 block active:bg-gray-50">
+                        <div class="flex-1 min-w-0">
+                            <div class="font-semibold text-gray-900">株式会社山田食品 <span class="text-xs font-normal text-gray-500">（C001）</span></div>
+                            <div class="text-sm text-gray-500 truncate">東京都渋谷区道玄坂1-2-3</div>
+                        </div>
+                        <button type="button" class="company-menu-btn p-2 text-gray-400 hover:text-gray-600 rounded-full" data-id="C001" aria-label="メニュー">
+                            <span class="material-icons">more_vert</span>
+                        </button>
+                    </a>
+                </li>
+                <li class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <a href="company-detail.html?id=C002" class="flex items-center gap-3 p-4 block active:bg-gray-50">
+                        <div class="flex-1 min-w-0">
+                            <div class="font-semibold text-gray-900">佐藤商事 <span class="text-xs font-normal text-gray-500">（C002）</span></div>
+                            <div class="text-sm text-gray-500 truncate">大阪府大阪市北区梅田4-5-6</div>
+                        </div>
+                        <button type="button" class="company-menu-btn p-2 text-gray-400 hover:text-gray-600 rounded-full" data-id="C002" aria-label="メニュー">
+                            <span class="material-icons">more_vert</span>
+                        </button>
+                    </a>
+                </li>
+                <li class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <a href="company-detail.html?id=C003" class="flex items-center gap-3 p-4 block active:bg-gray-50">
+                        <div class="flex-1 min-w-0">
+                            <div class="font-semibold text-gray-900">有限会社田中物産 <span class="text-xs font-normal text-gray-500">（C003）</span></div>
+                            <div class="text-sm text-gray-500 truncate">福岡県福岡市博多区博多駅前7-8-9</div>
+                        </div>
+                        <button type="button" class="company-menu-btn p-2 text-gray-400 hover:text-gray-600 rounded-full" data-id="C003" aria-label="メニュー">
+                            <span class="material-icons">more_vert</span>
+                        </button>
+                    </a>
+                </li>
+            </ul>
+        </main>
+
+        <div id="companyMenuDropdown" class="fixed hidden z-30 bg-white rounded-lg shadow-lg border border-gray-200 py-1 min-w-[140px]" style="left: 0; top: 0;">
+            <a href="#" id="companyMenuEdit" class="flex items-center gap-2 px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100">
+                <span class="material-icons text-lg">edit</span>編集
+            </a>
+            <button type="button" id="companyMenuDelete" class="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50">
+                <span class="material-icons text-lg">delete</span>削除
+            </button>
+        </div>
+        <div id="companyMenuBackdrop" class="fixed inset-0 z-20 hidden" aria-hidden="true"></div>
+
+        <nav class="bottom-nav">
+            <a href="company-list.html" class="active"><span class="material-icons">business</span>企業</a>
+            <a href="customer-list.html"><span class="material-icons">people</span>顧客</a>
+            <a href="case-list.html"><span class="material-icons">folder</span>案件</a>
+            <a href="material-list.html"><span class="material-icons">description</span>資料</a>
+            <a href="schedule-list.html"><span class="material-icons">event</span>予定</a>
+        </nav>
+    </div>
+    <script>
+        (function() {
+            var list = document.getElementById('companyList');
+            var dropdown = document.getElementById('companyMenuDropdown');
+            var backdrop = document.getElementById('companyMenuBackdrop');
+            var editLink = document.getElementById('companyMenuEdit');
+            var deleteBtn = document.getElementById('companyMenuDelete');
+            var currentId = null;
+            function openMenu(id, btn) {
+                currentId = id;
+                var r = btn.getBoundingClientRect();
+                dropdown.style.left = (r.right - 140) + 'px';
+                dropdown.style.top = (r.bottom + 4) + 'px';
+                dropdown.classList.remove('hidden');
+                backdrop.classList.remove('hidden');
+            }
+            function closeMenu() {
+                dropdown.classList.add('hidden');
+                backdrop.classList.add('hidden');
+                currentId = null;
+            }
+            list.addEventListener('click', function(e) {
+                var btn = e.target.closest('.company-menu-btn');
+                if (btn) { e.preventDefault(); openMenu(btn.getAttribute('data-id'), btn); }
+            });
+            backdrop.addEventListener('click', closeMenu);
+            editLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                if (currentId) location.href = 'company-edit.html?id=' + encodeURIComponent(currentId);
+                closeMenu();
+            });
+            deleteBtn.addEventListener('click', function() {
+                if (currentId && confirm('この企業を削除しますか？')) { closeMenu(); }
+            });
+            var search = document.getElementById('companySearch');
+            var items = list.querySelectorAll('li');
+            if (search) search.addEventListener('input', function() {
+                var q = (this.value || '').trim().toLowerCase();
+                items.forEach(function(li) {
+                    var text = (li.textContent || '').toLowerCase();
+                    li.style.display = q === '' || text.indexOf(q) >= 0 ? '' : 'none';
+                });
+            });
+        })();
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="screenshot.js"></script>
+</body>
+</html>

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>変更履歴詳細</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- サイドバー -->
+        <div class="w-64 bg-white border-r border-gray-200 flex flex-col">
+            <div class="p-4 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-gray-900">KANRI</h1>
+            </div>
+            <nav class="flex-1 p-4">
+                <a href="purchase-list.html" class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                    <span class="material-icons">shopping_cart</span>
+                    <span>仕入れ</span>
+                </a>
+                <a href="product-list.html" class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                    <span class="material-icons">inventory</span>
+                    <span>商品</span>
+                </a>
+                <a href="inventory-list.html" class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                    <span class="material-icons">checklist</span>
+                    <span>棚卸し</span>
+                </a>
+                <a href="report-list.html" class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                    <span class="material-icons">assessment</span>
+                    <span>レポート</span>
+                </a>
+                <a href="history.html" class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-900 bg-blue-50 text-blue-600 rounded-lg transition-colors">
+                    <span class="material-icons">history</span>
+                    <span>変更履歴</span>
+                </a>
+            </nav>
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
+                        <span class="material-icons text-gray-600">person</span>
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-gray-900">星野結水</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- メインコンテンツ -->
+        <div class="flex-1 overflow-y-auto">
+            <div class="container mx-auto px-4 py-8">
+                <div class="flex items-center gap-4 mb-4">
+                    <a href="history.html" class="text-blue-600 hover:text-blue-700 transition-colors">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                    </a>
+                    <h1 class="text-2xl font-bold text-gray-900">変更履歴詳細</h1>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+                    <div id="diffContainer" class="overflow-x-auto">
+                        <table id="diffTable" class="w-full text-sm">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left font-semibold text-gray-900 w-1/2">変更前</th>
+                                    <th class="px-4 py-3 text-left font-semibold text-gray-900 w-1/2">変更後</th>
+                                </tr>
+                            </thead>
+                            <tbody id="diffBody" class="divide-y divide-gray-200">
+                                <!-- JavaScriptで生成 -->
+                            </tbody>
+                        </table>
+                        <p id="diffEmpty" class="hidden py-8 text-center text-gray-500">変更内容は記録されていません</p>
+                    </div>
+                    <div id="restoreButtonArea" class="hidden px-6 py-4 border-t border-gray-200">
+                        <button type="button" id="restoreVersionBtn" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors">
+                            このバージョンを復元する
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const indexStr = urlParams.get('index');
+        const index = indexStr != null ? parseInt(indexStr, 10) : -1;
+
+        const historyItems = JSON.parse(localStorage.getItem('history') || '[]');
+        const purchases = JSON.parse(localStorage.getItem('purchases') || '[]');
+        const inventories = JSON.parse(localStorage.getItem('inventories') || '[]');
+        const products = JSON.parse(localStorage.getItem('products') || '[]');
+
+        function formatDateDisplay(dateStr) {
+            const d = new Date(dateStr);
+            return `${d.getFullYear()}年${d.getMonth() + 1}月${d.getDate()}日`;
+        }
+
+        function getDisplayTarget(item) {
+            const t = (item.target || '').trim();
+            const mPurchase = t.match(/^仕入れ\s+(P\d+)$/);
+            if (mPurchase) {
+                const p = purchases.find(x => x.id === mPurchase[1]);
+                if (p && p.companyName) return '仕入れ ' + p.companyName;
+            }
+            const mInventory = t.match(/^棚卸し\s+(I\d+)$/);
+            if (mInventory) {
+                const inv = inventories.find(i => i.id === mInventory[1]);
+                if (inv && inv.date) return '棚卸し ' + formatDateDisplay(inv.date);
+            }
+            if (t.startsWith('商品 ')) return t;
+            return item.target || '—';
+        }
+
+        function getActionText(action) {
+            if (action === '追加') return '追加しました。';
+            if (action === '編集') return '編集しました。';
+            if (action === '削除') return '削除しました。';
+            return (action || '') + 'しました。';
+        }
+
+        function renderDiff(item) {
+            const diffBody = document.getElementById('diffBody');
+            const diffTable = document.getElementById('diffTable');
+            const diffEmpty = document.getElementById('diffEmpty');
+            diffBody.innerHTML = '';
+            diffTable.classList.remove('hidden');
+            diffEmpty.classList.add('hidden');
+
+            let beforeLines = [];
+            let afterLines = [];
+
+            if (!item.diff) {
+                diffTable.classList.add('hidden');
+                diffEmpty.classList.remove('hidden');
+                return;
+            }
+
+            if (item.diff.before != null || item.diff.after != null) {
+                beforeLines = (item.diff.before ?? '').toString().split('\n').filter(Boolean);
+                afterLines = (item.diff.after ?? '').toString().split('\n').filter(Boolean);
+            } else if (item.diff.lines && Array.isArray(item.diff.lines)) {
+                beforeLines = item.diff.lines.filter(l => l.type === 'remove' || l.type === 'context').map(l => (l.text || '').trim()).filter(Boolean);
+                afterLines = item.diff.lines.filter(l => l.type === 'add' || l.type === 'context').map(l => (l.text || '').trim()).filter(Boolean);
+            }
+
+            if (beforeLines.length === 0 && afterLines.length === 0) {
+                diffTable.classList.add('hidden');
+                diffEmpty.classList.remove('hidden');
+                return;
+            }
+
+            const maxRows = Math.max(beforeLines.length, afterLines.length, 1);
+            for (let i = 0; i < maxRows; i++) {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-50/50';
+                const beforeText = (beforeLines[i] ?? '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const afterText = (afterLines[i] ?? '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+                const beforeCellClass = beforeText ? 'px-4 py-3 text-gray-900 align-top font-mono text-sm' : 'px-4 py-3 text-gray-400 align-top font-mono text-sm italic';
+                const afterCellClass = afterText ? 'px-4 py-3 text-gray-900 align-top font-mono text-sm' : 'px-4 py-3 text-gray-400 align-top font-mono text-sm italic';
+                tr.innerHTML = '<td class="' + beforeCellClass + ' border-r border-gray-200">' + (beforeText || '—') + '</td><td class="' + afterCellClass + '">' + (afterText || '—') + '</td>';
+                diffBody.appendChild(tr);
+            }
+        }
+
+        if (index >= 0 && index < historyItems.length) {
+            const item = historyItems[index];
+            renderDiff(item);
+            document.getElementById('restoreButtonArea').classList.remove('hidden');
+            document.getElementById('restoreVersionBtn').onclick = () => restoreVersion(item);
+        } else {
+            document.getElementById('diffTable').classList.add('hidden');
+            document.getElementById('diffEmpty').classList.remove('hidden');
+            document.getElementById('diffEmpty').textContent = '指定された履歴が見つかりません';
+            document.getElementById('restoreButtonArea').classList.add('hidden');
+        }
+
+        function restoreVersion(item) {
+            if (!confirm('このバージョンに復元しますか？')) return;
+            const afterLines = [];
+            if (item.diff && item.diff.after != null) {
+                afterLines.push(...(item.diff.after + '').split('\n').map(s => s.trim()).filter(Boolean));
+            } else if (item.diff && item.diff.lines) {
+                item.diff.lines.filter(l => l.type === 'add' || l.type === 'context').forEach(l => {
+                    const t = (l.text || '').trim();
+                    if (t) afterLines.push(t);
+                });
+            }
+            const t = (item.target || '').trim();
+            const mPurchase = t.match(/^仕入れ\s+(P\d+)$/);
+            const mInventory = t.match(/^棚卸し\s+(I\d+)$/);
+            const mProduct = t.match(/^商品\s+(.+)$/);
+            let restored = false;
+            if (mPurchase && afterLines.length > 0) {
+                const purchases = JSON.parse(localStorage.getItem('purchases') || '[]');
+                const p = purchases.find(x => x.id === mPurchase[1]);
+                if (p) {
+                    afterLines.forEach(line => {
+                        const colon = line.indexOf(':');
+                        if (colon <= 0) return;
+                        const key = line.slice(0, colon).trim();
+                        const val = line.slice(colon + 1).trim();
+                        if (key === '日付' && val) {
+                            const match = val.match(/(\d+)年(\d+)月(\d+)日/);
+                            if (match) p.date = `${match[1]}-${String(match[2]).padStart(2,'0')}-${String(match[3]).padStart(2,'0')}`;
+                        } else if ((key === '合計金額' || key === '合計') && val) {
+                            const num = parseInt(val.replace(/[¥,\s]/g, ''), 10);
+                            if (!isNaN(num)) p.totalAmount = num;
+                        } else if (key === '会社名' && val) p.companyName = val;
+                    });
+                    localStorage.setItem('purchases', JSON.stringify(purchases));
+                    restored = true;
+                }
+            }
+            if (mInventory && afterLines.length > 0) {
+                const inventories = JSON.parse(localStorage.getItem('inventories') || '[]');
+                const inv = inventories.find(i => i.id === mInventory[1]);
+                if (inv) {
+                    afterLines.forEach(line => {
+                        const colon = line.indexOf(':');
+                        if (colon <= 0) return;
+                        const key = line.slice(0, colon).trim();
+                        const val = line.slice(colon + 1).trim();
+                        if (key === '棚卸日' && val) {
+                            const match = val.match(/(\d+)年(\d+)月(\d+)日/);
+                            if (match) inv.date = `${match[1]}-${String(match[2]).padStart(2,'0')}-${String(match[3]).padStart(2,'0')}`;
+                        } else if ((key === '棚卸し高' || key === '合計') && val) {
+                            const num = parseInt(val.replace(/[¥,\s]/g, ''), 10);
+                            if (!isNaN(num)) inv.totalAmount = num;
+                        }
+                    });
+                    localStorage.setItem('inventories', JSON.stringify(inventories));
+                    restored = true;
+                }
+            }
+            if (mProduct && afterLines.length > 0) {
+                const products = JSON.parse(localStorage.getItem('products') || '[]');
+                const name = mProduct[1].trim();
+                const prod = products.find(x => (x.name || '').trim() === name);
+                if (prod) {
+                    afterLines.forEach(line => {
+                        const colon = line.indexOf(':');
+                        if (colon <= 0) return;
+                        const key = line.slice(0, colon).trim();
+                        const val = line.slice(colon + 1).trim();
+                        if (key === '単価' && val) {
+                            const num = parseInt(val.replace(/[¥,\s]/g, ''), 10);
+                            if (!isNaN(num)) prod.price = num;
+                        } else if (key === '商品名' && val) prod.name = val;
+                        else if (key === 'カテゴリ' && val) prod.category = val;
+                    });
+                    localStorage.setItem('products', JSON.stringify(products));
+                    restored = true;
+                }
+            }
+            if (restored) {
+                alert('復元しました');
+                window.location.href = 'history.html';
+            } else {
+                alert('この履歴からは自動で復元できません。該当の仕入れ・商品・棚卸しを手動で編集してください。');
+            }
+        }
+    </script>
+</body>
+</html>

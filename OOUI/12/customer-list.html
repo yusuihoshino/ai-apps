@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>顧客一覧 - 管理システム</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-white min-h-screen">
+    <header class="bg-white border-b border-gray-300 py-3">
+        <div class="container mx-auto px-8">
+            <nav class="inline-flex rounded-2xl bg-white p-1 gap-0.5">
+                <a href="customer-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl bg-gray-200 text-black text-sm font-medium">顧客</a>
+                <a href="contract-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">契約</a>
+                <a href="incident-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">事故</a>
+                <a href="application-list.html" class="inline-flex items-center justify-center h-9 px-3 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-100">申し込み</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-8 py-8">
+        <div class="w-full max-w-full">
+            <div class="flex items-center justify-between gap-3 mb-2">
+                <div class="flex items-center gap-3">
+                    <h1 class="text-lg font-bold text-black">顧客</h1>
+                    <div class="relative">
+                        <input type="text" id="customer-search" placeholder="検索" class="h-9 w-56 pl-8 pr-3 rounded-2xl border border-gray-400 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-black focus:border-black">
+                        <span class="material-icons text-gray-500 text-base absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none">search</span>
+                    </div>
+                </div>
+                <a href="customer-edit.html" class="inline-flex items-center justify-center gap-2 h-9 px-4 bg-black text-white rounded-xl text-sm font-bold hover:bg-gray-800 shrink-0">
+                    <span class="material-icons text-lg">add</span>新規作成
+                </a>
+            </div>
+            <div class="overflow-x-auto border border-gray-300 rounded-2xl w-full">
+                <table class="w-full text-left">
+                <thead class="border-b-2 border-gray-300 bg-gray-50">
+                    <tr>
+                        <th class="pb-3 pt-3 pl-6 pr-8 text-sm font-bold text-black">ID</th>
+                        <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">氏名</th>
+                        <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">電話番号</th>
+                        <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">メール</th>
+                        <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">住所</th>
+                        <th class="pb-3 pt-3 pr-8 text-sm font-bold text-black">担当者</th>
+                        <th class="pb-3 pt-3 pr-6 text-sm font-bold text-black w-12"></th>
+                    </tr>
+                </thead>
+                <tbody id="tbody">
+                </tbody>
+            </table>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        (function() {
+            var STORAGE_DELETED = 'customer_deleted';
+            var STORAGE_UPDATED = 'customer_updated';
+            var baseList = [
+                { id: 'CU001', name: '山田 太郎', phone: '03-1234-5678', email: 'taro.yamada@example.co.jp', address: '東京都中央区〇〇1-2-3', contact: '山田 太郎', date: '2024-04-01' },
+                { id: 'CU002', name: '佐藤 花子', phone: '06-9876-5432', email: 'hanako.sato@example.co.jp', address: '大阪府大阪市△△4-5-6', contact: '佐藤 花子', date: '2024-06-15' },
+                { id: 'CU003', name: '鈴木 一郎', phone: '052-111-2222', email: 'ichiro.suzuki@example.co.jp', address: '愛知県名古屋市□□7-8-9', contact: '鈴木 一郎', date: '2024-10-01' }
+            ];
+
+            function getDeleted() { try { return JSON.parse(sessionStorage.getItem(STORAGE_DELETED) || '[]'); } catch (e) { return []; } }
+            function getUpdated() { try { return JSON.parse(sessionStorage.getItem(STORAGE_UPDATED) || '{}'); } catch (e) { return {}; } }
+            function getList() {
+                var deleted = getDeleted();
+                var updated = getUpdated();
+                return baseList.filter(function(r) { return deleted.indexOf(r.id) < 0; }).map(function(r) { return updated[r.id] || r; });
+            }
+
+            function render() {
+                var list = getList().slice().sort(function(a, b) {
+                    return (a.id || '').localeCompare(b.id || '') * -1;
+                });
+                var keywordInput = document.getElementById('customer-search');
+                var keyword = keywordInput ? (keywordInput.value || '').toLowerCase() : '';
+                if (keyword) {
+                    list = list.filter(function(r) {
+                        return (r.id || '').toLowerCase().indexOf(keyword) >= 0 ||
+                            (r.name || '').toLowerCase().indexOf(keyword) >= 0 ||
+                            (r.phone || '').toLowerCase().indexOf(keyword) >= 0 ||
+                            (r.email || '').toLowerCase().indexOf(keyword) >= 0 ||
+                            (r.address || '').toLowerCase().indexOf(keyword) >= 0;
+                    });
+                }
+                var tbody = document.getElementById('tbody');
+                tbody.innerHTML = list.map(function(r) {
+                    return '<tr class="hover:bg-gray-50 cursor-pointer row-link" data-href="customer-detail.html?id=' + encodeURIComponent(r.id) + '">' +
+                        '<td class="py-3 pl-6 pr-8 text-sm font-medium text-gray-800">' + (r.id || '—') + '</td>' +
+                        '<td class="py-3 pr-8 font-bold text-black">' + (r.name || '') + '</td>' +
+                        '<td class="py-3 pr-8 text-sm font-medium text-gray-700">' + (r.phone || '—') + '</td>' +
+                        '<td class="py-3 pr-8 text-sm font-medium text-gray-800">' + (r.email || '—') + '</td>' +
+                        '<td class="py-3 pr-8 text-sm font-medium text-gray-800">' + (r.address || '—') + '</td>' +
+                        '<td class="py-3 pr-8 text-sm font-medium text-gray-800">' + (r.contact || '—') + '</td>' +
+                        '<td class="py-3 pr-6 row-actions relative">' +
+                        '<button type="button" class="menu-btn relative inline-flex items-center justify-center w-8 h-8 rounded-full hover:bg-gray-100 text-gray-600" data-id="' + r.id + '" aria-label="メニュー">' +
+                        '<span class="material-icons text-lg">more_vert</span></button>' +
+                        '<div class="menu-dropdown hidden absolute right-0 top-full mt-1 z-20 w-32 py-1 border border-gray-300 rounded-xl bg-white shadow-lg">' +
+                        '<a href="customer-edit.html?id=' + encodeURIComponent(r.id) + '" class="block px-4 py-2 text-sm text-black hover:bg-gray-100">編集</a>' +
+                        '<button type="button" class="customer-delete block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50" data-id="' + r.id + '">削除</button>' +
+                        '</div></td></tr>';
+                }).join('');
+
+                tbody.querySelectorAll('tr.row-link').forEach(function(tr) {
+                    tr.addEventListener('click', function(e) {
+                        if (e.target.closest('.row-actions')) return;
+                        location.href = this.getAttribute('data-href');
+                    });
+                });
+                tbody.querySelectorAll('.menu-btn').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var open = document.querySelector('.menu-dropdown:not(.hidden)');
+                        if (open && open !== this.nextElementSibling) open.classList.add('hidden');
+                        this.nextElementSibling.classList.toggle('hidden');
+                    });
+                });
+                tbody.querySelectorAll('.menu-dropdown').forEach(function(d) {
+                    d.addEventListener('click', function(e) { e.stopPropagation(); });
+                });
+                document.addEventListener('click', function() {
+                    document.querySelectorAll('.menu-dropdown').forEach(function(d) { d.classList.add('hidden'); });
+                });
+                document.querySelectorAll('.customer-delete').forEach(function(btn) {
+                    btn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        var id = this.getAttribute('data-id');
+                        if (!confirm('この顧客を削除しますか？')) return;
+                        var deleted = getDeleted();
+                        if (deleted.indexOf(id) < 0) deleted.push(id);
+                        sessionStorage.setItem(STORAGE_DELETED, JSON.stringify(deleted));
+                        render();
+                    });
+                });
+            }
+            render();
+            var searchInput = document.getElementById('customer-search');
+            if (searchInput) {
+                searchInput.addEventListener('input', render);
+            }
+        })();
+    </script>
+</body>
+</html>

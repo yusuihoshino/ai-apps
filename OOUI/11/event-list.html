@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>イベント一覧 - イベント管理</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        .calendar-day { min-height: 100px; }
+        .calendar-day.other-month { background-color: #f9fafb; color: #9ca3af; }
+        .view-tab-active { background-color: #2563eb; color: #fff; }
+        .view-tab-inactive { background-color: #f3f4f6; color: #374151; }
+        .view-tab-inactive:hover { background-color: #e5e7eb; }
+        .id-tooltip { position: fixed; z-index: 50; padding: 6px 10px; border-radius: 6px; font-size: 12px; font-weight: 500; color: #fff; background-color: #2563eb; white-space: nowrap; pointer-events: none; box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1); }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- サイドバー -->
+        <div class="w-64 bg-white border-r border-gray-200 flex flex-col shrink-0">
+            <div class="p-4 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-gray-900">イベント管理</h1>
+            </div>
+            <nav class="flex-1 p-4">
+                <a href="event-list.html" class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-900 bg-blue-50 text-blue-600 rounded-lg transition-colors">
+                    <span class="material-icons">event</span>
+                    <span>イベント</span>
+                </a>
+                <a href="material-list.html" class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors">
+                    <span class="material-icons">inventory_2</span>
+                    <span>資材</span>
+                </a>
+            </nav>
+        </div>
+
+        <!-- メインコンテンツ -->
+        <div class="flex-1 overflow-y-auto">
+            <div class="container mx-auto px-4 py-8">
+                <div class="mb-6">
+                    <h2 class="text-2xl font-bold text-gray-900">イベント一覧</h2>
+                </div>
+                <div class="mb-4 flex items-center justify-between gap-4">
+                    <div class="flex items-center gap-2 min-w-0 flex-1">
+                        <div class="relative w-full max-w-xs shrink-0">
+                            <span class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none">search</span>
+                            <input type="search" id="event-search" placeholder="項目名・IDで検索できます" class="pl-10 pr-4 h-10 border border-gray-300 rounded-lg w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500" aria-label="検索">
+                        </div>
+                        <div class="relative shrink-0">
+                            <button type="button" id="filter-toggle" class="inline-flex items-center justify-center gap-1.5 h-10 px-4 border border-gray-300 rounded-lg bg-white text-sm font-medium text-gray-700 hover:bg-gray-50 shrink-0">
+                                <span class="material-icons text-lg">tune</span>検索条件
+                            </button>
+                            <div id="filter-panel" class="hidden absolute left-0 top-full mt-1 z-10 w-72 bg-white rounded-lg border border-gray-200 shadow-lg py-3 px-4">
+                                <div class="space-y-2 text-sm">
+                                <div><label class="block text-gray-600 mb-0.5">イベント</label><input type="text" id="f-event" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm"></div>
+                                <div><label class="block text-gray-600 mb-0.5">会場</label><input type="text" id="f-venue" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm"></div>
+                                <div class="min-w-0"><label class="block text-gray-600 mb-0.5">表示期間</label><div class="flex gap-2 mt-0.5 min-w-0"><input type="text" id="f-start" class="min-w-0 flex-1 border border-gray-300 rounded px-2 py-1.5 text-sm" placeholder="開始"><input type="text" id="f-end" class="min-w-0 flex-1 border border-gray-300 rounded px-2 py-1.5 text-sm" placeholder="終了"></div></div>
+                                <div><label class="block text-gray-600 mb-0.5">主催者</label><input type="text" id="f-organizer" class="w-full border border-gray-300 rounded px-2 py-1.5 text-sm"></div>
+                                <div><label class="block text-gray-600 mb-0.5">カテゴリー</label><div class="grid grid-cols-2 gap-x-4 gap-y-1.5 pt-0.5"><label class="inline-flex items-center gap-2 cursor-pointer"><input type="checkbox" name="f-category" value="技術" class="rounded border-gray-300">技術</label><label class="inline-flex items-center gap-2 cursor-pointer"><input type="checkbox" name="f-category" value="研修" class="rounded border-gray-300">研修</label><label class="inline-flex items-center gap-2 cursor-pointer"><input type="checkbox" name="f-category" value="展示・商談" class="rounded border-gray-300">展示・商談</label><label class="inline-flex items-center gap-2 cursor-pointer"><input type="checkbox" name="f-category" value="セミナー" class="rounded border-gray-300">セミナー</label><label class="inline-flex items-center gap-2 cursor-pointer"><input type="checkbox" name="f-category" value="交流会" class="rounded border-gray-300">交流会</label><label class="inline-flex items-center gap-2 cursor-pointer"><input type="checkbox" name="f-category" value="説明会" class="rounded border-gray-300">説明会</label><label class="inline-flex items-center gap-2 cursor-pointer"><input type="checkbox" name="f-category" value="展示会" class="rounded border-gray-300">展示会</label><label class="inline-flex items-center gap-2 cursor-pointer"><input type="checkbox" name="f-category" value="懇親会" class="rounded border-gray-300">懇親会</label><label class="inline-flex items-center gap-2 cursor-pointer"><input type="checkbox" name="f-category" value="ウェビナー" class="rounded border-gray-300">ウェビナー</label><label class="inline-flex items-center gap-2 cursor-pointer"><input type="checkbox" name="f-category" value="その他" class="rounded border-gray-300">その他</label></div></div>
+                                </div>
+                                <div class="mt-3 flex justify-end gap-2">
+                                    <button type="button" id="filter-clear" class="inline-flex items-center justify-center h-10 px-4 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">クリア</button>
+                                    <button type="button" id="filter-apply" class="inline-flex items-center justify-center h-10 px-4 text-sm font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700">適用</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="event-detail.html" class="inline-flex items-center justify-center gap-2 h-10 px-4 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium shrink-0 mr-1">
+                        <span class="material-icons text-lg">add</span>新規作成
+                    </a>
+                </div>
+                <div class="mb-4 flex items-center gap-2">
+                    <div class="inline-flex rounded-lg border border-gray-200 bg-gray-100 p-1" role="tablist">
+                        <button type="button" id="view-list" class="view-tab-active inline-flex items-center justify-center h-10 px-4 rounded-md text-sm font-medium transition-colors">リスト</button>
+                        <button type="button" id="view-calendar" class="view-tab-inactive inline-flex items-center justify-center h-10 px-4 rounded-md text-sm font-medium transition-colors">カレンダー</button>
+                    </div>
+                </div>
+
+                <!-- リスト表示 -->
+                <div id="panel-list" class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b border-gray-200">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">イベント</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">会場</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">開始日</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">終了日</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">主催者</th>
+                                <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900">カテゴリー</th>
+                            </tr>
+                        </thead>
+                        <tbody id="event-tbody" class="divide-y divide-gray-200">
+                            <tr class="event-row hover:bg-gray-50 cursor-pointer" onclick="location.href='event-detail.html?id=E001'" data-event="技術カンファレンス 2025" data-venue="東京国際フォーラム" data-start="2025-03-15 9:00" data-end="2025-03-15 18:00" data-organizer="テック" data-category="技術">
+                                <td class="px-4 py-3 text-sm text-gray-900 relative" data-id="E001">技術カンファレンス 2025</td>
+                                <td class="px-4 py-3 text-sm text-gray-900 relative" data-id="V001">東京国際フォーラム</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">2025-03-15 9:00</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">2025-03-15 18:00</td>
+                                <td class="px-4 py-3 text-sm text-gray-900 relative" data-id="O001">テック</td>
+                                <td class="px-4 py-3 relative" data-id="C001"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-900">技術</span></td>
+                            </tr>
+                            <tr class="event-row hover:bg-gray-50 cursor-pointer" onclick="location.href='event-detail.html?id=E002'" data-event="営業研修会" data-venue="本社 大会議室" data-start="2025-03-20 10:00" data-end="2025-03-20 17:00" data-organizer="人事部" data-category="研修">
+                                <td class="px-4 py-3 text-sm text-gray-900 relative" data-id="E002">営業研修会</td>
+                                <td class="px-4 py-3 text-sm text-gray-900 relative" data-id="V002">本社 大会議室</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">2025-03-20 10:00</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">2025-03-20 17:00</td>
+                                <td class="px-4 py-3 text-sm text-gray-900 relative" data-id="O002">人事部</td>
+                                <td class="px-4 py-3 relative" data-id="C002"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-50 text-green-900">研修</span></td>
+                            </tr>
+                            <tr class="event-row hover:bg-gray-50 cursor-pointer" onclick="location.href='event-detail.html?id=E003'" data-event="展示会 春の商談会" data-venue="ビッグサイト" data-start="2025-04-01 9:00" data-end="2025-04-03 17:00" data-organizer="展示会運営委員会" data-category="展示・商談">
+                                <td class="px-4 py-3 text-sm text-gray-900 relative" data-id="E003">展示会 春の商談会</td>
+                                <td class="px-4 py-3 text-sm text-gray-900 relative" data-id="V003">ビッグサイト</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">2025-04-01 9:00</td>
+                                <td class="px-4 py-3 text-sm text-gray-900">2025-04-03 17:00</td>
+                                <td class="px-4 py-3 text-sm text-gray-900 relative" data-id="O003">展示会運営委員会</td>
+                                <td class="px-4 py-3 relative" data-id="C003"><span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-900">展示・商談</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- カレンダー表示 -->
+                <div id="panel-calendar" class="hidden">
+                    <div class="bg-white rounded-lg border border-gray-200 shadow-sm overflow-hidden">
+                        <div class="flex items-center justify-between px-6 py-4 border-b border-gray-200">
+                            <button type="button" id="cal-prev" class="inline-flex items-center justify-center h-10 w-10 rounded-lg hover:bg-gray-100"><span class="material-icons">chevron_left</span></button>
+                            <h3 id="cal-title" class="text-lg font-semibold text-gray-900">2025年3月</h3>
+                            <button type="button" id="cal-next" class="inline-flex items-center justify-center h-10 w-10 rounded-lg hover:bg-gray-100"><span class="material-icons">chevron_right</span></button>
+                        </div>
+                        <div class="p-4">
+                            <table class="w-full border-collapse">
+                                <thead>
+                                    <tr class="text-left text-sm font-medium text-gray-500">
+                                        <th class="border border-gray-200 p-2">日</th><th class="border border-gray-200 p-2">月</th><th class="border border-gray-200 p-2">火</th><th class="border border-gray-200 p-2">水</th><th class="border border-gray-200 p-2">木</th><th class="border border-gray-200 p-2">金</th><th class="border border-gray-200 p-2">土</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cal-body"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="id-tooltip" class="id-tooltip hidden"></div>
+    <script>
+        (function() {
+            var view = 'list';
+            var calYear = 2025, calMonth = 2;
+            var events = [
+                { id: 'E001', name: '技術カンファレンス 2025', date: '2025-03-15', url: 'event-detail.html?id=E001' },
+                { id: 'E002', name: '営業研修会', date: '2025-03-20', url: 'event-detail.html?id=E002' },
+                { id: 'E003', name: '展示会 春の商談会', date: '2025-04-01', url: 'event-detail.html?id=E003' }
+            ];
+            function showView(v) {
+                view = v;
+                document.getElementById('panel-list').classList.toggle('hidden', v !== 'list');
+                document.getElementById('panel-calendar').classList.toggle('hidden', v !== 'calendar');
+                document.getElementById('view-list').classList.toggle('view-tab-active', v === 'list');
+                document.getElementById('view-list').classList.toggle('view-tab-inactive', v !== 'list');
+                document.getElementById('view-calendar').classList.toggle('view-tab-active', v === 'calendar');
+                document.getElementById('view-calendar').classList.toggle('view-tab-inactive', v !== 'calendar');
+                if (v === 'calendar') renderCal();
+            }
+            document.getElementById('view-list').addEventListener('click', function() { showView('list'); });
+            document.getElementById('view-calendar').addEventListener('click', function() { showView('calendar'); });
+
+            var filterPanel = document.getElementById('filter-panel');
+            var filterToggle = document.getElementById('filter-toggle');
+            filterToggle.addEventListener('click', function(e) { e.stopPropagation(); filterPanel.classList.toggle('hidden'); });
+            document.getElementById('filter-apply').addEventListener('click', function() {
+                filterPanel.classList.add('hidden');
+                applyEventFilter();
+            });
+            document.getElementById('filter-clear').addEventListener('click', function() {
+                document.getElementById('f-event').value = '';
+                document.getElementById('f-venue').value = '';
+                document.getElementById('f-start').value = '';
+                document.getElementById('f-end').value = '';
+                document.getElementById('f-organizer').value = '';
+                document.querySelectorAll('input[name="f-category"]').forEach(function(cb) { cb.checked = false; });
+                applyEventFilter();
+            });
+            document.addEventListener('click', function() { filterPanel.classList.add('hidden'); });
+            filterPanel.addEventListener('click', function(e) { e.stopPropagation(); });
+            function applyEventFilter() {
+                var event = (document.getElementById('f-event').value || '').trim().toLowerCase();
+                var venue = (document.getElementById('f-venue').value || '').trim().toLowerCase();
+                var start = (document.getElementById('f-start').value || '').trim().toLowerCase();
+                var end = (document.getElementById('f-end').value || '').trim().toLowerCase();
+                var organizer = (document.getElementById('f-organizer').value || '').trim().toLowerCase();
+                var categories = [];
+                document.querySelectorAll('input[name="f-category"]:checked').forEach(function(cb) { categories.push(cb.value); });
+                document.querySelectorAll('.event-row').forEach(function(row) {
+                    var show = (!event || (row.getAttribute('data-event') || '').toLowerCase().indexOf(event) >= 0) &&
+                        (!venue || (row.getAttribute('data-venue') || '').toLowerCase().indexOf(venue) >= 0) &&
+                        (!start || (row.getAttribute('data-start') || '').toLowerCase().indexOf(start) >= 0) &&
+                        (!end || (row.getAttribute('data-end') || '').toLowerCase().indexOf(end) >= 0) &&
+                        (!organizer || (row.getAttribute('data-organizer') || '').toLowerCase().indexOf(organizer) >= 0) &&
+                        (categories.length === 0 || categories.indexOf(row.getAttribute('data-category')) >= 0);
+                    row.style.display = show ? '' : 'none';
+                });
+            }
+            document.getElementById('cal-prev').addEventListener('click', function() { calMonth--; if (calMonth < 0) { calYear--; calMonth = 11; } renderCal(); });
+            document.getElementById('cal-next').addEventListener('click', function() { calMonth++; if (calMonth > 11) { calYear++; calMonth = 0; } renderCal(); });
+            document.getElementById('event-search').addEventListener('input', function() { if (view === 'calendar') renderCal(); });
+            function matchesSearch(e, q) {
+                if (!q || !q.trim()) return true;
+                q = q.trim().toLowerCase();
+                return (e.name && e.name.toLowerCase().indexOf(q) >= 0) || (e.id && e.id.toLowerCase().indexOf(q) >= 0);
+            }
+            function renderCal() {
+                var q = document.getElementById('event-search').value;
+                document.getElementById('cal-title').textContent = calYear + '年' + (calMonth + 1) + '月';
+                var first = new Date(calYear, calMonth, 1), last = new Date(calYear, calMonth + 1, 0);
+                var startDay = first.getDay(), daysInMonth = last.getDate(), totalCells = 42, dayNum = 1 - startDay;
+                var html = '';
+                for (var i = 0; i < totalCells; i++) {
+                    if (i % 7 === 0) html += '<tr>';
+                    var cellDay, ymd, isOther = false;
+                    if (dayNum < 1) {
+                        cellDay = new Date(calYear, calMonth, 0).getDate() + dayNum;
+                        var pY = calMonth === 0 ? calYear - 1 : calYear, pM = calMonth === 0 ? 11 : calMonth - 1;
+                        ymd = pY + '-' + String(pM + 1).padStart(2, '0') + '-' + String(cellDay).padStart(2, '0');
+                        isOther = true;
+                    } else if (dayNum > daysInMonth) {
+                        cellDay = dayNum - daysInMonth;
+                        var nY = calMonth === 11 ? calYear + 1 : calYear, nM = calMonth === 11 ? 0 : calMonth + 1;
+                        ymd = nY + '-' + String(nM + 1).padStart(2, '0') + '-' + String(cellDay).padStart(2, '0');
+                        isOther = true;
+                    } else {
+                        cellDay = dayNum;
+                        ymd = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(cellDay).padStart(2, '0');
+                    }
+                    dayNum++;
+                    var list = [];
+                    events.forEach(function(e) { if (e.date === ymd && matchesSearch(e, q)) list.push(e); });
+                    var content = '<div class="text-xs font-medium text-gray-500 mb-1">' + cellDay + '</div>';
+                    list.forEach(function(e) {
+                        content += '<a href="' + e.url + '" class="block text-xs truncate rounded px-1 py-0.5 bg-blue-100 text-blue-800 mb-0.5" title="' + e.name + '">' + e.name + '</a>';
+                    });
+                    html += '<td class="border border-gray-200 p-2 align-top calendar-day' + (isOther ? ' other-month' : '') + '">' + content + '</td>';
+                    if (i % 7 === 6) html += '</tr>';
+                }
+                document.getElementById('cal-body').innerHTML = html;
+            }
+            var tip = document.getElementById('id-tooltip');
+            document.querySelectorAll('[data-id]').forEach(function(el) {
+                el.addEventListener('mouseenter', function(e) {
+                    var id = el.getAttribute('data-id');
+                    if (!id) return;
+                    tip.textContent = 'ID: ' + id;
+                    tip.classList.remove('hidden');
+                    tip.style.visibility = 'hidden';
+                    requestAnimationFrame(function() {
+                        tip.style.left = (e.clientX - tip.offsetWidth / 2) + 'px';
+                        tip.style.top = (e.clientY - tip.offsetHeight - 8) + 'px';
+                        tip.style.visibility = 'visible';
+                    });
+                });
+                el.addEventListener('mousemove', function(e) {
+                    if (!tip.classList.contains('hidden')) {
+                        tip.style.left = (e.clientX - tip.offsetWidth / 2) + 'px';
+                        tip.style.top = (e.clientY - tip.offsetHeight - 8) + 'px';
+                    }
+                });
+                el.addEventListener('mouseleave', function() { tip.classList.add('hidden'); });
+            });
+        })();
+    </script>
+</body>
+</html>

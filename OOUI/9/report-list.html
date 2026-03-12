@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>レポート一覧</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="bg-gray-50">
+    <div class="flex h-screen">
+        <!-- サイドバー -->
+        <div class="w-64 bg-white border-r border-gray-200 flex flex-col">
+            <div class="p-4 border-b border-gray-200">
+                <h1 class="text-xl font-bold text-gray-900">KANRI</h1>
+            </div>
+            <nav class="flex-1 p-4">
+                <a 
+                    href="purchase-list.html"
+                    class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                    <span class="material-icons">shopping_cart</span>
+                    <span>仕入れ</span>
+                </a>
+                <a 
+                    href="product-list.html"
+                    class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                    <span class="material-icons">inventory</span>
+                    <span>商品</span>
+                </a>
+                <a 
+                    href="inventory-list.html"
+                    class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                    <span class="material-icons">checklist</span>
+                    <span>棚卸し</span>
+                </a>
+                <a 
+                    href="report-list.html"
+                    class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-900 bg-blue-50 text-blue-600 rounded-lg transition-colors"
+                >
+                    <span class="material-icons">assessment</span>
+                    <span>レポート</span>
+                </a>
+                <a 
+                    href="history.html"
+                    class="flex items-center gap-3 px-4 py-3 mb-2 font-semibold text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                    <span class="material-icons">history</span>
+                    <span>変更履歴</span>
+                </a>
+            </nav>
+            <!-- ユーザー情報 -->
+            <div class="p-4 border-t border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center overflow-hidden">
+                        <span class="material-icons text-gray-600">person</span>
+                    </div>
+                    <div>
+                        <div class="text-sm font-semibold text-gray-900">星野結水</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- メインコンテンツ -->
+        <div class="flex-1 overflow-y-auto">
+            <div class="container mx-auto px-4 py-8">
+                <h2 class="text-2xl font-bold text-gray-900 mb-6">レポート一覧</h2>
+
+                <!-- レポートテーブル -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
+                    <div class="min-w-[600px]">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900 relative" data-sort="year">
+                                        <div class="flex items-center gap-2">
+                                            <span>年</span>
+                                            <button class="sort-menu-btn p-1 text-gray-200 hover:text-gray-400 transition-colors" data-sort-key="year">
+                                                <span class="sort-icon text-lg">▼</span>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900 relative" data-sort="previousInventory">
+                                        <div class="flex items-center gap-2">
+                                            <span>前期末棚卸高</span>
+                                            <button class="sort-menu-btn p-1 text-gray-200 hover:text-gray-400 transition-colors" data-sort-key="previousInventory">
+                                                <span class="sort-icon text-lg">▼</span>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900 relative" data-sort="currentPurchases">
+                                        <div class="flex items-center gap-2">
+                                            <span>今期の仕入高</span>
+                                            <button class="sort-menu-btn p-1 text-gray-200 hover:text-gray-400 transition-colors" data-sort-key="currentPurchases">
+                                                <span class="sort-icon text-lg">▼</span>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900 relative" data-sort="currentInventory">
+                                        <div class="flex items-center gap-2">
+                                            <span>今期末の棚卸高</span>
+                                            <button class="sort-menu-btn p-1 text-gray-200 hover:text-gray-400 transition-colors" data-sort-key="currentInventory">
+                                                <span class="sort-icon text-lg">▼</span>
+                                            </button>
+                                        </div>
+                                    </th>
+                                    <th class="px-4 py-3 text-left text-sm font-semibold text-gray-900 relative" data-sort="costOfSales">
+                                        <div class="flex items-center gap-2">
+                                            <span>売上原価</span>
+                                            <button class="sort-menu-btn p-1 text-gray-200 hover:text-gray-400 transition-colors" data-sort-key="costOfSales">
+                                                <span class="sort-icon text-lg">▼</span>
+                                            </button>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="reportTableBody" class="divide-y divide-gray-200">
+                                <!-- JavaScriptで動的に生成 -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 年別レポート推移グラフ -->
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden mt-6">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div class="flex items-center gap-4">
+                                <h2 class="text-lg font-semibold text-gray-900">年別レポート推移</h2>
+                                <div class="flex items-center gap-3">
+                                    <select id="startYearSelect" class="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <!-- JavaScriptで動的に生成 -->
+                                    </select>
+                                    <label for="endYearSelect" class="text-sm font-medium text-gray-700">から</label>
+                                    <select id="endYearSelect" class="px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                                        <!-- JavaScriptで動的に生成 -->
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="w-full">
+                            <svg id="reportLineChart" width="100%" height="500" viewBox="0 0 1000 500" preserveAspectRatio="xMidYMid meet">
+                                <!-- グラフはJavaScriptで動的に描画 -->
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 金額フォーマット
+        function formatCurrency(amount) {
+            return '¥' + new Intl.NumberFormat('ja-JP').format(amount);
+        }
+
+        // ソート状態
+        let reportSortKey = localStorage.getItem('reportSortKey') || 'year';
+        let reportSortDir = localStorage.getItem('reportSortDir') || 'desc';
+
+
+        // 年選択プルダウンの初期化
+        function initializeYearSelects() {
+            const purchases = JSON.parse(localStorage.getItem('purchases') || '[]');
+            const inventories = JSON.parse(localStorage.getItem('inventories') || '[]');
+            
+            const years = new Set();
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            
+            // 現在年を追加
+            years.add(currentYear);
+            
+            // データから年を抽出
+            purchases.forEach(p => {
+                if (p.date) {
+                    years.add(new Date(p.date).getFullYear());
+                }
+            });
+            inventories.forEach(i => {
+                if (i.date) {
+                    years.add(new Date(i.date).getFullYear());
+                }
+            });
+            
+            // 年を降順でソート
+            const sortedYears = Array.from(years).sort((a, b) => b - a);
+            
+            const startSelect = document.getElementById('startYearSelect');
+            const endSelect = document.getElementById('endYearSelect');
+            
+            startSelect.innerHTML = '';
+            endSelect.innerHTML = '';
+            
+            sortedYears.forEach(year => {
+                const startOption = document.createElement('option');
+                startOption.value = year;
+                startOption.textContent = year + '年';
+                startSelect.appendChild(startOption);
+                
+                const endOption = document.createElement('option');
+                endOption.value = year;
+                endOption.textContent = year + '年';
+                if (year === currentYear) {
+                    endOption.selected = true;
+                }
+                endSelect.appendChild(endOption);
+            });
+            
+            // 開始年は5年前をデフォルトに
+            if (sortedYears.length >= 5) {
+                startSelect.value = sortedYears[4];
+            } else if (sortedYears.length > 0) {
+                startSelect.value = sortedYears[sortedYears.length - 1];
+            }
+        }
+
+        // レポートデータを取得
+        function getReportData(startYear = null, endYear = null) {
+            const purchases = JSON.parse(localStorage.getItem('purchases') || '[]');
+            const inventories = JSON.parse(localStorage.getItem('inventories') || '[]');
+            
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            
+            // 開始年と終了年を取得
+            if (startYear === null || endYear === null) {
+                startYear = parseInt(document.getElementById('startYearSelect').value) || currentYear - 4;
+                endYear = parseInt(document.getElementById('endYearSelect').value) || currentYear;
+            }
+            
+            // 開始年から終了年までの年を生成
+            const years = [];
+            for (let year = startYear; year <= endYear; year++) {
+                years.push(year);
+            }
+            
+            // 年を降順でソート（念のため）
+            const sortedYears = [...years].sort((a, b) => b - a);
+            
+            // 各年のレポートデータを計算
+            const reports = sortedYears.map(year => {
+                const previousYear = year - 1;
+
+                // 今期の仕入高
+                const currentPurchases = purchases.filter(p => {
+                    const y = new Date(p.date).getFullYear();
+                    return y === year;
+                });
+                let currentPurchasesTotal = currentPurchases.reduce((sum, p) => sum + (p.totalAmount || 0), 0);
+                if (currentPurchasesTotal === 0) {
+                    currentPurchasesTotal = 2000000;
+                }
+
+                // 棚卸しは日付でソート（新しい順）
+                const sortedInventories = [...inventories].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+                // 今期末の棚卸高
+                const currentYearInventories = sortedInventories.filter(i => new Date(i.date).getFullYear() === year);
+                const latestCurrentInventory = currentYearInventories[0] || sortedInventories.find(i => new Date(i.date).getFullYear() <= year);
+                let currentInventoryValue = latestCurrentInventory ? (latestCurrentInventory.totalAmount || 0) : 0;
+                if (currentInventoryValue === 0) {
+                    currentInventoryValue = 1800000;
+                }
+
+                // 前期末棚卸高
+                const previousYearInventories = sortedInventories.filter(i => new Date(i.date).getFullYear() === previousYear);
+                const latestPreviousInventory = previousYearInventories[0] || sortedInventories.find(i => new Date(i.date).getFullYear() < year);
+                let previousInventoryValue = latestPreviousInventory ? (latestPreviousInventory.totalAmount || 0) : 0;
+                if (previousInventoryValue === 0) {
+                    previousInventoryValue = 1500000;
+                }
+
+                // 売上原価
+                const costOfSales = previousInventoryValue + currentPurchasesTotal - currentInventoryValue;
+
+                return {
+                    year: year,
+                    previousInventory: previousInventoryValue,
+                    currentPurchases: currentPurchasesTotal,
+                    currentInventory: currentInventoryValue,
+                    costOfSales: Math.max(0, costOfSales)
+                };
+            });
+
+            return reports;
+        }
+
+        // ソート関数
+        function getSortVal(report, key) {
+            switch(key) {
+                case 'year':
+                    return report.year;
+                case 'previousInventory':
+                    return report.previousInventory;
+                case 'currentPurchases':
+                    return report.currentPurchases;
+                case 'currentInventory':
+                    return report.currentInventory;
+                case 'costOfSales':
+                    return report.costOfSales;
+                default:
+                    return report.year;
+            }
+        }
+
+        // レポート一覧を表示
+        function renderReports() {
+            const reports = getReportData();
+            const tbody = document.getElementById('reportTableBody');
+            tbody.innerHTML = '';
+
+            // ソート
+            const sortedReports = [...reports].sort((a, b) => {
+                const aVal = getSortVal(a, reportSortKey);
+                const bVal = getSortVal(b, reportSortKey);
+                if (reportSortDir === 'asc') {
+                    return aVal > bVal ? 1 : -1;
+                } else {
+                    return aVal < bVal ? 1 : -1;
+                }
+            });
+
+            if (sortedReports.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="5" class="px-4 py-8 text-center text-gray-500">レポートデータがありません</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            sortedReports.forEach(report => {
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-50 transition-colors cursor-pointer';
+                row.onclick = () => {
+                    window.location.href = `report-detail.html?year=${report.year}`;
+                };
+
+                row.innerHTML = `
+                    <td class="px-4 py-3 text-sm text-gray-900">${report.year}年</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">${formatCurrency(report.previousInventory)}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">${formatCurrency(report.currentPurchases)}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">${formatCurrency(report.currentInventory)}</td>
+                    <td class="px-4 py-3 text-sm text-gray-900">${formatCurrency(report.costOfSales)}</td>
+                `;
+
+                tbody.appendChild(row);
+            });
+
+            // ソートアイコンを更新
+            updateReportSortIcons();
+        }
+
+        // ソートアイコンを更新
+        function updateReportSortIcons() {
+            document.querySelectorAll('.sort-menu-btn').forEach(btn => {
+                const sortKey = btn.getAttribute('data-sort-key');
+                const icon = btn.querySelector('.sort-icon');
+                if (icon) {
+                    if (reportSortKey === sortKey) {
+                        icon.textContent = reportSortDir === 'asc' ? '▲' : '▼';
+                        icon.className = 'sort-icon text-lg text-blue-900 font-bold';
+                    } else {
+                        icon.textContent = '▼';
+                        icon.className = 'sort-icon text-lg text-gray-200';
+                    }
+                }
+            });
+        }
+
+        // 折れ線グラフを描画（期間選択に対応）
+        function renderLineChartWithPeriod() {
+            const startYear = parseInt(document.getElementById('startYearSelect').value);
+            const endYear = parseInt(document.getElementById('endYearSelect').value);
+            
+            // 開始年が終了年より大きい場合は入れ替え
+            if (startYear > endYear) {
+                document.getElementById('startYearSelect').value = endYear;
+                document.getElementById('endYearSelect').value = startYear;
+            }
+            
+            const reports = getReportData();
+            renderLineChart(reports);
+        }
+
+        // 折れ線グラフを描画
+        function renderLineChart(reports) {
+            const svg = document.getElementById('reportLineChart');
+            svg.innerHTML = '';
+
+            if (reports.length === 0) {
+                svg.innerHTML = '<text x="500" y="250" text-anchor="middle" font-size="16" fill="#6B7280">データがありません</text>';
+                return;
+            }
+
+            const width = 1000;
+            const height = 500;
+            const padding = { top: 40, right: 60, bottom: 80, left: 100 };
+            const chartWidth = width - padding.left - padding.right;
+            const chartHeight = height - padding.top - padding.bottom;
+
+            // 年でソート（昇順）
+            const sortedReports = [...reports].sort((a, b) => a.year - b.year);
+
+            // 最大値を計算
+            const allValues = sortedReports.flatMap(r => [
+                r.previousInventory,
+                r.currentPurchases,
+                r.currentInventory,
+                r.costOfSales
+            ]);
+            const maxValue = Math.max(...allValues) * 1.1;
+
+            // Y軸の目盛り
+            const yTicks = 5;
+            const tickStep = maxValue / yTicks;
+
+            // グリッド線とY軸ラベル
+            for (let i = 0; i <= yTicks; i++) {
+                const y = padding.top + chartHeight - (chartHeight * i / yTicks);
+                const value = Math.round(tickStep * i);
+
+                // グリッド線
+                svg.innerHTML += `<line x1="${padding.left}" y1="${y}" x2="${padding.left + chartWidth}" y2="${y}" stroke="#E5E7EB" stroke-width="1" />`;
+                
+                // Y軸ラベル
+                svg.innerHTML += `<text x="${padding.left - 10}" y="${y + 5}" text-anchor="end" font-size="12" fill="#6B7280">${formatCurrency(value)}</text>`;
+            }
+
+            // X軸の年ラベルと位置を計算
+            const yearSpacing = chartWidth / (sortedReports.length - 1 || 1);
+            const yearPositions = sortedReports.map((report, index) => ({
+                year: report.year,
+                x: padding.left + (index * yearSpacing)
+            }));
+
+            // データ系列の定義
+            const dataSeries = [
+                { key: 'previousInventory', label: '前期末棚卸高', color: '#3B82F6' },
+                { key: 'currentPurchases', label: '今期の仕入高', color: '#10B981' },
+                { key: 'currentInventory', label: '今期末の棚卸高', color: '#F59E0B' },
+                { key: 'costOfSales', label: '売上原価', color: '#EF4444' }
+            ];
+
+            // 各系列の折れ線を描画
+            dataSeries.forEach(series => {
+                const points = sortedReports.map((report, index) => {
+                    const x = padding.left + (index * yearSpacing);
+                    const value = report[series.key];
+                    const y = padding.top + chartHeight - (value / maxValue) * chartHeight;
+                    return { x, y, value };
+                });
+
+                // 折れ線のパスを作成
+                let pathData = `M ${points[0].x} ${points[0].y}`;
+                for (let i = 1; i < points.length; i++) {
+                    pathData += ` L ${points[i].x} ${points[i].y}`;
+                }
+
+                // 折れ線を描画
+                svg.innerHTML += `<path d="${pathData}" fill="none" stroke="${series.color}" stroke-width="3" />`;
+
+                // 点を描画
+                points.forEach(point => {
+                    svg.innerHTML += `<circle cx="${point.x}" cy="${point.y}" r="4" fill="${series.color}" />`;
+                });
+            });
+
+            // X軸の年ラベル
+            yearPositions.forEach(pos => {
+                svg.innerHTML += `<text x="${pos.x}" y="${padding.top + chartHeight + 25}" text-anchor="middle" font-size="12" fill="#374151">${pos.year}</text>`;
+            });
+
+            // 凡例
+            const legendX = padding.left + chartWidth + 20;
+            const legendYStart = padding.top;
+            dataSeries.forEach((series, index) => {
+                const y = legendYStart + (index * 25);
+                svg.innerHTML += `<line x1="${legendX}" y1="${y}" x2="${legendX + 30}" y2="${y}" stroke="${series.color}" stroke-width="3" />`;
+                svg.innerHTML += `<text x="${legendX + 35}" y="${y + 5}" font-size="12" fill="#374151">${series.label}</text>`;
+            });
+
+            // X軸の線
+            svg.innerHTML += `<line x1="${padding.left}" y1="${padding.top + chartHeight}" x2="${padding.left + chartWidth}" y2="${padding.top + chartHeight}" stroke="#374151" stroke-width="2" />`;
+            
+            // Y軸の線
+            svg.innerHTML += `<line x1="${padding.left}" y1="${padding.top}" x2="${padding.left}" y2="${padding.top + chartHeight}" stroke="#374151" stroke-width="2" />`;
+        }
+
+
+
+        // ソート設定
+        function setupReportTableSort() {
+            // 既存のクリックイベントは削除（新しいメニューシステムを使用）
+        }
+
+        // ソートメニューの表示/非表示
+        function setupReportSortMenus() {
+            let currentMenu = null;
+            let currentSortKey = null;
+
+            document.querySelectorAll('.sort-menu-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const sortKey = btn.getAttribute('data-sort-key');
+                    const th = btn.closest('th');
+                    const rect = th.getBoundingClientRect();
+                    
+                    if (currentMenu) {
+                        currentMenu.classList.add('hidden');
+                    }
+                    
+                    const menu = document.getElementById('sortMenu');
+                    menu.style.top = `${rect.bottom}px`;
+                    menu.style.left = `${rect.right - 120}px`;
+                    menu.classList.remove('hidden');
+                    currentMenu = menu;
+                    currentSortKey = sortKey;
+                });
+            });
+
+            document.querySelectorAll('.sort-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const sortDir = option.getAttribute('data-sort-dir');
+                    if (currentSortKey) {
+                        reportSortKey = currentSortKey;
+                        reportSortDir = sortDir;
+                        localStorage.setItem('reportSortKey', reportSortKey);
+                        localStorage.setItem('reportSortDir', reportSortDir);
+                        renderReports();
+                    }
+                    if (currentMenu) {
+                        currentMenu.classList.add('hidden');
+                    }
+                    currentMenu = null;
+                    currentSortKey = null;
+                });
+            });
+
+            document.addEventListener('click', (e) => {
+                if (!e.target.closest('.sort-menu-btn') && !e.target.closest('#sortMenu')) {
+                    if (currentMenu) {
+                        currentMenu.classList.add('hidden');
+                    }
+                    currentMenu = null;
+                    currentSortKey = null;
+                }
+            });
+        }
+
+        // 初期化
+        initializeYearSelects();
+        setupReportTableSort();
+        setupReportSortMenus();
+        renderReports();
+        renderLineChartWithPeriod();
+        
+        // 期間選択変更時にグラフを再描画
+        document.getElementById('startYearSelect').addEventListener('change', renderLineChartWithPeriod);
+        document.getElementById('endYearSelect').addEventListener('change', renderLineChartWithPeriod);
+    </script>
+
+    <!-- ソートメニュー -->
+    <div id="sortMenu" class="hidden absolute bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[120px]">
+        <div class="py-1">
+            <button class="sort-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-sort-dir="asc">
+                昇順
+            </button>
+            <button class="sort-option w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100" data-sort-dir="desc">
+                降順
+            </button>
+        </div>
+    </div>
+</body>
+</html>
