@@ -1,0 +1,14 @@
+# 個人の予定データ（公開リポジトリに含めない）
+data.json
+data/
+
+# 通知用にアップロードした画像
+notification-images/*
+!notification-images/manifest.json
+
+# Python
+__pycache__/
+*.pyc
+
+# OS
+.DS_Store

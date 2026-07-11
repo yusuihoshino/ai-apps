@@ -1,0 +1,29 @@
+{
+  "version": 1,
+  "schedule": {
+    "events": [],
+    "memo": ""
+  },
+  "routines": [],
+  "settings": {
+    "startHour": 8,
+    "endHour": 19,
+    "sidebarCollapsed": false,
+    "headerCollapsed": false,
+    "tagAutoComplete": {
+      "task": false,
+      "schedule": true,
+      "break": true
+    },
+    "tagFillMovable": {
+      "task": true,
+      "schedule": false,
+      "break": true
+    },
+    "tagNotify": {
+      "task": true,
+      "schedule": false,
+      "break": true
+    }
+  }
+}

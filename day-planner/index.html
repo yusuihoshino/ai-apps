@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self'; base-uri 'self'; form-action 'self'; frame-ancestors 'none';">
+  <title>day planner</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <div class="app">
+    <div class="main">
+      <section class="calendar" aria-label="1日のスケジュール">
+        <header class="cal-header">
+          <div class="view-tabs" role="tablist" aria-label="ビュー切替">
+            <button type="button" class="view-tab active" data-view="calendar" role="tab"
+              aria-selected="true" aria-label="カレンダー" title="カレンダー">
+              <svg class="view-tab-icon" viewBox="0 0 24 24" width="16" height="16" fill="none"
+                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true">
+                <rect x="3" y="4.5" width="18" height="16" rx="2" />
+                <path d="M3 9h18M8 2.5v4M16 2.5v4" />
+              </svg>
+            </button>
+            <button type="button" class="view-tab" data-view="board" role="tab"
+              aria-selected="false" aria-label="タスク一覧" title="タスク一覧">
+              <svg class="view-tab-icon" viewBox="0 0 24 24" width="16" height="16" fill="none"
+                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true">
+                <path d="M8 6h13M8 12h13M8 18h13" />
+                <path d="M3.5 6h.01M3.5 12h.01M3.5 18h.01" />
+              </svg>
+            </button>
+            <button type="button" class="view-tab" data-view="markdown" role="tab"
+              aria-selected="false" aria-label="マークダウン" title="マークダウン">
+              <span class="view-tab-label" aria-hidden="true">MD</span>
+            </button>
+            <button type="button" class="view-tab" data-view="settings" role="tab"
+              aria-selected="false" aria-label="設定" title="設定">
+              <svg class="view-tab-icon" viewBox="0 0 24 24" width="16" height="16" fill="none"
+                stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true">
+                <circle cx="12" cy="12" r="3.2" />
+                <path
+                  d="M19.4 13.5a7.7 7.7 0 0 0 .06-3l1.8-1.4-1.8-3.1-2.2.7a7.8 7.8 0 0 0-2.6-1.5L14.2 2h-4.4l-.5 3.2a7.8 7.8 0 0 0-2.6 1.5l-2.2-.7-1.8 3.1 1.8 1.4a7.7 7.7 0 0 0 0 3l-1.8 1.4 1.8 3.1 2.2-.7a7.8 7.8 0 0 0 2.6 1.5l.5 3.2h4.4l.5-3.2a7.8 7.8 0 0 0 2.6-1.5l2.2.7 1.8-3.1-1.9-1.4Z" />
+              </svg>
+            </button>
+          </div>
+          <div class="range-settings" aria-label="表示時間範囲">
+            <button type="button" id="btn-update-range" class="cal-btn cal-btn-icon range-update-btn"
+              aria-label="現在時刻以降に更新" title="現在時刻以降に更新">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor"
+                stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M21 12a9 9 0 1 1-2.64-6.36" />
+                <path d="M21 3v6h-6" />
+              </svg>
+            </button>
+            <select id="view-start-hour" class="range-select" aria-label="表示開始時刻"></select>
+            <span class="range-sep">–</span>
+            <select id="view-end-hour" class="range-select" aria-label="表示終了時刻"></select>
+          </div>
+          <div class="cal-actions">
+            <button type="button" id="btn-fill-gaps" class="cal-btn cal-btn-icon" aria-label="詰める" title="詰める (F)">
+              <svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8"
+                stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 12h16" />
+                <path d="M12 4v5M9.5 6.5 12 9 14.5 6.5" />
+                <path d="M12 20v-5M9.5 17.5 12 15 14.5 17.5" />
+              </svg>
+            </button>
+            <div class="cal-bulk-menu" id="cal-bulk-menu">
+              <button type="button" id="btn-bulk-actions" class="cal-btn cal-btn-icon" aria-label="一括操作"
+                aria-haspopup="menu" aria-expanded="false" title="一括操作">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor" aria-hidden="true">
+                  <circle cx="12" cy="6" r="1.6" />
+                  <circle cx="12" cy="12" r="1.6" />
+                  <circle cx="12" cy="18" r="1.6" />
+                </svg>
+              </button>
+              <div id="cal-bulk-menu-panel" class="cal-bulk-menu-panel" role="menu" hidden>
+                <button type="button" class="cal-bulk-menu-item" role="menuitem" data-bulk-action="delete-all">
+                  全てを削除
+                </button>
+                <button type="button" class="cal-bulk-menu-item" role="menuitem" data-bulk-action="mark-undone">
+                  全てを未完了に
+                </button>
+                <button type="button" class="cal-bulk-menu-item" role="menuitem" data-bulk-action="delete-completed">
+                  完了しているものを全て削除
+                </button>
+              </div>
+            </div>
+          </div>
+        </header>
+        <div id="grid-scaffold" class="grid-scaffold">
+          <div id="time-axis" class="time-axis" aria-hidden="true"></div>
+          <div id="grid" class="grid-table"></div>
+        </div>
+        <div id="task-board" class="task-board" hidden>
+          <div class="task-board-toolbar">
+            <div class="board-sort" role="group" aria-label="並び順">
+              <button type="button" class="board-sort-btn active" data-sort="duration">時間順</button>
+              <button type="button" class="board-sort-btn" data-sort="random">ランダム</button>
+            </div>
+          </div>
+          <div id="task-board-list" class="task-board-list"></div>
+          <div id="task-board-empty" class="task-board-empty" hidden>予定がありません</div>
+        </div>
+        <div id="task-markdown" class="task-markdown" hidden>
+          <div class="task-markdown-toolbar">
+            <button type="button" id="btn-load-markdown" class="cal-btn">読み込み</button>
+            <button type="button" id="btn-copy-markdown" class="cal-btn">コピー</button>
+          </div>
+          <textarea id="task-markdown-editor" class="task-markdown-editor" spellcheck="false"
+            placeholder="* [タスク] タイトル 09:00–10:00&#10;  * 子タスク&#10;  * メモ&#10;    * メモ内容"></textarea>
+        </div>
+        <div id="settings-view" class="settings-view" hidden>
+          <div class="settings-view-body">
+            <p id="hosting-notice" class="hosting-notice" hidden>
+              Web版: 予定・設定・通知画像はこのブラウザの localStorage にのみ保存されます。サーバーへ送信されません。
+            </p>
+            <section class="settings-section" aria-labelledby="settings-analysis-label">
+              <h2 id="settings-analysis-label" class="settings-section-label">分析</h2>
+              <div class="analysis-content">
+                <div class="analysis-total">
+                  <span class="analysis-total-label">表示エリア合計</span>
+                  <span id="analysis-total" class="analysis-total-value"></span>
+                </div>
+                <div class="analysis-bar-wrap">
+                  <div id="analysis-bar-done" class="analysis-bar-seg seg-done"></div>
+                  <div id="analysis-bar-todo" class="analysis-bar-seg seg-todo"></div>
+                  <div id="analysis-bar-free" class="analysis-bar-seg seg-free"></div>
+                </div>
+                <div class="analysis-breakdown">
+                  <div class="analysis-row">
+                    <span class="analysis-swatch swatch-done"></span>
+                    <span class="analysis-row-label">完了</span>
+                    <span id="analysis-done" class="analysis-row-value"></span>
+                  </div>
+                  <div class="analysis-row">
+                    <span class="analysis-swatch swatch-todo"></span>
+                    <span class="analysis-row-label">未完了</span>
+                    <span id="analysis-todo" class="analysis-row-value"></span>
+                  </div>
+                  <div class="analysis-row">
+                    <span class="analysis-swatch swatch-free"></span>
+                    <span class="analysis-row-label">余っている</span>
+                    <span id="analysis-free" class="analysis-row-value"></span>
+                  </div>
+                </div>
+                <div class="analysis-adherence">
+                  <h3 class="analysis-subheading">予定の達成</h3>
+                  <div class="analysis-row">
+                    <span class="analysis-swatch swatch-ontime"></span>
+                    <span class="analysis-row-label">予定通りに完了</span>
+                    <span id="analysis-ontime" class="analysis-row-value"></span>
+                  </div>
+                  <div class="analysis-row">
+                    <span class="analysis-swatch swatch-overdue"></span>
+                    <span class="analysis-row-label">期限超過で未完了</span>
+                    <span id="analysis-overdue" class="analysis-row-value"></span>
+                  </div>
+                </div>
+              </div>
+            </section>
+            <section class="settings-section" aria-labelledby="settings-tag-behavior-label">
+              <h2 id="settings-tag-behavior-label" class="settings-section-label">タグの挙動</h2>
+              <div class="tag-behavior-table" role="table" aria-label="タグごとの挙動">
+                <div class="tag-behavior-row tag-behavior-head" role="row">
+                  <span class="tag-behavior-cell" role="columnheader">タグ</span>
+                  <span class="tag-behavior-cell" role="columnheader">終了後に自動完了</span>
+                  <span class="tag-behavior-cell" role="columnheader">詰める対象</span>
+                  <span class="tag-behavior-cell" role="columnheader">未完了後のときに通知</span>
+                </div>
+                <div id="tag-behavior-rows"></div>
+              </div>
+            </section>
+            <section class="settings-section" aria-labelledby="settings-notify-label">
+              <h2 id="settings-notify-label" class="settings-section-label">通知</h2>
+              <div class="settings-notify-row">
+                <select id="notification-sound" class="settings-select" aria-label="通知音"></select>
+                <button type="button" id="btn-test-notification" class="cal-btn settings-test-btn">試聴</button>
+                <button type="button" id="btn-test-popup" class="cal-btn settings-test-btn">ポップアップを試す</button>
+              </div>
+              <div class="settings-subsection" aria-labelledby="settings-popup-image-label">
+                <h3 id="settings-popup-image-label" class="settings-subheading">ポップアップ画像</h3>
+                <p class="settings-hint">複数登録でき、通知時にランダムで1枚表示されます。</p>
+                <div id="notification-image-list" class="notification-image-list"></div>
+                <p id="notification-image-empty" class="notification-image-empty">画像未設定</p>
+                <div class="settings-actions">
+                  <label class="cal-btn settings-upload-btn">
+                    画像を追加
+                    <input type="file" id="notification-image-input" accept="image/*" multiple hidden>
+                  </label>
+                  <button type="button" id="btn-clear-notification-images" class="cal-btn settings-test-btn" hidden>すべて削除</button>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+      </section>
+
+      <aside id="sidebar" class="sidebar">
+        <nav class="sidebar-tabs" role="tablist" aria-label="サイドバー">
+          <button type="button" class="sidebar-tab active" data-tab="selection" role="tab"
+            aria-selected="true" aria-label="選択" title="選択">
+            <svg class="sidebar-tab-icon" viewBox="0 0 24 24" width="16" height="16"
+              fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <rect x="5" y="5" width="14" height="14" rx="3.5" />
+              <circle cx="5" cy="5" r="1.75" fill="currentColor" stroke="none" />
+              <circle cx="19" cy="19" r="1.75" fill="currentColor" stroke="none" />
+            </svg>
+          </button>
+          <button type="button" class="sidebar-tab" data-tab="now" role="tab" aria-selected="false"
+            aria-label="現在" title="現在">
+            <svg class="sidebar-tab-icon" viewBox="0 0 24 24" width="16" height="16"
+              fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="13" r="7" />
+              <path d="M12 10v3.5l2.5 1.5" />
+              <path d="M9.5 3.5h5M12 3.5V6" />
+            </svg>
+          </button>
+          <button type="button" class="sidebar-tab" data-tab="routine" role="tab"
+            aria-selected="false" aria-label="ルーティーン" title="ルーティーン">
+            <svg class="sidebar-tab-icon" viewBox="0 0 24 24" width="16" height="16"
+              fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <polyline points="17 2 21 6 17 10" />
+              <path d="M3 12V10a4 4 0 0 1 4-4h14" />
+              <polyline points="7 22 3 18 7 14" />
+              <path d="M21 12v2a4 4 0 0 1-4 4H3" />
+            </svg>
+          </button>
+          <button type="button" class="sidebar-tab" data-tab="memo" role="tab" aria-selected="false"
+            aria-label="メモ" title="メモ">
+            <svg class="sidebar-tab-icon" viewBox="0 0 24 24" width="16" height="16"
+              fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true">
+              <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" />
+              <path d="M14 3v5h5" />
+              <path d="M9 13h6M9 17h4" />
+            </svg>
+          </button>
+        </nav>
+        <div class="sidebar-body">
+          <div id="panel-selection" class="sidebar-panel">
+            <div id="selection-empty" class="panel-empty">No data</div>
+            <div id="selection-content" class="selection-content" hidden>
+              <div class="sidebar-title-row">
+                <input type="checkbox" id="event-done" class="event-check" aria-label="予定を完了">
+                <textarea id="event-title" rows="1" placeholder="（無題）" aria-label="予定名"></textarea>
+                <button type="button" id="btn-delete-event" class="btn-icon btn-trash" aria-label="予定を削除">
+                  <svg viewBox="0 0 24 24" width="14" height="14" aria-hidden="true">
+                    <path fill="currentColor"
+                      d="M9 3h6l1 2h4v2H4V5h4l1-2zm1 6h2v9h-2V9zm4 0h2v9h-2V9zM7 9h2v9H7V9z" />
+                  </svg>
+                </button>
+              </div>
+
+              <div id="tag-picker" class="tag-picker" role="group" aria-label="タグ"></div>
+
+              <div class="sidebar-tasks">
+                <ul id="task-list" class="task-list"></ul>
+                <button type="button" id="btn-add-task" class="btn-icon btn-add" aria-label="子タスクを追加">+</button>
+              </div>
+
+              <textarea id="event-notes" class="sidebar-notes" rows="5" placeholder="- 本質は？&#10;- 捨てても問題ない要素は？&#10;- 実行するとどうなる？&#10;- 実行しないとどうなる？" aria-label="メモ"></textarea>
+            </div>
+          </div>
+
+          <div id="panel-now" class="sidebar-panel" hidden>
+            <button type="button" id="now-expand" class="now-expand" aria-label="全画面表示"
+              title="全画面表示">
+              <svg class="now-expand-icon now-expand-open" viewBox="0 0 24 24" width="15" height="15"
+                fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true">
+                <path d="M8 3H5a2 2 0 0 0-2 2v3M16 3h3a2 2 0 0 1 2 2v3M8 21H5a2 2 0 0 1-2-2v-3M16 21h3a2 2 0 0 0 2-2v-3" />
+              </svg>
+              <svg class="now-expand-icon now-expand-close" viewBox="0 0 24 24" width="15" height="15"
+                fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 8h3a1 1 0 0 0 1-1V4M20 8h-3a1 1 0 0 1-1-1V4M4 16h3a1 1 0 0 1 1 1v3M20 16h-3a1 1 0 0 1-1 1v3" />
+              </svg>
+            </button>
+            <div class="now-view-tabs" role="tablist" aria-label="現在時刻の表示">
+              <button type="button" class="now-view-tab active" data-now-view="task" role="tab"
+                aria-selected="true">タスク</button>
+              <button type="button" class="now-view-tab" data-now-view="clock" role="tab"
+                aria-selected="false">1時間</button>
+            </div>
+            <div id="now-task-view" class="now-task-view">
+              <div id="now-empty" class="panel-empty">現在時刻に該当する予定はありません</div>
+              <div id="now-content" class="now-content" hidden>
+                <div id="now-event-title" class="now-event-title"></div>
+                <div class="now-progress-wrap">
+                  <svg class="progress-ring" viewBox="0 0 120 120" aria-hidden="true">
+                    <circle class="progress-ring-bg" cx="60" cy="60" r="52" />
+                    <circle id="now-progress-ring" class="progress-ring-fill" cx="60" cy="60" r="52" />
+                  </svg>
+                  <div class="now-progress-center">
+                    <span id="now-remaining" class="now-remaining-value"></span>
+                    <span id="now-elapsed" class="now-elapsed-value"></span>
+                  </div>
+                </div>
+
+                <div class="now-details">
+                  <section id="now-tasks-section" class="now-section">
+                    <h3 class="now-section-label">子タスク</h3>
+                    <div class="sidebar-tasks">
+                      <ul id="now-task-list" class="task-list"></ul>
+                      <button type="button" id="now-add-task" class="btn-icon btn-add"
+                        aria-label="子タスクを追加">+</button>
+                    </div>
+                  </section>
+                  <section id="now-notes-section" class="now-section">
+                    <h3 class="now-section-label">メモ</h3>
+                    <textarea id="now-notes" class="sidebar-notes now-notes-input" rows="5"
+                      placeholder="- 本質は？&#10;- 捨てても問題ない要素は？&#10;- 実行するとどうなる？&#10;- 実行しないとどうなる？"
+                      aria-label="メモ"></textarea>
+                  </section>
+                </div>
+              </div>
+            </div>
+            <div id="now-clock-view" class="now-hour-clock" hidden>
+              <p id="hour-clock-range" class="hour-clock-range"></p>
+              <div class="hour-clock-stage">
+                <svg id="hour-clock-svg" class="hour-clock-svg" viewBox="0 0 220 220" aria-hidden="true">
+                  <circle class="hour-clock-face" cx="110" cy="110" r="82" />
+                  <circle class="hour-clock-track" cx="110" cy="110" r="92" />
+                  <g id="hour-clock-indicators"></g>
+                  <g class="hour-clock-dividers">
+                    <line x1="110" y1="110" x2="110" y2="28" />
+                    <line x1="110" y1="110" x2="192" y2="110" />
+                    <line x1="110" y1="110" x2="110" y2="192" />
+                    <line x1="110" y1="110" x2="28" y2="110" />
+                  </g>
+                  <g id="hour-clock-hand-group" class="hour-clock-hand-group">
+                    <line x1="110" y1="110" x2="110" y2="34" />
+                  </g>
+                  <circle class="hour-clock-hub" cx="110" cy="110" r="5" />
+                </svg>
+                <div id="hour-clock-labels" class="hour-clock-labels"></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="panel-routine" class="sidebar-panel" hidden></div>
+
+          <div id="panel-memo" class="sidebar-panel" hidden>
+            <div class="memo-editor">
+              <pre id="day-memo-highlight" class="memo-highlight" aria-hidden="true"></pre>
+              <textarea id="day-memo" class="sidebar-notes memo-input" placeholder="メモ" aria-label="メモ" spellcheck="false"></textarea>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <button type="button" id="sidebar-toggle" class="sidebar-toggle" aria-label="サイドバーを折りたたむ"
+        aria-expanded="true">
+        <svg class="sidebar-toggle-icon" viewBox="0 0 24 24" width="12" height="12" aria-hidden="true">
+          <path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round" d="M9 6l6 6-6 6" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div id="notification-popup" class="notification-popup" hidden>
+    <div class="notification-popup-backdrop" id="notification-popup-backdrop"></div>
+    <div class="notification-popup-card" role="dialog" aria-modal="true" aria-labelledby="notification-popup-message">
+      <p id="notification-popup-message" class="notification-popup-message"></p>
+      <p id="notification-popup-detail" class="notification-popup-detail"></p>
+      <img id="notification-popup-image" class="notification-popup-image" alt="" hidden>
+      <button type="button" id="notification-popup-close" class="cal-btn notification-popup-close">閉じる</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+
+</html>
